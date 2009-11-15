@@ -1,0 +1,9 @@
+* CRUD for players
+
+* CRUD for events
+
+* AJAX saving of status.
+
+* Email for players to recover their own URL.
+
+* UI to change a player's token.
