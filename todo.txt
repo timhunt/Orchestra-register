@@ -1,9 +1,19 @@
+* Subtotal bug
+
+* By default don't show events in the past.
+
+* Make sure it prints nicely.
+
 * CRUD for players
 
 * CRUD for events
+
+--- Version 1.0 ---
 
 * AJAX saving of status.
 
 * Email for players to recover their own URL.
 
 * UI to change a player's token.
+
+* Support for more than one Seriese of rehearsals

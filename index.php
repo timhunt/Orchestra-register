@@ -30,9 +30,11 @@ $or = new orchestra_register();
 $events = $or->get_events();
 $user = $or->get_current_user();
 if (!empty($user->player->part)) {
-   $players = $or->get_players($user->player->section, $user->player->part);
+    $players = $or->get_players($user->player->section, $user->player->part);
+    $savechangesbutton = '<p><input type="submit" name="save" value="Save changes" /></p>';
 } else {
     $players = $or->get_players();
+    $savechangesbutton = '';
 }
 $or->load_attendance();
 $subtotals = $or->load_subtotals();
@@ -42,6 +44,7 @@ $output = new html_output();
 $output->header($or);
 ?>
 <form action="<?php echo $or->url('savechoices.php'); ?>" method="post">
+<?php echo $savechangesbutton; ?>
 <div>
 
 <table>
@@ -91,6 +94,8 @@ foreach ($players as $player) {
 }
 $rowparity = 1;
 ?>
+</tbody>
+<tbody id="subtotals">
 <tr class="headingrow">
 <th colspan="3">Totals by part</th>
 <?php

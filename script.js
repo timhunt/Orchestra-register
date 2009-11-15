@@ -1,6 +1,6 @@
 function init_index_page() {
     YUI().use('event', function(Y) {
-        // TODO Y.on('click', onclick_select, '#wikimarkup');
+//        Y.on('change', save_status_change, '.statusselect');
     });
 }
 
@@ -24,3 +24,7 @@ function init_wiki_format_page() {
 function onclick_select() {
     this.select();
 }
+
+//function save_status_change() {
+//    
+//}
