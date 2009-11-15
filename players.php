@@ -26,7 +26,7 @@ $or = new orchestra_register();
 
 $user = $or->get_current_user();
 if (!$user->can_edit_players()) {
-    throw new permission_exception('You don\'t have permission to recover other players\' tokens.');
+    throw new permission_exception('You don\'t have permission to edit the list of players.');
 }
 
 $players = $or->get_players();
@@ -41,5 +41,5 @@ foreach ($players as $player) {
 }
 echo '</ul>';
 echo '<p><a href="' . $or->url('') . '">Back to the register</a></p>';
-$output->call_to_js('init_recover_tokens_page');
+$output->call_to_js('init_edit_players_page');
 $output->footer($or);

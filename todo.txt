@@ -1,10 +1,8 @@
-* By default don't show events in the past.
-
-* Make sure it prints nicely.
-
 * CRUD for players
 
 * CRUD for events
+
+* Make sure it prints nicely.
 
 * Sesskey protection.
 

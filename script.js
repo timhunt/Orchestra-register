@@ -8,7 +8,7 @@ function init_login_page() {
     document.getElementById('email').focus();
 }
 
-function init_recover_tokens_page() {
+function init_edit_players_page() {
     YUI().use('event', function(Y) {
         Y.on('click', onclick_select, 'input');
     });

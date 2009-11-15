@@ -339,6 +339,9 @@ class database {
             $player->email = $data[2];
             $player->part = $data[3];
             $player->role = 'player';
+            if ($firstplayer) {
+                $player->role = 'admin';
+            }
             $this->insert_player($player);
             if ($firstplayer) {
                 $this->set_password($this->get_last_insert_id(), $pwsalt . 'mozart');

@@ -162,7 +162,7 @@ foreach ($subtotals as $part => $subtotal) {
 <?php
 if ($user->can_edit_players()) {
 ?>
-<p><a href="<?php echo $or->url('recovertokens.php', false); ?>">List of users' edit URLs</a></p>
+<p><a href="<?php echo $or->url('players.php', false); ?>">Edit the list of players</a></p>
 <?php
 }
 $output->call_to_js('init_index_page');

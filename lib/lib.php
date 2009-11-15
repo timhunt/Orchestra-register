@@ -263,14 +263,16 @@ class user {
     public $authlevel = self::AUTH_NONE;
     public function can_edit_attendance($player) {
         return ($this->authlevel >= self::AUTH_TOKEN && $this->player->id == $player->id) ||
-                $this->authlevel >= self::AUTH_LOGIN;
+                $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
     public function can_edit_players() {
-        return $this->authlevel >= self::AUTH_LOGIN &&
-                in_array($this->player->role, array(self::ORGANISER, self::ADMIN));
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
     public function is_logged_in() {
         return $this->authlevel >= self::AUTH_LOGIN;
+    }
+    protected function is_organiser() {
+        return in_array($this->player->role, array(self::ORGANISER, self::ADMIN));
     }
     public function get_name() {
         return $this->player->get_name();
