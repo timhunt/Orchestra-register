@@ -23,7 +23,8 @@
 
 require_once(dirname(__FILE__) . '/lib/lib.php');
 $or = new orchestra_register();
-$events = $or->get_events();
+$includepast = $or->get_param('past', request::TYPE_BOOL, false, false);
+$events = $or->get_events($includepast);
 $players = $or->get_players();
 $user = $or->get_current_user();
 $or->load_attendance();
@@ -43,4 +44,8 @@ foreach ($players as $player) {
     }
 }
 
-$or->redirect('');
+if ($includepast) {
+    $or->redirect('?past=1');
+} else {
+    $or->redirect('');
+}

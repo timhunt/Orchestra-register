@@ -6,6 +6,8 @@
 
 * CRUD for events
 
+* Sesskey protection.
+
 --- Version 1.0 ---
 
 * AJAX saving of status.

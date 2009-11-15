@@ -71,9 +71,9 @@ class orchestra_register {
         return $this->players;
     }
 
-    public function get_events() {
+    public function get_events($includepast = false) {
         if (is_null($this->events)) {
-            $this->events = $this->db->load_events();
+            $this->events = $this->db->load_events($includepast);
         }
         return $this->events;
     }
@@ -132,17 +132,22 @@ class orchestra_register {
         return 'event' . $event->id . '@' . $this->config->icalguid;
     }
 
-    public function url($relativeurl, $withtoken = true) {
+    public function url($relativeurl, $withtoken = true, $xmlescape = true) {
         $extra = '';
         if ($withtoken && empty($_SESSION['userid']) && !empty($this->user->player->authkey)) {
             $extra = 't=' . $this->user->player->authkey;
             if (strpos($relativeurl, '?') !== false) {
-                $extra = '&amp;' . $extra;
+                $extra = '&' . $extra;
             } else {
                 $extra = '?' . $extra;
             }
         }
-        return $this->sysconfig->wwwroot . $relativeurl . $extra;
+        $url = $this->sysconfig->wwwroot . $relativeurl . $extra;
+        if ($xmlescape) {
+            return htmlspecialchars($url);
+        } else {
+            return $url;
+        }
     }
 
     public function get_param($name, $type, $default = null, $postonly = true) {
@@ -194,9 +199,9 @@ class orchestra_register {
         return $this->user;
     }
 
-    public function redirect($relativeurl) {
+    public function redirect($relativeurl, $withtoken = true) {
         header('HTTP/1.1 303 See Other');
-        header('Location: ' . $this->url($relativeurl));
+        header('Location: ' . $this->url($relativeurl, $withtoken, false));
         exit(0);
     }
 

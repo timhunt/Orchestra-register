@@ -65,6 +65,16 @@ class database {
         return $this->get_records_sql('SELECT * FROM ' . $table . $order, $class);
     }
 
+    protected function get_records_select($table, $where, $class, $order = '') {
+        if ($where) {
+            $where = ' WHERE ' . $where;
+        }
+        if ($order) {
+            $order = ' ORDER BY ' . $order;
+        }
+        return $this->get_records_sql('SELECT * FROM ' . $table . $where . $order, $class);
+    }
+
     protected function get_records_sql($sql, $class) {
         $result = $this->execute_sql($sql);
         $objects = array();
@@ -97,8 +107,13 @@ class database {
         ", 'player');
     }
 
-    public function load_events() {
-        return $this->get_records('events', 'event', 'timestart');
+    public function load_events($includepast = false) {
+        if ($includepast) {
+            return $this->get_records('events', 'event', 'timestart');
+        } else {
+            return $this->get_records_select('events', 'timeend > ' . $this->escape(time()),
+                    'event', 'timestart');
+        }
     }
 
     public function load_attendances() {

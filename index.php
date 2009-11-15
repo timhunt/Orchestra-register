@@ -27,7 +27,8 @@
 require_once(dirname(__FILE__) . '/lib/lib.php');
 
 $or = new orchestra_register();
-$events = $or->get_events();
+$includepast = $or->get_param('past', request::TYPE_BOOL, false, false);
+$events = $or->get_events($includepast);
 $user = $or->get_current_user();
 if (!empty($user->player->part)) {
     $players = $or->get_players($user->player->section, $user->player->part);
@@ -38,12 +39,27 @@ if (!empty($user->player->part)) {
 }
 $or->load_attendance();
 $subtotals = $or->load_subtotals();
-$rowparity = 1;
+
+if ($includepast) {
+    $showhidepasturl = $or->url('');
+    $showhidepastlabel = 'Hide events in the past';
+} else {
+    $showhidepasturl = $or->url('?past=1');
+    $showhidepastlabel = 'Show events in the past';
+}
+
 
 $output = new html_output();
 $output->header($or);
 ?>
 <form action="<?php echo $or->url('savechoices.php'); ?>" method="post">
+<?php
+if ($includepast) {
+?>
+<input type="hidden" name="past" value="1" />
+<?php
+}
+?>
 <?php echo $savechangesbutton; ?>
 <div>
 
@@ -68,6 +84,7 @@ foreach ($events as $event) {
 </thead>
 <tbody>
 <?php
+$rowparity = 1;
 foreach ($players as $player) {
     $editable = $user->can_edit_attendance($player);
     ?>
@@ -92,7 +109,6 @@ foreach ($players as $player) {
 </tr>
     <?php
 }
-$rowparity = 1;
 ?>
 </tbody>
 <tbody id="subtotals">
@@ -107,6 +123,7 @@ foreach ($events as $event) {
 ?>
 </tr>
 <?php
+$rowparity = 1;
 foreach ($subtotals as $part => $subtotal) {
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
@@ -139,6 +156,7 @@ foreach ($subtotals as $part => $subtotal) {
 </div>
 </form>
 
+<p><a href="<?php echo $showhidepasturl; ?>"><?php echo $showhidepastlabel; ?></a></p>
 <p><a href="<?php echo $or->url('ical.php', false); ?>">Download iCal file (will get the rehearsals into Outlook)</a></p>
 <p><a href="<?php echo $or->url('wikiformat.php', false); ?>">List of events to copy-and-paste into the wiki</a></p>
 <?php

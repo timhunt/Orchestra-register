@@ -36,7 +36,7 @@ $output->header($or, 'Get players\' edit URLs');
 echo '<ul>';
 foreach ($players as $player) {
     echo '<li>', $player->get_name(), ' (', $player->part, ')',
-            ' <input type="text" size="80" readonly="readonly" value="', $or->url('?t=' . $player->authkey),
+            ' <input type="text" size="80" readonly="readonly" value="', $or->url('?t=' . $player->authkey, false),
             '" />', "</li>\n";
 }
 echo '</ul>';
