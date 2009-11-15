@@ -23,7 +23,7 @@
 
 require_once(dirname(__FILE__) . '/lib/lib.php');
 $or = new orchestra_register();
-$events = $or->get_events();
+$events = $or->get_events(true);
 
 function ical_foramt_timestamp($timestamp) {
     return gmstrftime('%Y%m%dT%H%M%SZ', $timestamp);

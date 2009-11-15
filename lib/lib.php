@@ -32,6 +32,7 @@ class orchestra_register {
     private $user;
     private $players = null;
     private $events = null;
+    private $parts = null;
     private $request;
     private $sysconfig;
     private $config;
@@ -64,9 +65,13 @@ class orchestra_register {
         date_default_timezone_set($this->config->timezone);
     }
 
-    public function get_players($currentsection = '', $currentpart = '') {
+    public function get_player($id, $includedeleted = false) {
+        return $this->db->find_player_by_id($id, $includedeleted);
+    }
+
+    public function get_players($includedeleted = false, $currentsection = '', $currentpart = '') {
         if (is_null($this->players)) {
-            $this->players = $this->db->load_players($currentsection, $currentpart);
+            $this->players = $this->db->load_players($includedeleted, $currentsection, $currentpart);
         }
         return $this->players;
     }
@@ -76,6 +81,17 @@ class orchestra_register {
             $this->events = $this->db->load_events($includepast);
         }
         return $this->events;
+    }
+
+    public function get_parts() {
+        if (is_null($this->parts)) {
+            $partsdata = $this->db->load_parts();
+            $this->parts = array();
+            foreach ($partsdata as $part) {
+                $this->parts[$part->section][$part->part] = $part->part;
+            }
+        }
+        return $this->parts;
     }
 
     public function load_attendance() {
@@ -108,6 +124,14 @@ class orchestra_register {
 
     public function set_attendance($player, $event, $newattendance) {
         $this->db->set_attendance($player->id, $event->id, $newattendance);
+    }
+
+    public function delete_player($player) {
+        $this->db->set_player_deleted($player->id, 1);
+    }
+
+    public function undelete_player($player) {
+        $this->db->set_player_deleted($player->id, 0);
     }
 
     public function get_title() {
@@ -174,6 +198,7 @@ class orchestra_register {
         session_regenerate_id(true);
     }
 
+    /** @return user */
     public function get_current_user() {
         if ($this->user) {
             return $this->user;
@@ -238,7 +263,7 @@ class request {
     public function validate($raw, $type) {
         switch ($type) {
             case self::TYPE_INT:
-                return strval(int_val($raw)) === $raw;
+                return strval(intval($raw)) === $raw;
             case self::TYPE_ATTENDANCE:
                 return array_key_exists($raw, attendance::$symbols);
             case self::TYPE_EMAIL:
@@ -258,6 +283,11 @@ class user {
     const PLAYER = 'player';
     const ORGANISER = 'organiser';
     const ADMIN = 'admin';
+    protected static $roles = array(
+        self::PLAYER => 'Ordinary player',
+        self::ORGANISER => 'Committee member',
+        self::ADMIN => 'Administrator',
+    );
     /** @var player */
     public $player;
     public $authlevel = self::AUTH_NONE;
@@ -276,6 +306,13 @@ class user {
     }
     public function get_name() {
         return $this->player->get_name();
+    }
+    public function assignable_roles() {
+        $assignableroles = array();
+        foreach (self::$roles as $role => $name) {
+            $assignableroles[$role] = $name;
+        }
+        return $assignableroles;
     }
 }
 
@@ -339,7 +376,8 @@ class player {
     public $username;
     public $pwhash;
     public $pwsalt;
-    public $role = user::PLAYER; 
+    public $role = user::PLAYER;
+    public $deleted = 0;
     public $attendance = array(); // $eventid => attendance.
     public function get_attendance($event) {
         if (!array_key_exists($event->id, $this->attendance)) {
@@ -363,10 +401,10 @@ class attendance {
     const NOTREQUIRED = 'notrequired';
     public static $symbols = array(
         self::UNKNOWN => '-',
-        self::NOTREQUIRED => 'N',
-        self::NO => 'N',
-        self::UNSURE => '?',
-        self::YES => 'Y',
+        self::NOTREQUIRED => 'Not required',
+        self::NO => 'No',
+        self::UNSURE => 'Not sure',
+        self::YES => 'Yes',
     );
     public $eventid;
     public $playerid;

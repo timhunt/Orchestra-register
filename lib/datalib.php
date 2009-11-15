@@ -93,12 +93,18 @@ class database {
         $this->execute_sql($sql);
     }
 
-    public function load_players($currentsection = '', $currentpart = '') {
+    public function load_players($includedeleted = false, $currentsection = '', $currentpart = '') {
+        if ($includedeleted) {
+            $where = '';
+        } else {
+            $where = 'WHERE deleted = 0';
+        }
         return $this->get_records_sql("
-            SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
+            SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role, deleted
             FROM players
             JOIN parts ON players.part = parts.part
             JOIN sections ON parts.section = sections.section
+            $where
             ORDER BY
                 CASE WHEN parts.section = " . $this->escape($currentsection) . " THEN -1 ELSE sectionsort END,
                 CASE WHEN players.part = " . $this->escape($currentpart) . " THEN -1 ELSE partsort END,
@@ -133,7 +139,16 @@ class database {
             JOIN sections ON parts.section = sections.section
             JOIN events
             LEFT JOIN attendances ON playerid = players.id AND eventid = events.id
+            WHERE players.deleted = 0
             GROUP BY events.id, parts.part, parts.section
+            ORDER BY sectionsort, partsort", 'stdClass');
+    }
+
+    public function load_parts() {
+        return $this->get_records_sql("
+            SELECT parts.part, parts.section
+            FROM parts
+            JOIN sections ON parts.section = sections.section
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
@@ -151,12 +166,16 @@ class database {
         return $object;
     }
 
-    public function find_player_by_id($playerid) {
+    public function find_player_by_id($playerid, $includedeleted = false) {
+        $conditions = array('id' => $playerid);
+        if (!$includedeleted) {
+            $conditions['deleted'] = 0;
+        }
         return $this->get_record_sql("
-                SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
+                SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role, deleted
                 FROM players
                 JOIN parts ON players.part = parts.part
-                WHERE " . $this->where_clause(array('id' => $playerid)), 'player');
+                WHERE " . $this->where_clause($conditions), 'player');
     }
 
     public function find_player_by_token($token) {
@@ -164,18 +183,23 @@ class database {
                 SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
                 FROM players
                 JOIN parts ON players.part = parts.part
-                WHERE " . $this->where_clause(array('authkey' => $token)), 'player');
+                WHERE " . $this->where_clause(array('authkey' => $token, 'deleted' => 0)), 'player');
     }
 
     public function check_user_auth($email, $saltedpassword) {
         return $this->get_record_select('players',
                 "email = " . $this->escape($email) . " AND pwhash = SHA1(CONCAT(" .
-                $this->escape($saltedpassword) . ", pwsalt))", 'player');
+                $this->escape($saltedpassword) . ", pwsalt)) AND deleted = 0", 'player');
     }
 
     public function set_password($playerid, $saltedpassword) {
         $this->update("UPDATE players SET pwhash = SHA1(CONCAT(" .
             $this->escape($saltedpassword) . ", pwsalt)) WHERE id = " . $this->escape($playerid));
+    }
+
+    public function set_player_deleted($playerid, $deleted) {
+        $this->update("UPDATE players SET deleted = " . $this->escape($deleted) .
+                " WHERE id = " . $this->escape($playerid));
     }
 
     public function load_config() {
@@ -211,11 +235,12 @@ class database {
     }
 
     public function insert_player($player) {
-        $sql = "INSERT INTO players (firstname, lastname, email, part, authkey, pwhash, pwsalt, role)
+        $sql = "INSERT INTO players (firstname, lastname, email, part, authkey, pwhash, pwsalt, role, deleted)
                 VALUES (" . $this->escape($player->firstname) . ", " . $this->escape($player->lastname) . ", " .
                 $this->escape($player->email) . ", " . $this->escape($player->part) . ", " .
                 $this->escape($this->random_string(40)) . ", NULL, " .
-                $this->escape($this->random_string(40)) . ", " . $this->escape($player->role) . ")";
+                $this->escape($this->random_string(40)) . ", " . $this->escape($player->role) . ", " .
+                $this->escape($player->deleted) . ")";
         $this->update($sql);
     }
 
@@ -293,7 +318,8 @@ class database {
                 authkey VARCHAR(40) NOT NULL,
                 pwhash VARCHAR(40) NULL,
                 pwsalt VARCHAR(40) NULL,
-                role VARCHAR(40) NOT NULL
+                role VARCHAR(40) NOT NULL,
+                deleted INT(1) NOT NULL DEFAULT 0
             ) ENGINE = InnoDB
         ");
         $this->execute_sql("

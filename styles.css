@@ -33,6 +33,9 @@ pre {
     padding: 1em;
     background: #eee;
 }
+.deleted {
+    color: #aaa;
+}
 .logininfo {
     float: right;
     font-size: 0.8em;

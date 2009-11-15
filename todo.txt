@@ -1,3 +1,5 @@
+* index.php name and initial.
+
 * CRUD for players
 
 * CRUD for events

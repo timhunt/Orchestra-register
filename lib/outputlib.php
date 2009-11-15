@@ -62,6 +62,56 @@ class html_output {
     <?php
     }
 
+    public function action_button($url, $params, $label) {
+        $output = '<form action="' . $url . '" method="post"><div>';
+        foreach ($params as $name => $value) {
+            $output .= '<input type="hidden" name="' . $name . '" value="' . $value . '" />';
+        }
+        $output .= '<input type="submit" value="' . $label . '" />';
+        $output .= '</div></form>';
+        return $output;
+    }
+
+    public function form_field($label, $field, $postfix = '') {
+        if ($postfix) {
+            $postfix = ' (' . $postfix . ')';
+        }
+        return '<p><span class="label">' . $label . ' </span><span class="field">' .
+                $field . '</span><span class="postfix">' . $postfix . '</span></p>';
+    }
+
+    public function text_field($label, $name, $default, $postfix = '') {
+        return $this->form_field($label, '<input type="text" name="' . $name .
+                '" value="' . htmlspecialchars($default) . '" />');
+    }
+
+    public function password_field($label, $name, $default, $postfix = '') {
+        return $this->form_field($label, '<input type="password" name="' . $name .
+                '" value="' . htmlspecialchars($default) . '" /> ', $postfix);
+    }
+
+    public function select($name, $choices, $default = null) {
+        $output = '<select name="' . $name . '">';
+        foreach ($choices as $value => $label) {
+            $output .= '<option value="' . $value . '">' . htmlspecialchars($label) . '</option>';
+        }
+        $output .= '</select>';
+        return $output;
+    }
+
+    public function group_select($name, $choices, $default = null) {
+        $output = '<select name="' . $name . '">';
+        foreach ($choices as $group => $groupchoices) {
+            $output .= '<optgroup label="' . $group . '">';
+            foreach ($groupchoices as $value => $label) {
+                $output .= '<option value="' . $value . '">' . htmlspecialchars($label) . '</option>';
+            }
+            $output .= '</optgroup>';
+        }
+        $output .= '</select>';
+        return $output;
+    }
+
     public function call_to_js($function, $arguments = array()) {
         $quotedargs = array();
         foreach ($arguments as $arg) {
