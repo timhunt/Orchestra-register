@@ -44,11 +44,11 @@ class orchestra_register {
         error_reporting(E_ALL);
 
         $config = new sys_config();
-        include(dirname(__FILE__) . '/config.php');
+        include(dirname(__FILE__) . '/../config.php');
         $this->sysconfig = $config;
 
         $version = new version();
-        include(dirname(__FILE__) . '/version.php');
+        include(dirname(__FILE__) . '/../version.php');
         $this->version = $version;
 
         $this->db = new database($this->sysconfig->dbhost, $this->sysconfig->dbuser,

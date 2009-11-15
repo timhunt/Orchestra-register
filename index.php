@@ -24,7 +24,7 @@
         ini_set('display_errors', 1);
         error_reporting(E_ALL);
 
-require_once(dirname(__FILE__) . '/lib.php');
+require_once(dirname(__FILE__) . '/lib/lib.php');
 
 $or = new orchestra_register();
 $events = $or->get_events();
