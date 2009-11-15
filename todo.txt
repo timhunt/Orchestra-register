@@ -1,5 +1,3 @@
-* Subtotal bug
-
 * By default don't show events in the past.
 
 * Make sure it prints nicely.

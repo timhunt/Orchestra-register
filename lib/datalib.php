@@ -158,6 +158,11 @@ class database {
                 $this->escape($saltedpassword) . ", pwsalt))", 'player');
     }
 
+    public function set_password($playerid, $saltedpassword) {
+        $this->update("UPDATE players SET pwhash = SHA1(CONCAT(" .
+            $this->escape($saltedpassword) . ", pwsalt)) WHERE id = " . $this->escape($playerid));
+    }
+
     public function load_config() {
         $result = $this->execute_sql('SELECT * FROM config');
         $config = new db_config();
@@ -238,6 +243,10 @@ class database {
         }
     }
 
+    protected function get_last_insert_id() {
+        return mysql_insert_id($this->conn);
+    }
+
     protected function install() {
         $this->execute_sql("
             CREATE TABLE config (
@@ -247,15 +256,16 @@ class database {
         ");
         $this->execute_sql("
             CREATE TABLE sections (
-                section VARCHAR(100) NOT NULL,
-                sectionsort INT(10) NOT NULL
+                section VARCHAR(100) NOT NULL PRIMARY KEY,
+                sectionsort INT(10) NOT NULL UNIQUE
             ) ENGINE = InnoDB
         ");
         $this->execute_sql("
             CREATE TABLE parts (
-                part VARCHAR(100) NOT NULL,
+                part VARCHAR(100) NOT NULL PRIMARY KEY,
                 section VARCHAR(100) NOT NULL REFERENCES sections (section) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                partsort INT(10) NOT NULL
+                partsort INT(10) NOT NULL,
+                CONSTRAINT UNIQUE (section, partsort)
             ) ENGINE = InnoDB
         ");
         $this->execute_sql("
@@ -286,11 +296,13 @@ class database {
             CREATE TABLE attendances (
                 playerid INT(10) NOT NULL REFERENCES players (id) ON DELETE CASCADE ON UPDATE RESTRICT,
                 eventid INT(10) NOT NULL REFERENCES events (id) ON DELETE CASCADE ON UPDATE RESTRICT,
-                status VARCHAR(32) NOT NULL
+                status VARCHAR(32) NOT NULL,
+                CONSTRAINT PRIMARY KEY (playerid, eventid)
             ) ENGINE = InnoDB
         ");
 
-        $this->set_config('pwsalt', $this->random_string(40));
+        $pwsalt = $this->random_string(40);
+        $this->set_config('pwsalt', $pwsalt);
         $this->set_config('icalguid', $this->random_string(40));
         $this->set_config('title', 'OU Orchestra Register');
         $this->set_config('timezone', 'Europe/London');
@@ -304,6 +316,7 @@ class database {
             $this->insert_part($part[2], $part[0], $part[1]);
         }
         $players = self::load_csv('data/players.txt');
+        $firstplayer = true;
         foreach ($players as $data) {
             $player = new player();
             $player->firstname = $data[0];
@@ -312,6 +325,10 @@ class database {
             $player->part = $data[3];
             $player->role = 'player';
             $this->insert_player($player);
+            if ($firstplayer) {
+                $this->set_password($this->get_last_insert_id(), $pwsalt . 'mozart');
+                $firstplayer = false;
+            }
         }
         $events = self::load_csv('data/events.txt');
         foreach ($events as $data) {
@@ -327,7 +344,7 @@ class database {
 
     public static function load_csv($filename, $skipheader = true) {
         $data = array();
-        $handle = fopen(dirname(__FILE__) . '/' . $filename, 'r');
+        $handle = fopen(dirname(__FILE__) . '/../' . $filename, 'r');
         if ($skipheader) {
             fgets($handle);
         }
