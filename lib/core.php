@@ -153,7 +153,8 @@ class orchestra_register {
     }
 
     public function version_string() {
-        return 'Orchestra Register ' . $this->version->name . ' (' . $this->version->id . ')';
+        return 'Orchestra Register ' . $this->version->name . ' (' . $this->version->id .
+                ') <a href="doc/">Documentation</a>';
     }
 
     public function get_event_guid($event) {

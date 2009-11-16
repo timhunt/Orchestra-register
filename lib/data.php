@@ -387,11 +387,14 @@ class database {
     }
 
     public static function load_csv($filename, $skipheader = true) {
-        $data = array();
         $handle = fopen(dirname(__FILE__) . '/../' . $filename, 'r');
+        if (!$handle) {
+            return array();
+        }
         if ($skipheader) {
             fgets($handle);
         }
+        $data = array();
         while (($row = fgetcsv($handle)) !== false) {
             $data[] = $row;
         }
