@@ -1,0 +1,48 @@
+body {
+    font: 12px/1.2 Verdana, sans-serif;
+}
+h1 {
+    font-weight: bold;
+    font-size: 140%;
+}
+th {
+    text-align: left;
+}
+th span {
+    display: block;
+}
+.eventdatetime,
+.eventvenue {
+    font-weight: normal;
+}
+.r1 {
+    background: #eee;
+}
+.headingrow {
+    background: #ddd;
+}
+table {
+    border-collapse: collapse;
+}
+.footer {
+    font-size: 0.7em;
+    font-style: italic;
+    margin-top: 2em;
+}
+pre {
+    padding: 1em;
+    background: #eee;
+}
+.deleted {
+    color: #aaa;
+}
+.logininfo {
+    float: right;
+    font-size: 0.8em;
+}
+.outof {
+    font-size: 0.7em;
+}
+.total {
+    font-weight: bold;
+}
