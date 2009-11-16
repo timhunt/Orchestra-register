@@ -1,12 +1,10 @@
-* index.php name and initial.
-
-* CRUD for players
+* CrUd for players
 
 * CRUD for events
 
 * Make sure it prints nicely.
 
-* Sesskey protection.
+* XSRF protection.
 
 --- Version 1.0 ---
 

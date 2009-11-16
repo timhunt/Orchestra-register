@@ -90,7 +90,7 @@ foreach ($players as $player) {
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
 <td><?php echo $player->section; ?></td>
 <td><?php echo $player->part; ?></td>
-<th><?php echo $player->get_name(); ?></th>
+<th><?php echo $player->get_public_name(); ?></th>
     <?php
     foreach ($events as $event) {
         $attendance = $player->get_attendance($event);

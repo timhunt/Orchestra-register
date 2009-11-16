@@ -395,6 +395,9 @@ class player {
     public function get_name() {
         return $this->firstname . ' ' . $this->lastname;
     }
+    public function get_public_name() {
+        return $this->firstname . ' ' . substr($this->lastname, 0, 1);
+    }
 }
 
 class attendance {
