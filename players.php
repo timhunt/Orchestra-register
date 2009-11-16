@@ -22,7 +22,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/lib/lib.php');
+require_once(dirname(__FILE__) . '/lib/core.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
@@ -72,11 +72,13 @@ foreach ($players as $player) {
         $actions[] = $output->action_button($or->url('players.php', false),
                 array('undelete' => $player->id), 'Un-delete');
         $extrarowclass = ' deleted';
+        $readonly = 'disabled="disabled"';
     } else {
         $actions[] = '<a href="' . $or->url('player.php?id=' . $player->id, false) . '">Edit</a>';
         $actions[] = $output->action_button($or->url('players.php', false),
                 array('delete' => $player->id), 'Delete');
         $extrarowclass = '';
+        $readonly = 'readonly="readonly"';
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
@@ -85,7 +87,7 @@ foreach ($players as $player) {
 <th><?php echo $player->get_name(); ?></th>
 <td><?php echo $player->email; ?></td>
 <td><?php echo implode("\n", $actions); ?></td>
-<td><input type="text" size="60" readonly="readonly" value="<?php echo $or->url('?t=' . $player->authkey, false); ?>" /></td>
+<td><input type="text" size="60" <?php echo $readonly; ?> value="<?php echo $or->url('?t=' . $player->authkey, false); ?>" /></td>
 </tr>
 <?php
 }

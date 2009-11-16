@@ -20,11 +20,10 @@
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
         ini_set('display_errors', 1);
         error_reporting(E_ALL);
 
-require_once(dirname(__FILE__) . '/lib/lib.php');
+require_once(dirname(__FILE__) . '/lib/core.php');
 
 $or = new orchestra_register();
 $includepast = $or->get_param('past', request::TYPE_BOOL, false, false);

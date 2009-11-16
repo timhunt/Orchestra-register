@@ -20,22 +20,16 @@
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
 
-require_once(dirname(__FILE__) . '/lib/lib.php');
+require_once(dirname(__FILE__) . '/lib/core.php');
+require_once(dirname(__FILE__) . '/lib/form.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
 if (!$user->can_edit_players()) {
     throw new permission_exception('You don\'t have permission to edit the list of players.');
-}
-
-if ($or->get_param('cancel', request::TYPE_BOOL, false)) {
-    $or->redirect('players.php');
-
-} else if ($id = $or->get_param('save', request::TYPE_INT, 0)) {
-    // TODO save
-    $or->redirect('players.php');
-
 }
 
 $playerid = $or->get_param('id', request::TYPE_INT, 0, false);
@@ -54,32 +48,40 @@ if ($playerid) {
 $parts = $or->get_parts();
 
 $assignableroles = $user->assignable_roles();
-if (!array_key_exists($player->role, $assignableroles)) {
+if ($playerid && !array_key_exists($player->role, $assignableroles)) {
     $assignableroles = false;
+}
+
+$form = new form($or->url('player.php', false, false), $submitlabel);
+if ($playerid) {
+    $form->add_field(new hidden_field('playerid', $playerid, request::TYPE_INT));
+}
+$form->add_field(new text_field('firstname', 'First name', request::TYPE_RAW));
+$form->add_field(new text_field('lastname', 'Last name', request::TYPE_RAW));
+$form->add_field(new text_field('email', 'Email', request::TYPE_EMAIL));
+$form->add_field(new group_select_field('part', 'Part', $parts));
+if ($assignableroles) {
+    $form->add_field(new select_field('role', 'Role', $assignableroles));
+    $form->get_field('role')->note = 'Controls what this person is allowed to do';
+}
+$form->add_field(new password_field('changepw', 'New password', request::TYPE_RAW));
+$form->add_field(new password_field('confirmchangepw', 'Comfirm new password', request::TYPE_RAW));
+$form->get_field('changepw')->note = 'Leave blank for no change';
+$form->set_required_fields('firstname', 'lastname', 'email');
+
+$form->set_initial_data($player);
+
+switch ($form->parse_request($or->get_request())) {
+    case form::CANCELLED:
+        $or->redirect('players.php');
+
+    case form::SUBMITTED:
+        // TODO save
+        $or->redirect('players.php');
 }
 
 $output = new html_output($title);
 $output->header($or, $title);
-
-?>
-<form action="<?php echo $or->url('player.php'); ?>" method="post">
-<div>
-<?php
-echo $output->text_field('First name', 'firstname', $player->firstname);
-echo $output->text_field('Last name', 'lastname', $player->lastname);
-echo $output->text_field('Email', 'email', $player->email);
-echo $output->form_field('Part', $output->group_select('part', $parts));
-if ($assignableroles) {
-    echo $output->form_field('Role', $output->select('role', $user->assignable_roles(), $player->role),
-            'Controls what this person is allowed to do');
-}
-echo $output->password_field('New password', 'newpassword', '', 'Leave blank for no change');
-echo $output->password_field('Comfirm new password', 'confirmnewpassword', '');
-?>
-<p><input type="submit" name="save" value="<?php echo $submitlabel; ?>" />
-<input type="submit" name="cancel" value="Cancel" /></p>
-</div>
-</form>
-<?php
+echo $form->output($output);
 $output->call_to_js('init_edit_player_page');
 $output->footer($or);

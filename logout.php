@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/lib/lib.php');
+require_once(dirname(__FILE__) . '/lib/core.php');
 
 $or = new orchestra_register();
 $or->get_current_user();

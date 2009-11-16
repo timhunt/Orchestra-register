@@ -21,8 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/datalib.php');
-require_once(dirname(__FILE__) . '/outputlib.php');
+require_once(dirname(__FILE__) . '/data.php');
+require_once(dirname(__FILE__) . '/output.php');
 
 class permission_exception extends Exception {
     
@@ -63,6 +63,10 @@ class orchestra_register {
         session_start();
 
         date_default_timezone_set($this->config->timezone);
+    }
+
+    public function get_request() {
+        return $this->request;
     }
 
     public function get_player($id, $includedeleted = false) {

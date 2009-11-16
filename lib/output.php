@@ -72,12 +72,25 @@ class html_output {
         return $output;
     }
 
+    public function start_form($action, $method) {
+        $html = '<form action="' . htmlspecialchars($action) . '" method="' . $method . '"><div>';
+        return $html;
+    }
+
+    public function submit_button($name, $label) {
+        return '<input type="submit" name="' . $name . '" value="' . $label . '">';
+    }
+
+    public function end_form() {
+        return '</div></form>';
+    }
+
     public function form_field($label, $field, $postfix = '') {
         if ($postfix) {
             $postfix = ' (' . $postfix . ')';
         }
         return '<p><span class="label">' . $label . ' </span><span class="field">' .
-                $field . '</span><span class="postfix">' . $postfix . '</span></p>';
+                $field . '</span><span class="postfix">' . $postfix . "</span></p>\n";
     }
 
     public function text_field($label, $name, $default, $postfix = '') {
@@ -91,21 +104,30 @@ class html_output {
     }
 
     public function select($name, $choices, $default = null) {
-        $output = '<select name="' . $name . '">';
-        foreach ($choices as $value => $label) {
-            $output .= '<option value="' . $value . '">' . htmlspecialchars($label) . '</option>';
-        }
+        $output = '<select id="' . $name . '" name="' . $name . '">';
+        $output .= $this->options($choices, $default);
         $output .= '</select>';
         return $output;
     }
 
+    protected function options($choices, $default) {
+        $output = '';
+        foreach ($choices as $value => $label) {
+            if ($value == $default) {
+                $selected = ' selected="selected"';
+            } else {
+                $selected = '';
+            }
+            $output .= '<option value="' . $value . '"' . $selected . '>' . htmlspecialchars($label) . '</option>';
+        }
+        return $output;
+    }
+
     public function group_select($name, $choices, $default = null) {
-        $output = '<select name="' . $name . '">';
+        $output = '<select id="' . $name . '" name="' . $name . '">';
         foreach ($choices as $group => $groupchoices) {
             $output .= '<optgroup label="' . $group . '">';
-            foreach ($groupchoices as $value => $label) {
-                $output .= '<option value="' . $value . '">' . htmlspecialchars($label) . '</option>';
-            }
+            $output .= $this->options($groupchoices, $default);
             $output .= '</optgroup>';
         }
         $output .= '</select>';
