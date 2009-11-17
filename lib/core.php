@@ -388,9 +388,9 @@ class event {
     public $timeend;
     public $timemodified;
 
-    public function get_nice_datetime() {
-        $startdate = strftime(self::DATE_FORMAT, $this->timestart);
-        $enddate = strftime(self::DATE_FORMAT, $this->timeend);
+    public function get_nice_datetime($dateformat = self::DATE_FORMAT) {
+        $startdate = strftime($dateformat, $this->timestart);
+        $enddate = strftime($dateformat, $this->timeend);
         $starttime = strftime(self::TIME_FORMAT, $this->timestart);
         $endtime = strftime(self::TIME_FORMAT, $this->timeend);
         if ($startdate == $enddate) {

@@ -54,6 +54,8 @@ $output = new html_output($or);
 $output->header('Edit players');
 
 ?>
+<p><a href="<?php echo $or->url('player.php'); ?>">Add another player</a></p>
+<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <table>
 <thead>
 <tr class="headingrow">

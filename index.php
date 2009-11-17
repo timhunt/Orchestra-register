@@ -158,13 +158,17 @@ foreach ($subtotals as $part => $subtotal) {
 </form>
 
 <p><a href="<?php echo $showhidepasturl; ?>"><?php echo $showhidepastlabel; ?></a></p>
-<p><a href="<?php echo $or->url('ical.php', false); ?>">Download iCal file (will get the rehearsals into Outlook)</a></p>
+<p><a href="<?php echo $or->url('ical.php', false); ?>">Download iCal file (to add the rehearsals into Outlook, etc.)</a></p>
 <?php
 if ($user->can_edit_players()) {
-?>
-<p><a href="<?php echo $or->url('wikiformat.php', false); ?>">List of events to copy-and-paste into the wiki</a></p>
+    ?>
 <p><a href="<?php echo $or->url('players.php', false); ?>">Edit the list of players</a></p>
-<?php
+    <?php
+}
+if ($user->can_edit_events()) {
+    ?>
+<p><a href="<?php echo $or->url('wikiformat.php', false); ?>">List of events to copy-and-paste into the wiki</a></p>
+    <?php
 }
 $output->call_to_js('init_index_page');
 $output->footer();

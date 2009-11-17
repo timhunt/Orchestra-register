@@ -33,7 +33,7 @@ foreach ($events as $event) {
         $content .= "\n===" . $nextmonth . "===\n\n";
     }
     $month = $nextmonth;
-    $content .= '* ' . $event->get_nice_datetime() . ', ' . $event->venue . "\n";
+    $content .= '* ' . $event->get_nice_datetime('%A %e') . ', ' . $event->venue . "\n";
 }
 
 $wikiediturl = $or->get_wiki_edit_url();
