@@ -1,0 +1,2 @@
+Event Name, Description, Venue, Date, Time start, Time finish
+Rehearsal,,Hall,17 October 2009,19:00,21:00

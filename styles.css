@@ -4,6 +4,20 @@ body {
 h1 {
     font-weight: bold;
     font-size: 140%;
+    margin: 0 0 0.5em;
+}
+h2 {
+    font-weight: bold;
+    font-size: 125%;
+    margin: 1.2em 0 0.4em;
+}
+h3 {
+    font-weight: bold;
+    font-size: 100%;
+    margin: 1em 0 0.5em;
+}
+p {
+    margin: 0.5em 0;
 }
 th {
     text-align: left;
@@ -30,8 +44,8 @@ table {
     margin-top: 2em;
 }
 pre {
-    padding: 1em;
-    background: #eee;
+    padding: 0.5em 1em;
+    background: #ddd;
 }
 .deleted {
     color: #aaa;

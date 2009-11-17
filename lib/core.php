@@ -442,7 +442,7 @@ class attendance {
         self::UNKNOWN => '-',
         self::NOTREQUIRED => 'Not needed',
         self::NO => 'No',
-        self::UNSURE => 'Not sure',
+        self::UNSURE => 'Unsure',
         self::YES => 'Yes',
     );
     public $eventid;
