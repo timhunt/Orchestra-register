@@ -53,3 +53,28 @@ pre {
 .error {
     color: #800;
 }
+.unknown {
+}
+.yes {
+    background: #ddffdd;
+}
+.no {
+    background: #ffe4e4;
+}
+.unsure {
+    background: #ffc;
+}
+.notrequired {
+    color: #888;
+}
+.r1 .unknown {
+}
+.r1 .yes {
+    background: #bfb;
+}
+.r1 .no {
+    background: #f8cccc;
+}
+.r1 .unsure {
+    background: #f4f4b0;
+}

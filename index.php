@@ -95,15 +95,16 @@ foreach ($players as $player) {
     <?php
     foreach ($events as $event) {
         $attendance = $player->get_attendance($event);
-        if ($editable && $attendance->status != attendance::NOTREQUIRED) {
-            ?>
-<td class="<?php echo $attendance->status; ?>"><?php echo $attendance->get_select(); ?></td>
-            <?php
+        ?>
+<td class="<?php echo $attendance->status; ?>"><?php
+        if ($editable) {
+            echo $attendance->get_select($user->can_edit_events());
         } else {
-            ?>
-<td class="<?php echo $attendance->status; ?>"><?php echo $attendance->get_symbol(); ?></td>
-            <?php
+            echo $attendance->get_symbol();
         }
+        ?>
+</td>
+        <?php
     }
     ?>
 </tr>

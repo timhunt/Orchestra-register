@@ -331,6 +331,9 @@ class user {
     public function can_edit_players() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
+    public function can_edit_events() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+    }
     public function is_logged_in() {
         return $this->authlevel >= self::AUTH_LOGIN;
     }
@@ -437,7 +440,7 @@ class attendance {
     const NOTREQUIRED = 'notrequired';
     public static $symbols = array(
         self::UNKNOWN => '-',
-        self::NOTREQUIRED => 'Not required',
+        self::NOTREQUIRED => 'Not needed',
         self::NO => 'No',
         self::UNSURE => 'Not sure',
         self::YES => 'Yes',
@@ -451,15 +454,19 @@ class attendance {
     public function get_field_name() {
         return 'att_' . $this->playerid . '_' . $this->eventid;
     }
-    public function get_select() {
+    public function get_select($includenoneeded) {
+        if (!$includenoneeded && $this->status == attendance::NOTREQUIRED) {
+            return $this->get_symbol();
+        }
         $output = '<select name="' . $this->get_field_name() . '" class="statusselect" id="' .
                 $this->get_field_name() . '">';
         foreach (self::$symbols as $value => $symbol) {
-            if ($value == self::NOTREQUIRED) {
+            if (!$includenoneeded && $value == self::NOTREQUIRED) {
                 continue;
             }
             $selected = $this->status == $value ? ' selected="selected"' : '';
-            $output .= '<option value="' . $value . '"' . $selected . '>' . $symbol . '</option>';
+            $output .= '<option class="' . $value . '" value" value="' . $value . '"' .
+                    $selected . '>' . $symbol . '</option>';
         }
         $output .= '</select>';
         return $output;
