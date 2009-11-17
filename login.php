@@ -34,8 +34,10 @@ if ($ok) {
     $or->redirect('');
 }
 
-$output = new html_output();
-$output->header($or, 'Login');
+$or->refresh_sesskey();
+
+$output = new html_output($or);
+$output->header('Login');
 
 if ($ok === false) {
     echo '<p class="loginfailure">Email and or password not recognised.</p>';
@@ -44,7 +46,7 @@ if ($ok === false) {
 ?>
 <form action="<?php echo $or->url('login.php'); ?>" method="post">
 <div>
-
+<?php echo $output->sesskey_input($or); ?>
 <p>Email: <input type="text" size="50" name="email" id="email" value="<?php echo htmlspecialchars($or->get_param('email', '//')); ?>" /></p>
 <p>Password: <input type="password" size="50" name="password" /></p>
 
@@ -55,4 +57,4 @@ if ($ok === false) {
 <?php
 
 $output->call_to_js('init_login_page');
-$output->footer($or);
+$output->footer();

@@ -183,12 +183,27 @@ class orchestra_register {
         return $this->request->get_param($name, $type, $default, $postonly);
     }
 
+    public function require_sesskey() {
+        if ($this->get_sesskey() != $this->get_param('sesskey', request::TYPE_AUTHTOKEN)) {
+            throw new Exception('Invalid request (sesskey does not match)');
+        }
+    }
+
+    public function refresh_sesskey() {
+        $this->get_current_user()->refresh_sesskey();
+    }
+
+    public function get_sesskey() {
+        return $this->get_current_user()->sesskey;
+    }
+
     public function verify_login() {
         $email = $this->request->get_param('email', request::TYPE_EMAIL);
         $password = $this->request->get_param('password', request::TYPE_RAW);
         if (is_null($email) || is_null($password)) {
             return null;
         }
+        $this->require_sesskey();
         $player = $this->db->check_user_auth($email, $this->config->pwsalt . $password);
         if ($player) {
             session_regenerate_id(true);
@@ -201,6 +216,7 @@ class orchestra_register {
     public function logout() {
         unset($_SESSION['userid']);
         session_regenerate_id(true);
+        $this->refresh_sesskey();
     }
 
     /** @return user */
@@ -296,6 +312,18 @@ class user {
     /** @var player */
     public $player;
     public $authlevel = self::AUTH_NONE;
+    public $sesskey;
+    public function __construct() {
+        if (array_key_exists('sesskey', $_SESSION)) {
+            $this->sesskey = $_SESSION['sesskey'];
+        } else {
+            $this->refresh_sesskey();
+        }
+    }
+    public function refresh_sesskey() {
+        $this->sesskey = database::random_string(40);
+        $_SESSION['sesskey'] = $this->sesskey;
+    }
     public function can_edit_attendance($player) {
         return ($this->authlevel >= self::AUTH_TOKEN && $this->player->id == $player->id) ||
                 $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();

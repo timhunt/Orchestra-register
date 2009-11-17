@@ -68,18 +68,22 @@ class form {
         }
     }
 
-    public function parse_request(request $request) {
-        if ($request->get_param('cancel', request::TYPE_BOOL, false)) {
+    public function parse_request(orchestra_register $or) {
+        if ($or->get_param('cancel', request::TYPE_BOOL, false)) {
             return $this->state = self::CANCELLED;
         }
 
-        if (!$request->get_param('submit', request::TYPE_BOOL, false)) {
+        if (!$or->get_param('submit', request::TYPE_BOOL, false)) {
             return $this->state = self::NOTHING;
         }
 
-        $isvalid = TRUE;
+        $or->require_sesskey();
+
+        $isvalid = true;
         foreach ($this->fields as $field) {
-            $isvalid = $isvalid && $field->parse_request($request);
+            if (!$field->parse_request($or)) {
+                $isvalid = false;
+            }
         }
 
         if ($isvalid) {
@@ -102,6 +106,7 @@ class form {
 
     public function output(html_output $output) {
         $html = $output->start_form($this->actionurl, $this->method);
+        $html .= $output->sesskey_input();
         foreach ($this->fields as $field) {
             $html .= $field->output($output);
         }
@@ -118,7 +123,8 @@ class form {
 abstract class form_field {
     public $label;
     public $name;
-    public $note;
+    public $note = '';
+    public $error = '';
     public $default = null;
     public $initial = null;
     public $submitted = null;
@@ -129,13 +135,21 @@ abstract class form_field {
         $this->label = $label;
     }
 
-    abstract public function parse_request(request $request);
+    abstract public function parse_request(orchestra_register $or);
 
     public function set_initial($data) {
         if (is_array($data) && isset($data[$this->name])) {
             $this->initial = $data[$this->name];
         } else if (is_object($data) && isset($data->{$this->name})) {
             $this->initial = $data->{$this->name};
+        }
+    }
+
+    public function get_current() {
+        if (!is_null($this->submitted)) {
+            return $this->submitted;
+        } else {
+            return $this->get_initial();
         }
     }
 
@@ -150,7 +164,9 @@ abstract class form_field {
     }
 
     public function output(html_output $output) {
-        if ($this->note) {
+        if ($this->error) {
+            $note = '<span class="error">' . $this->error . '</span>';
+        } else if ($this->note) {
             $note = $this->note;
         } else if ($this->isrequired) {
             $note = 'Required';
@@ -172,12 +188,17 @@ abstract class single_value_field extends form_field {
         $this->default = $default;
     }
 
-    public function parse_request(request $request) {
-        $this->submitted = $request->get_param($this->name, $this->type, null);
-        if (!is_null($this->submitted)) {
-            return !$this->isrequired || !empty($this->submitted);
+    public function parse_request(orchestra_register $or) {
+        $this->submitted = $or->get_param($this->name, $this->type, null);
+        if (is_null($this->submitted)) {
+            $this->error = 'Invalid input';
+            return false;
         }
-        return false;
+        if ($this->isrequired && $this->submitted === '') {
+            $this->error = 'Required';
+            return false;
+        }
+        return true;
     }
 }
 
@@ -188,21 +209,21 @@ class hidden_field extends single_value_field {
 
     public function output_field(html_output $output) {
         return '<input type="hidden" id="' . $this->name . '" name="' . $this->name .
-                '" value="' . $this->get_initial() . '" />';
+                '" value="' . $this->get_current() . '" />';
     }
 }
 
 class text_field extends single_value_field {
     public function output_field(html_output $output) {
         return '<input type="text" id="' . $this->name . '" name="' . $this->name .
-                '" value="' . $this->get_initial() . '" />';
+                '" value="' . $this->get_current() . '" />';
     }
 }
 
 class password_field extends single_value_field {
     public function output_field(html_output $output) {
         return '<input type="password" id="' . $this->name . '" name="' . $this->name .
-                '" value="' . $this->get_initial() . '" />';
+                '" value="' . $this->get_current() . '" />';
     }
 }
 
@@ -214,8 +235,8 @@ class select_field extends single_value_field {
         $this->choices = $choices;
     }
 
-    public function parse_request(request $request) {
-        if (parent::parse_request($request) && array_key_exists($this->submitted, $this->choices)) {
+    public function parse_request(orchestra_register $or) {
+        if (parent::parse_request($or) && array_key_exists($this->submitted, $this->choices)) {
             return true;
         }
         $this->submitted = null;
@@ -223,7 +244,7 @@ class select_field extends single_value_field {
     }
 
     public function output_field(html_output $output) {
-        return $output->select($this->name, $this->choices, $this->get_initial());
+        return $output->select($this->name, $this->choices, $this->get_current());
     }
 }
 
@@ -235,9 +256,9 @@ class group_select_field extends single_value_field {
         $this->choices = $choices;
     }
 
-    public function parse_request(request $request) {
-        if (parent::parse_request($request)) {
-            foreach ($choices as $groupoptions) {
+    public function parse_request(orchestra_register $or) {
+        if (parent::parse_request($or)) {
+            foreach ($this->choices as $groupoptions) {
                 if (array_key_exists($this->submitted, $groupoptions)) {
                     return true;
                 }
@@ -248,6 +269,6 @@ class group_select_field extends single_value_field {
     }
 
     public function output_field(html_output $output) {
-        return $output->group_select($this->name, $this->choices, $this->get_initial());
+        return $output->group_select($this->name, $this->choices, $this->get_current());
     }
 }

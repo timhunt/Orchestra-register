@@ -29,6 +29,8 @@ $players = $or->get_players();
 $user = $or->get_current_user();
 $or->load_attendance();
 
+$or->require_sesskey();
+
 foreach ($players as $player) {
     if (!$user->can_edit_attendance($player)) {
         continue;

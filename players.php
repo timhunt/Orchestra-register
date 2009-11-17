@@ -31,6 +31,7 @@ if (!$user->can_edit_players()) {
 }
 
 if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
+    $or->require_sesskey();
     $player = $or->get_player($id);
     if ($player && $player->deleted == 0) {
         $or->delete_player($player);
@@ -38,6 +39,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $or->redirect('players.php');
 
 } else if ($id = $or->get_param('undelete', request::TYPE_INT, 0)) {
+    $or->require_sesskey();
     $player = $or->get_player($id, true);
     if ($player && $player->deleted == 1) {
         $or->undelete_player($player);
@@ -48,8 +50,8 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
 
 $players = $or->get_players(true);
 
-$output = new html_output('Edit players');
-$output->header($or, 'Edit players');
+$output = new html_output($or);
+$output->header('Edit players');
 
 ?>
 <table>
@@ -98,4 +100,4 @@ foreach ($players as $player) {
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
 $output->call_to_js('init_edit_players_page');
-$output->footer($or);
+$output->footer();

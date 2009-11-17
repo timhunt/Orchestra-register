@@ -23,10 +23,15 @@
  */
 
 class html_output {
+    protected $or;
     protected $javascriptcode = array();
 
-    public function header($or, $subhead = '') {
-        $title = $or->get_title();
+    public function __construct(orchestra_register $or) {
+        $this->or = $or;
+    }
+
+    public function header($subhead = '') {
+        $title = $this->or->get_title();
         if ($subhead) {
             $title = $subhead . ' - ' . $title;
         }
@@ -36,22 +41,22 @@ class html_output {
     <html>
     <head>
     <title><?php echo $title; ?></title>
-    <link rel="stylesheet" type="text/css" href="<?php echo $or->url('styles.css', false); ?>" />
+    <link rel="stylesheet" type="text/css" href="<?php echo $this->or->url('styles.css', false); ?>" />
     </head>
     <body>
-    <div class="logininfo"><?php echo $or->get_login_info(); ?></div>
-    <h1><?php echo $or->get_title(); ?></h1>
+    <div class="logininfo"><?php echo $this->or->get_login_info(); ?></div>
+    <h1><?php echo $this->or->get_title(); ?></h1>
     <?php
         if ($subhead) {
             echo '<h2>' . $subhead . '</h2>';
         }
     }
 
-    public function footer($or) {
+    public function footer() {
     ?>
-    <div class="footer"><?php echo $or->version_string(); ?></div>
-    <script type="text/javascript" src="<?php echo $or->url('thirdparty/yui-min.js', false); ?>"></script>
-    <script type="text/javascript" src="<?php echo $or->url('script.js', false); ?>"></script>
+    <div class="footer"><?php echo $this->or->version_string(); ?></div>
+    <script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false); ?>"></script>
+    <script type="text/javascript" src="<?php echo $this->or->url('script.js', false); ?>"></script>
     <?php
     if ($this->javascriptcode) {
         echo '<script type="text/javascript">' . implode("\n", $this->javascriptcode) . '</script>';
@@ -64,6 +69,7 @@ class html_output {
 
     public function action_button($url, $params, $label) {
         $output = '<form action="' . $url . '" method="post"><div>';
+        $output .= $this->sesskey_input();
         foreach ($params as $name => $value) {
             $output .= '<input type="hidden" name="' . $name . '" value="' . $value . '" />';
         }
@@ -86,11 +92,16 @@ class html_output {
     }
 
     public function form_field($label, $field, $postfix = '') {
-        if ($postfix) {
-            $postfix = ' (' . $postfix . ')';
-        }
         return '<p><span class="label">' . $label . ' </span><span class="field">' .
-                $field . '</span><span class="postfix">' . $postfix . "</span></p>\n";
+                $field . '</span><span class="postfix"> ' . $postfix . "</span></p>\n";
+    }
+
+    public function sesskey_input() {
+        return $this->hidden_field('sesskey', $this->or->get_sesskey());
+    }
+
+    public function hidden_field($name, $value) {
+        return '<input type="hidden" name="' . $name . '" value="' . htmlspecialchars($value) . '" />';
     }
 
     public function text_field($label, $name, $default, $postfix = '') {

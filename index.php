@@ -48,15 +48,16 @@ if ($includepast) {
 }
 
 
-$output = new html_output();
-$output->header($or);
+$output = new html_output($or);
+$output->header();
 ?>
 <form action="<?php echo $or->url('savechoices.php'); ?>" method="post">
 <?php
+echo $output->sesskey_input($or);
 if ($includepast) {
-?>
+    ?>
 <input type="hidden" name="past" value="1" />
-<?php
+    <?php
 }
 ?>
 <?php echo $savechangesbutton; ?>
@@ -165,4 +166,4 @@ if ($user->can_edit_players()) {
 <?php
 }
 $output->call_to_js('init_index_page');
-$output->footer($or);
+$output->footer();

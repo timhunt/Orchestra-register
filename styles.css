@@ -46,3 +46,10 @@ pre {
 .total {
     font-weight: bold;
 }
+.postfix {
+    font-size: 0.8em;
+    font-style: italic;
+}
+.error {
+    color: #800;
+}

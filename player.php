@@ -54,7 +54,7 @@ if ($playerid && !array_key_exists($player->role, $assignableroles)) {
 
 $form = new form($or->url('player.php', false, false), $submitlabel);
 if ($playerid) {
-    $form->add_field(new hidden_field('playerid', $playerid, request::TYPE_INT));
+    $form->add_field(new hidden_field('id', request::TYPE_INT, $playerid));
 }
 $form->add_field(new text_field('firstname', 'First name', request::TYPE_RAW));
 $form->add_field(new text_field('lastname', 'Last name', request::TYPE_RAW));
@@ -71,17 +71,18 @@ $form->set_required_fields('firstname', 'lastname', 'email');
 
 $form->set_initial_data($player);
 
-switch ($form->parse_request($or->get_request())) {
+switch ($form->parse_request($or)) {
     case form::CANCELLED:
         $or->redirect('players.php');
 
     case form::SUBMITTED:
         // TODO save
+        die;
         $or->redirect('players.php');
 }
 
-$output = new html_output($title);
-$output->header($or, $title);
+$output = new html_output($or);
+$output->header($title);
 echo $form->output($output);
 $output->call_to_js('init_edit_player_page');
-$output->footer($or);
+$output->footer();

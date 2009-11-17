@@ -238,8 +238,8 @@ class database {
         $sql = "INSERT INTO players (firstname, lastname, email, part, authkey, pwhash, pwsalt, role, deleted)
                 VALUES (" . $this->escape($player->firstname) . ", " . $this->escape($player->lastname) . ", " .
                 $this->escape($player->email) . ", " . $this->escape($player->part) . ", " .
-                $this->escape($this->random_string(40)) . ", NULL, " .
-                $this->escape($this->random_string(40)) . ", " . $this->escape($player->role) . ", " .
+                $this->escape(self::random_string(40)) . ", NULL, " .
+                $this->escape(self::random_string(40)) . ", " . $this->escape($player->role) . ", " .
                 $this->escape($player->deleted) . ")";
         $this->update($sql);
     }
@@ -265,7 +265,7 @@ class database {
         $this->update($sql);
     }
 
-    public function random_string($length) {
+    public static function random_string($length) {
         $pool  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $pool .= 'abcdefghijklmnopqrstuvwxyz';
         $pool .= '0123456789';
@@ -342,9 +342,9 @@ class database {
             ) ENGINE = InnoDB
         ");
 
-        $pwsalt = $this->random_string(40);
+        $pwsalt = self::random_string(40);
         $this->set_config('pwsalt', $pwsalt);
-        $this->set_config('icalguid', $this->random_string(40));
+        $this->set_config('icalguid', self::random_string(40));
         $this->set_config('title', 'OU Orchestra Register');
         $this->set_config('timezone', 'Europe/London');
 

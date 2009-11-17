@@ -38,8 +38,8 @@ foreach ($events as $event) {
 
 $wikiediturl = $or->get_wiki_edit_url();
 
-$output = new html_output();
-$output->header($or, 'Export events for the wiki');
+$output = new html_output($or);
+$output->header('Export events for the wiki');
 if ($wikiediturl) {
     echo '<p>Copy the rehearsal list below to the <a href="' . $wikiediturl .
             '">Orchestra Rehearsals page</a>.</p>';
@@ -47,4 +47,4 @@ if ($wikiediturl) {
 echo '<textarea id="wikimarkup" readonly="readonly" cols="80" rows="25">' . $content . '</textarea>';
 echo '<p><a href="' . $or->url('') . '">Back to the register</a></p>';
 $output->call_to_js('init_wiki_format_page');
-$output->footer($or);
+$output->footer();
