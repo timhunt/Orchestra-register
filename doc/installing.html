@@ -2,17 +2,115 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-<title>TITLE - Orchestra Register</title>
+<title>Installing - Docs - Orchestra Register</title>
 <link rel="stylesheet" type="text/css" href="../styles.css" />
 </head>
 <body>
 
-<h1>TITLE</h1>
+<h1>How to install Orchestra register</h1>
 
-<p></p>
+<p>These instructions should mostly seem fairly familiar if you have ever
+installed a web application written in PHP before.</p>
 
-<h2></h2>
 
+<h2>System requirements</h2>
+
+<p>Orchestra register needs to be installed on a web server that can execute PHP
+code, and that can connect to a MySQL database. As far as I am aware, it does
+not require any special PHP modules. The minimum required versions are:</p>
+
+<ul>
+<li>PHP version 5 or greater (tested on PHP 5.2.x).</li>
+<li>MySQL 5 or greater (tested on MySQL 5.1.x). Orchestra register uses only InnoDB tables.</li>
+</ul>
+
+<p>I'm afraid those requirements are currently rather vague. If you discover that
+Orchestra register does, or does not, work with particular versions of PHP or MySQL,
+it would be helpful if you could let us know.</p>
+
+
+<h2>Creating a database</h2>
+
+<p>you need to <a href="http://dev.mysql.com/doc/refman/5.1/en/database-use.html">create
+a database</a> for Orchestra register to store its data in. Below I will assume that
+the database is called <tt>registerdb</tt>.</p>
+
+<p>I would also recommend that you
+<a href="http://dev.mysql.com/doc/refman/5.1/en/user-account-management.html"></a>create
+a database user that is only allowed to access that database. Whichever user
+account you plan to use to let the Orchestra register system connect to the
+database needs to have all privileges (except for GRANT OPTION) over that database.
+In what follows I will assume you are connecting to the database using username
+<tt>registeruser</tt> with password <tt>secret!</tt>.</p>
+
+
+<h2>Getting the code</h2>
+
+<p>You need to download all the Orchestra register code, and put it somewhere
+where your web server can execute it. For example, in a typical Apache install,
+you might put the code in <tt>/var/www/register</tt>.</p>
+
+<p>How you do that is up to you. You could download a zip file of the code, uncompress
+it, and then upload it using FTP. Alternatively, you could use a command like</p>
+<pre>git clone git://github.com/timhunt/Orchestra-register.git register</pre>
+<p>from the command line in <tt>/var/www</tt>. The latter method would make
+it easier to update to future releases when the time comes.</p>
+
+
+<h2>Create config.php</h2>
+
+<p>In the place where you put the the Orchestra register code, you need to
+create a file called config.php that contains the information needed to
+connect to the database.</p>
+
+<p>The easiest way to create config.php is to edit make a copy of the example
+file config-dist.php, and then edit that copy. You need to fill in the
+database information, and also the URL that points to this instance of
+Orchestra register.</p>
+
+<p>Using the example values from above, a config.php file would look something like:</p>
+<pre>
+&lt;?php
+
+$config-&gt;dbhost = 'localhost';
+$config-&gt;dbuser = 'registeruser';
+$config-&gt;dbpass = 'secret!';
+$config-&gt;dbname = 'register';
+
+$config-&gt;wwwroot = 'http://example.com/register/';
+</pre>
+
+
+<h2>Prepare some initial data</h2>
+
+<p>When Orchestra register installs itself, there the option to automatically
+load the list of sections, parts, players and events. To do this you need to
+edit the files in the <tt>data</tt> folder. There is a reasonable default
+set of parts and sections already set up. If you want to automatically create
+players or events, you will need to start with a copy of <tt>players-example.txt</tt>
+renamed to <tt>players.txt</tt> (or a copy of <tt>events-example.txt</tt> renamed
+to <tt>events.txt</tt>).</p>
+
+<p>Actually, for now, it is pretty essential that you create <tt>players.txt</tt> file
+with at least one player in it. When Orchestra register installs itself, the
+first player is given administrator access, with the password <b>mozart</b>, and this
+is the only way to create the first administrator account.</p>
+
+
+<h2>Allow Orchestra register to install itself</h2>
+
+<p>Now everything is ready, so you just need to go the the URL where you put
+Orchestra register (<tt>http://example.com/register/</tt> in the example above).
+Orchestra register will automatically install itself. That is, it will
+create the necessary database tables, and populate some of them with data.</p>
+
+<p>Once the installation is complete, you will see the register screen with all
+the attendance information blank. The system is now ready for use.</p>
+
+<p>During the installation, the first player in the <tt>data/player.txt</tt>
+file is made an administrator, with the password <b>mozart</b>. You are strongly
+advised to change that password as soon as possible. You can do that by logging
+in as that player and going to the edit players page.</p>
 
 
 <h2>See also</h2>
