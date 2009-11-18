@@ -25,6 +25,8 @@ require_once(dirname(__FILE__) . '/lib/core.php');
 
 $or = new orchestra_register();
 $includepast = $or->get_param('past', request::TYPE_BOOL, false, false);
+$printview = $or->get_param('print', request::TYPE_BOOL, false, false);
+
 $events = $or->get_events($includepast);
 $user = $or->get_current_user();
 if (!empty($user->player->part)) {
@@ -47,19 +49,28 @@ if ($includepast) {
 
 
 $output = new html_output($or);
-$output->header();
+
+$bodyclass = '';
+if ($printview) {
+    $bodyclass = 'print';
+}
+$output->header('', $bodyclass);
+
+if (!$printview && $user->is_authenticated()) {
 ?>
 <form action="<?php echo $or->url('savechoices.php'); ?>" method="post">
+<div>
+
 <?php
-echo $output->sesskey_input($or);
-if ($includepast) {
-    ?>
+    echo $output->sesskey_input($or);
+    if ($includepast) {
+        ?>
 <input type="hidden" name="past" value="1" />
-    <?php
+        <?php
+    }
+    echo $savechangesbutton;
 }
 ?>
-<?php echo $savechangesbutton; ?>
-<div>
 
 <table>
 <thead>
@@ -95,7 +106,7 @@ foreach ($players as $player) {
         $attendance = $player->get_attendance($event);
         ?>
 <td class="<?php echo $attendance->status; ?>"><?php
-        if ($editable) {
+        if (!$printview && $editable) {
             echo $attendance->get_select($user->can_edit_events());
         } else {
             echo $attendance->get_symbol();
@@ -145,25 +156,38 @@ foreach ($subtotals as $part => $subtotal) {
     }
     ?>
 </tr>
-    <?php 
+    <?php
 }
 ?>
 </tbody>
 </table>
+<?php
+if (!$printview && $user->is_authenticated()) {
+    ?>
 
 <input type="submit" name="save" value="Save changes" />
 </div>
 </form>
+    <?php
+}
 
+if ($printview) {
+    ?>
+<p>From <?php echo $or->url('', false); ?> at <?php echo strftime('%H:%M, %d %B %Y') ?>.</p>
+    <?php
+} else {
+    ?>
 <p><a href="<?php echo $showhidepasturl; ?>"><?php echo $showhidepastlabel; ?></a></p>
 <p><a href="<?php echo $or->url('ical.php', false); ?>">Download iCal file (to add the rehearsals into Outlook, etc.)</a></p>
-<?php
-if ($user->can_edit_players()) {
+<p><a href="<?php echo $or->url('?print=1'); ?>">Printable view</a></p>
+    <?php
+}
+if (!$printview && $user->can_edit_players()) {
     ?>
 <p><a href="<?php echo $or->url('players.php', false); ?>">Edit the list of players</a></p>
     <?php
 }
-if ($user->can_edit_events()) {
+if (!$printview && $user->can_edit_events()) {
     ?>
 <p><a href="<?php echo $or->url('events.php', false); ?>">Edit the list of events</a></p>
 <p><a href="<?php echo $or->url('wikiformat.php', false); ?>">List of events to copy-and-paste into the wiki</a></p>

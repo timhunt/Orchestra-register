@@ -135,7 +135,7 @@ class database {
                 parts.section,
                 events.id AS eventid,
                 sum(CASE WHEN status = '" . attendance::YES . "' THEN 1 ELSE 0 END) AS attending,
-                sum(CASE WHEN status = '" . attendance::NOTREQUIRED . "' THEN 0 ELSE 1 END) AS numplayers 
+                sum(CASE WHEN status = '" . attendance::NOTREQUIRED . "' THEN 0 ELSE 1 END) AS numplayers
             FROM players
             JOIN parts ON players.part = parts.part
             JOIN sections ON parts.section = sections.section

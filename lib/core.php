@@ -25,7 +25,6 @@ require_once(dirname(__FILE__) . '/data.php');
 require_once(dirname(__FILE__) . '/output.php');
 
 class permission_exception extends Exception {
-    
 }
 
 class orchestra_register {
@@ -373,6 +372,9 @@ class user {
     }
     public function is_logged_in() {
         return $this->authlevel >= self::AUTH_LOGIN;
+    }
+    public function is_authenticated() {
+        return $this->authlevel >= self::AUTH_TOKEN;
     }
     protected function is_organiser() {
         return in_array($this->player->role, array(self::ORGANISER, self::ADMIN));

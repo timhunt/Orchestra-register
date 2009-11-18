@@ -31,10 +31,13 @@ class html_output {
         $this->or = $or;
     }
 
-    public function header($subhead = '') {
+    public function header($subhead = '', $bodyclass = '') {
         $title = $this->or->get_title();
         if ($subhead) {
             $title = $subhead . ' - ' . $title;
+        }
+        if ($bodyclass) {
+            $bodyclass = ' class="' . $bodyclass . '"';
         }
         $stylesheets = array($this->or->url('styles.css', false));
         if (is_readable(dirname(__FILE__) . '/../' . self::EXTRA_STYLES)) {
@@ -54,7 +57,7 @@ class html_output {
     }
     ?>
 </head>
-<body>
+<body<?php echo $bodyclass; ?>>
 <div class="logininfo"><?php echo $this->or->get_login_info(); ?></div>
 <h1><?php echo $this->or->get_title(); ?></h1>
     <?php
