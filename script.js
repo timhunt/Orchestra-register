@@ -1,4 +1,15 @@
-function init_index_page() {
+function init_index_page(eventids, playerids) {
+    YUI().use('event', 'ua', function(Y) {
+        if (Y.UA.gecko > 0) {
+            // There is  a really annoying Firfox bug that stops this from working.
+            // The select you are leaving is changes before we get the event, so
+            // there is no way to prevent the default action. Therefore, don't add
+            // the event handlers.
+            return;
+        }
+
+        Y.on('keydown', register_keydown, 'select.statusselect', null, eventids, playerids);
+    });
 }
 
 function init_login_page() {
@@ -31,4 +42,43 @@ function init_wiki_format_page() {
 
 function onclick_select() {
     this.select();
+}
+
+function register_keydown(e, eventids, playerids) {
+    switch (e.keyCode) {
+    case 38: // Up
+        move_register_focus(e.currentTarget.get('id'), -1, 1, playerids);
+        break;
+    case 40: // Down 
+        move_register_focus(e.currentTarget.get('id'), 1, 1, playerids);
+        break;
+    case 37: // Left
+        move_register_focus(e.currentTarget.get('id'), -1, 2, eventids);
+        break;
+    case 39: // Right
+        move_register_focus(e.currentTarget.get('id'), 1, 2, eventids);
+        break;
+    default:
+        return;
+    }
+    e.halt();
+}
+
+function move_register_focus(currentid, direction, bit, ids) {
+    var bits = currentid.split('_');
+    var len = ids.length;
+    for (var i = 0; i < len; ++i) {
+        if (ids[i] == bits[bit]) {
+            break;
+        }
+    }
+    if (i == len) {
+        return;
+    }
+    var iStart = i;
+    do {
+        i = (i + direction + len) % len;
+        bits[bit] = ids[i];
+    } while (!document.getElementById(bits.join('_')) && i != iStart);
+    document.getElementById(bits.join('_')).focus();
 }

@@ -72,7 +72,7 @@ if (!$printview && $user->is_authenticated()) {
 }
 ?>
 
-<table>
+<table id="register">
 <thead>
 <tr class="headingrow">
 <th>Section</th>
@@ -193,5 +193,5 @@ if (!$printview && $user->can_edit_events()) {
 <p><a href="<?php echo $or->url('wikiformat.php', false); ?>">List of events to copy-and-paste into the wiki</a></p>
     <?php
 }
-$output->call_to_js('init_index_page');
+$output->call_to_js('init_index_page', array(array_keys($events), array_keys($players)));
 $output->footer();
