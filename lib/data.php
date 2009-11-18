@@ -113,13 +113,15 @@ class database {
         ", 'player');
     }
 
-    public function load_events($includepast = false) {
-        if ($includepast) {
-            return $this->get_records('events', 'event', 'timestart');
-        } else {
-            return $this->get_records_select('events', 'timeend > ' . $this->escape(time()),
-                    'event', 'timestart');
+    public function load_events($includepast = false, $includedeleted = false) {
+        $conditions = array();
+        if (!$includedeleted) {
+            $conditions[] = 'deleted = 0';
         }
+        if (!$includepast) {
+            $conditions[] = 'timeend > ' . $this->escape(time());
+        }
+        return $this->get_records_select('events', implode(' AND ', $conditions), 'event', 'timestart');
     }
 
     public function load_attendances() {
@@ -202,10 +204,18 @@ class database {
                 " WHERE id = " . $this->escape($playerid));
     }
 
+    public function set_event_deleted($eventid, $deleted) {
+        $this->update("UPDATE events SET deleted = " . $this->escape($deleted) .
+                " WHERE id = " . $this->escape($eventid));
+    }
+
     /**
      * @return db_config
      */
     public function load_config() {
+        if (!$this->table_exists('config')) {
+            $this->install();
+        }
         $result = $this->execute_sql('SELECT * FROM config');
         $config = new db_config();
         while ($row = mysql_fetch_object($result)) {
@@ -230,11 +240,14 @@ class database {
         $this->update($sql);
     }
 
-    public function set_config($name, $value) {
+    public function set_config($name, $value, $config = null) {
         $sql = "INSERT INTO config (name, value)
                 VALUES (" . $this->escape($name) . ", " . $this->escape($value) . ")
                 ON DUPLICATE KEY UPDATE value = " . $this->escape($value);
         $this->update($sql);
+        if ($config) {
+            $config->$name = $value;
+        }
     }
 
     public function insert_player($player) {
@@ -296,14 +309,43 @@ class database {
         return $string;
     }
 
-    public function check_installed() {
-        if (!$this->table_exists('config')) {
-            $this->install();
-        }
-    }
-
     protected function get_last_insert_id() {
         return mysql_insert_id($this->conn);
+    }
+
+    public static function load_csv($filename, $skipheader = true) {
+        $handle = fopen(dirname(__FILE__) . '/../' . $filename, 'r');
+        if (!$handle) {
+            return array();
+        }
+        if ($skipheader) {
+            fgets($handle);
+        }
+        $data = array();
+        while (($row = fgetcsv($handle)) !== false) {
+            $data[] = $row;
+        }
+        fclose($handle);
+        return $data;
+    }
+
+    public function check_installed(db_config $config, $codeversion) {
+        $donesomething = false;
+        if (is_null($config)) {
+            $this->install();
+            $donesomething = true;
+
+        } else if ($config->version < $codeversion) {
+            $this->upgrade($config->version);
+            $donesomething = true;
+        }
+
+        if ($donesomething) {
+            $this->set_config('version', $codeversion);
+            $config = $this->load_config();
+        }
+
+        return $config;
     }
 
     protected function install() {
@@ -349,7 +391,8 @@ class database {
                 venue VARCHAR(100) NOT NULL,
                 timestart INT(10) NOT NULL,
                 timeend INT(10) NOT NULL,
-                timemodified INT(10) NOT NULL
+                timemodified INT(10) NOT NULL,
+                deleted INT(1) NOT NULL DEFAULT 0
             ) ENGINE = InnoDB
         ");
         $this->execute_sql("
@@ -405,19 +448,10 @@ class database {
         }
     }
 
-    public static function load_csv($filename, $skipheader = true) {
-        $handle = fopen(dirname(__FILE__) . '/../' . $filename, 'r');
-        if (!$handle) {
-            return array();
+    protected function upgrade($fromversion) {
+        if ($fromversion < 2009111800) {
+            $this->update('ALTER TABLE events ADD COLUMN
+                    deleted INT(1) NOT NULL DEFAULT 0');
         }
-        if ($skipheader) {
-            fgets($handle);
-        }
-        $data = array();
-        while (($row = fgetcsv($handle)) !== false) {
-            $data[] = $row;
-        }
-        fclose($handle);
-        return $data;
     }
 }

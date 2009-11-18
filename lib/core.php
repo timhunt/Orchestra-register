@@ -56,9 +56,9 @@ class orchestra_register {
 
         $this->db = new database($this->sysconfig->dbhost, $this->sysconfig->dbuser,
                 $this->sysconfig->dbpass, $this->sysconfig->dbname);
-        $this->db->check_installed();
 
         $this->config = $this->db->load_config();
+        $this->config = $this->db->check_installed($this->config, $this->version->id);
 
         $this->request = new request();
 
@@ -82,9 +82,9 @@ class orchestra_register {
         return $this->players;
     }
 
-    public function get_events($includepast = false) {
+    public function get_events($includepast = false, $includedeleted = false) {
         if (is_null($this->events)) {
-            $this->events = $this->db->load_events($includepast);
+            $this->events = $this->db->load_events($includepast, $includedeleted);
         }
         return $this->events;
     }
@@ -150,6 +150,14 @@ class orchestra_register {
 
     public function set_player_password($playerid, $newpassword) {
         $this->db->set_password($playerid, $this->config->pwsalt . $newpassword);
+    }
+
+    public function delete_event($event) {
+        $this->db->set_event_deleted($event->id, 1);
+    }
+
+    public function undelete_event($event) {
+        $this->db->set_event_deleted($event->id, 0);
     }
 
     public function get_title() {
@@ -390,6 +398,8 @@ class sys_config {
 }
 
 class db_config {
+    public $version;
+
     public $pwsalt;
 
     public $icalguid;
@@ -415,6 +425,7 @@ class event {
     public $timestart;
     public $timeend;
     public $timemodified;
+    public $deleted = 0;
 
     public function get_nice_datetime($dateformat = self::DATE_FORMAT) {
         $startdate = strftime($dateformat, $this->timestart);
