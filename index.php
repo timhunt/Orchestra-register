@@ -20,8 +20,6 @@
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
 
 require_once(dirname(__FILE__) . '/lib/core.php');
 
@@ -73,9 +71,9 @@ if ($includepast) {
 foreach ($events as $event) {
     ?>
 <th>
-<span class="eventname"><?php echo $event->name; ?></span>
+<span class="eventname"><?php echo htmlspecialchars($event->name); ?></span>
 <span class="eventdatetime"><?php echo $event->get_nice_datetime(); ?></span>
-<span class="eventvenue"><?php echo $event->venue; ?></span>
+<span class="eventvenue"><?php echo htmlspecialchars($event->venue); ?></span>
 </th>
     <?php
 }
@@ -89,9 +87,9 @@ foreach ($players as $player) {
     $editable = $user->can_edit_attendance($player);
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
-<td><?php echo $player->section; ?></td>
-<td><?php echo $player->part; ?></td>
-<th><?php echo $player->get_public_name(); ?></th>
+<td><?php echo htmlspecialchars($player->section); ?></td>
+<td><?php echo htmlspecialchars($player->part); ?></td>
+<th><?php echo htmlspecialchars($player->get_public_name()); ?></th>
     <?php
     foreach ($events as $event) {
         $attendance = $player->get_attendance($event);
@@ -118,7 +116,7 @@ foreach ($players as $player) {
 <?php
 foreach ($events as $event) {
     ?>
-<th><span class="eventdatetime"><?php echo $event->get_nice_datetime(); ?></span></th>
+<th><span class="eventdatetime"><?php echo htmlspecialchars($event->get_nice_datetime()); ?></span></th>
     <?php
 }
 ?>
@@ -128,8 +126,8 @@ $rowparity = 1;
 foreach ($subtotals as $part => $subtotal) {
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
-<td><?php echo $subtotal->section; ?></td>
-<th colspan="2"><?php echo $part; ?></th>
+<td><?php echo htmlspecialchars($subtotal->section); ?></td>
+<th colspan="2"><?php echo htmlspecialchars($part); ?></th>
     <?php
     foreach ($events as $event) {
         ?>
@@ -167,6 +165,7 @@ if ($user->can_edit_players()) {
 }
 if ($user->can_edit_events()) {
     ?>
+<p><a href="<?php echo $or->url('events.php', false); ?>">Edit the list of events</a></p>
 <p><a href="<?php echo $or->url('wikiformat.php', false); ?>">List of events to copy-and-paste into the wiki</a></p>
     <?php
 }

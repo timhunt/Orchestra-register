@@ -188,6 +188,14 @@ class database {
                 WHERE " . $this->where_clause(array('authkey' => $token, 'deleted' => 0)), 'player');
     }
 
+    public function find_event_by_id($eventid, $includedeleted = false) {
+        $conditions = array('id' => $eventid);
+        if (!$includedeleted) {
+            $conditions['deleted'] = 0;
+        }
+        return $this->get_record_select('events', $this->where_clause($conditions), 'event');
+    }
+
     public function check_user_auth($email, $saltedpassword) {
         return $this->get_record_select('players',
                 "email = " . $this->escape($email) . " AND pwhash = SHA1(CONCAT(" .

@@ -82,6 +82,10 @@ class orchestra_register {
         return $this->players;
     }
 
+    public function get_event($id, $includedeleted = false) {
+        return $this->db->find_event_by_id($id, $includedeleted);
+    }
+
     public function get_events($includepast = false, $includedeleted = false) {
         if (is_null($this->events)) {
             $this->events = $this->db->load_events($includepast, $includedeleted);

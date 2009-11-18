@@ -20,8 +20,6 @@
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
 
 require_once(dirname(__FILE__) . '/lib/core.php');
 require_once(dirname(__FILE__) . '/lib/form.php');

@@ -26,80 +26,81 @@ require_once(dirname(__FILE__) . '/lib/core.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
-if (!$user->can_edit_players()) {
-    throw new permission_exception('You don\'t have permission to edit the list of players.');
+if (!$user->can_edit_events()) {
+    throw new permission_exception('You don\'t have permission to edit the list of events.');
 }
 
 if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $or->require_sesskey();
-    $player = $or->get_player($id);
-    if ($player && $player->deleted == 0) {
-        $or->delete_player($player);
+    $event = $or->get_event($id);
+    if ($event && $event->deleted == 0) {
+        $or->delete_event($event);
     }
-    $or->redirect('players.php');
+    $or->redirect('events.php');
 
 } else if ($id = $or->get_param('undelete', request::TYPE_INT, 0)) {
     $or->require_sesskey();
-    $player = $or->get_player($id, true);
-    if ($player && $player->deleted == 1) {
-        $or->undelete_player($player);
+    $event = $or->get_event($id, true);
+    if ($event && $event->deleted == 1) {
+        $or->undelete_event($event);
     }
-    $or->redirect('players.php');
+    $or->redirect('events.php');
 
 }
 
-$players = $or->get_players(true);
+$events = $or->get_events(true, true);
 
 $output = new html_output($or);
-$output->header('Edit players');
+$output->header('Edit events');
 
 ?>
-<p><a href="<?php echo $or->url('player.php'); ?>">Add another player</a></p>
+<p><a href="<?php echo $or->url('event.php'); ?>">Add another event</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <table>
 <thead>
 <tr class="headingrow">
-<th>Section</th>
-<th>Part</th>
-<th>Name</th>
-<th>Email</th>
+<th>Event name</th>
+<th>Venue</th>
+<th>Date</th>
+<th>Time start</th>
+<th>Time end</th>
 <th>Actions</th>
-<th>URL</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <?php
 $rowparity = 1;
-foreach ($players as $player) {
+foreach ($events as $event) {
     $actions = array();
-    if ($player->deleted) {
-        $actions[] = $output->action_button($or->url('players.php', false),
-                array('undelete' => $player->id), 'Un-delete');
+    if ($event->deleted) {
+        $actions[] = $output->action_button($or->url('events.php', false),
+                array('undelete' => $event->id), 'Un-delete');
         $extrarowclass = ' deleted';
-        $readonly = 'disabled="disabled"';
+
     } else {
-        $actions[] = '<a href="' . $or->url('player.php?id=' . $player->id, false) . '">Edit</a>';
-        $actions[] = $output->action_button($or->url('players.php', false),
-                array('delete' => $player->id), 'Delete');
+        $actions[] = '<a href="' . $or->url('event.php?id=' . $event->id, false) . '">Edit</a>';
+        $actions[] = $output->action_button($or->url('events.php', false),
+                array('delete' => $event->id), 'Delete');
         $extrarowclass = '';
-        $readonly = 'readonly="readonly"';
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
-<td><?php echo htmlspecialchars($player->section); ?></td>
-<td><?php echo htmlspecialchars($player->part); ?></td>
-<th><?php echo htmlspecialchars($player->get_name()); ?></th>
-<td><?php echo htmlspecialchars($player->email); ?></td>
+<td><?php echo htmlspecialchars($event->name); ?></td>
+<th><?php echo htmlspecialchars($event->venue); ?></th>
+<td><?php echo strftime(event::DATE_FORMAT, $event->timestart); ?></td>
+<td><?php echo strftime(event::TIME_FORMAT, $event->timestart); ?></td>
+<td><?php echo strftime(event::TIME_FORMAT, $event->timeend); ?></td>
 <td><?php echo implode("\n", $actions); ?></td>
-<td><input type="text" size="60" <?php echo $readonly; ?> value="<?php echo $or->url('?t=' . $player->authkey, false); ?>" /></td>
+<td><?php echo htmlspecialchars($event->description); ?></td>
 </tr>
 <?php
 }
 ?>
 </tbody>
 </table>
-<p><a href="<?php echo $or->url('player.php'); ?>">Add another player</a></p>
+<p><a href="<?php echo $or->url('event.php'); ?>">Add another event</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
-$output->call_to_js('init_edit_players_page');
+$output->call_to_js('init_edit_events_page');
 $output->footer();

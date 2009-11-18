@@ -15,6 +15,13 @@ function init_edit_player_page() {
     document.getElementById('firstname').focus();
 }
 
+function init_edit_events_page() {
+}
+
+function init_edit_event_page() {
+    document.getElementById('name').focus();
+}
+
 function init_wiki_format_page() {
     YUI().use('event', function(Y) {
         Y.on('click', onclick_select, '#wikimarkup');
