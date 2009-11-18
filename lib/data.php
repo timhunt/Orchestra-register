@@ -202,6 +202,9 @@ class database {
                 " WHERE id = " . $this->escape($playerid));
     }
 
+    /**
+     * @return db_config
+     */
     public function load_config() {
         $result = $this->execute_sql('SELECT * FROM config');
         $config = new db_config();
@@ -242,6 +245,21 @@ class database {
                 $this->escape(self::random_string(40)) . ", " . $this->escape($player->role) . ", " .
                 $this->escape($player->deleted) . ")";
         $this->update($sql);
+        $player->id = $this->get_last_insert_id();
+    }
+
+    public function update_player($player) {
+        if (empty($player->id)) {
+            throw new Exception('Player not in the database. Cannot update.');
+        }
+        $sql = "UPDATE players SET
+                firstname = " . $this->escape($player->firstname) . ",
+                lastname = " . $this->escape($player->lastname) . ",
+                email = " . $this->escape($player->email) . ",
+                part = " . $this->escape($player->part) . ",
+                role = " . $this->escape($player->role) . "
+                WHERE " . $this->where_clause(array('id' => $player->id));
+        $this->update($sql);
     }
 
     public function insert_event($event) {
@@ -250,6 +268,7 @@ class database {
                 $this->escape($event->venue) . ", " . $this->escape($event->timestart) . ", " .
                 $this->escape($event->timeend) . ", " . time() . ")";
         $this->update($sql);
+        $event->id = $this->get_last_insert_id();
     }
 
     public function insert_section($section, $sort) {

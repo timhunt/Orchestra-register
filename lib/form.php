@@ -42,7 +42,7 @@ class form {
     }
 
     public function add_field(form_field $field) {
-        $this->fields[$field->name] = $field;
+        $this->fields[$field->get_name()] = $field;
     }
 
     /**
@@ -58,7 +58,7 @@ class form {
      */
     public function set_required_fields($_) {
         foreach (func_get_args() as $field) {
-            $this->fields[$field]->isrequired = true;
+            $this->fields[$field]->set_required(true);
         }
     }
 
@@ -93,6 +93,13 @@ class form {
         }
     }
 
+    public function set_field_error($name, $message) {
+        $this->get_field($name)->set_error($message);
+        if ($this->state == self::SUBMITTED) {
+            $this->state = self::INVALID;
+        }
+    }
+
     public function get_outcome() {
         if (is_null($this->state)) {
             throw new Exception('Must call parse_request before calling get_outcome on a form.');
@@ -100,8 +107,16 @@ class form {
         return $this->state;
     }
 
+    public function get_field_value($name) {
+        return $this->get_field($name)->get_current();
+    }
+
     public function get_submitted_data($class) {
-        
+        $object = new $class();
+        foreach ($this->fields as $name => $field) {
+            $object->$name = $field->get_submitted();
+        }
+        return $object;
     }
 
     public function output(html_output $output) {
@@ -121,14 +136,15 @@ class form {
 }
 
 abstract class form_field {
-    public $label;
-    public $name;
-    public $note = '';
-    public $error = '';
-    public $default = null;
-    public $initial = null;
-    public $submitted = null;
-    public $isrequired = false;
+    protected $label;
+    protected $name;
+    protected $note = '';
+    protected $error = '';
+    protected $default = null;
+    protected $initial = null;
+    protected $submitted = null;
+    protected $raw = null;
+    protected $isrequired = false;
 
     public function __construct($name, $label) {
         $this->name = $name;
@@ -145,9 +161,38 @@ abstract class form_field {
         }
     }
 
+    public function set_required($isrequired) {
+        $this->isrequired = $isrequired;
+    }
+
+    public function set_note($note) {
+        $this->note = $note;
+    }
+
+    public function set_error($message) {
+        $this->error = $message;
+        if (is_null($this->raw)) {
+            $this->raw = $this->submitted;
+        }
+        $this->submitted = null;
+    }
+
+    public function get_name() {
+        return $this->name;
+    }
+
+    public function get_submitted() {
+        if (is_null($this->submitted)) {
+            throw new Exception('No submitted data.');
+        }
+        return $this->submitted;
+    }
+
     public function get_current() {
         if (!is_null($this->submitted)) {
             return $this->submitted;
+        } else if (!is_null($this->raw)) {
+            return $this->raw;
         } else {
             return $this->get_initial();
         }
@@ -180,7 +225,7 @@ abstract class form_field {
 }
 
 abstract class single_value_field extends form_field {
-    public $type;
+    protected $type;
 
     public function __construct($name, $label, $type, $default = null) {
         parent::__construct($name, $label);
@@ -189,9 +234,10 @@ abstract class single_value_field extends form_field {
     }
 
     public function parse_request(orchestra_register $or) {
-        $this->submitted = $or->get_param($this->name, $this->type, null);
+        $this->submitted = $or->get_param($this->name, $this->type);
         if (is_null($this->submitted)) {
-            $this->error = 'Invalid input';
+            $this->error = 'Not a valid ' . request::$typenames[$this->type];
+            $this->raw = $or->get_param($this->name, request::TYPE_RAW);
             return false;
         }
         if ($this->isrequired && $this->submitted === '') {
@@ -224,6 +270,15 @@ class password_field extends single_value_field {
     public function output_field(html_output $output) {
         return '<input type="password" id="' . $this->name . '" name="' . $this->name .
                 '" value="' . $this->get_current() . '" />';
+    }
+    public function parse_request(orchestra_register $or) {
+        $isvalid = parent::parse_request($or);
+        $this->raw = '';
+        return $isvalid;
+    }
+    public function set_error($message) {
+        parent::set_error($message);
+        $this->raw = '';
     }
 }
 

@@ -34,7 +34,9 @@ class orchestra_register {
     private $events = null;
     private $parts = null;
     private $request;
+    /** @var sys_config */
     private $sysconfig;
+    /** @var db_config */
     private $config;
     private $version;
     private $db;
@@ -130,12 +132,24 @@ class orchestra_register {
         $this->db->set_attendance($player->id, $event->id, $newattendance);
     }
 
+    public function create_player($player) {
+        $this->db->insert_player($player);
+    }
+
+    public function update_player($player) {
+        $this->db->update_player($player);
+    }
+
     public function delete_player($player) {
         $this->db->set_player_deleted($player->id, 1);
     }
 
     public function undelete_player($player) {
         $this->db->set_player_deleted($player->id, 0);
+    }
+
+    public function set_player_password($playerid, $newpassword) {
+        $this->db->set_password($playerid, $this->config->pwsalt . $newpassword);
     }
 
     public function get_title() {
@@ -263,6 +277,14 @@ class request {
     const TYPE_BOOL = 4;
     const TYPE_RAW = 666;
     const TYPE_AUTHTOKEN = '/[a-zA-Z0-9]{40}/';
+    public static $typenames = array(
+        self::TYPE_INT => 'integer',
+        self::TYPE_ATTENDANCE => 'attendance status',
+        self::TYPE_EMAIL => 'email address',
+        self::TYPE_BOOL => 'boolean',
+        self::TYPE_RAW => 'anything',
+        self::TYPE_AUTHTOKEN => 'authentication token',
+    );
     public function get_param($name, $type, $default = null, $postonly = true) {
         if (array_key_exists($name, $_POST)) {
             $raw = $_POST[$name];
@@ -334,21 +356,27 @@ class user {
     public function can_edit_events() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
+    public function can_set_passwords() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
+    }
     public function is_logged_in() {
         return $this->authlevel >= self::AUTH_LOGIN;
     }
     protected function is_organiser() {
         return in_array($this->player->role, array(self::ORGANISER, self::ADMIN));
     }
+    protected function is_admin() {
+        return $this->player->role == self::ADMIN;
+    }
     public function get_name() {
         return $this->player->get_name();
     }
-    public function assignable_roles() {
-        $assignableroles = array();
-        foreach (self::$roles as $role => $name) {
-            $assignableroles[$role] = $name;
+    public function assignable_roles($playerid) {
+        if ($this->authlevel < self::AUTH_LOGIN || !$this->is_admin() ||
+                $this->player->id == $playerid) {
+            return array();
         }
-        return $assignableroles;
+        return self::$roles;
     }
 }
 

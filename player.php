@@ -38,46 +38,63 @@ if ($playerid) {
     $player = $or->get_player($playerid);
     $title = 'Edit a player';
     $submitlabel = 'Save changes';
+    $url = $or->url('player.php?id=' . $playerid, false, false);
 
 } else {
     $player = new player();
     $title = 'Add a player';
     $submitlabel = 'Create player';
+    $url = $or->url('player.php', false, false);
 }
 
 $parts = $or->get_parts();
 
-$assignableroles = $user->assignable_roles();
-if ($playerid && !array_key_exists($player->role, $assignableroles)) {
-    $assignableroles = false;
-}
+$assignableroles = $user->assignable_roles($playerid);
 
-$form = new form($or->url('player.php', false, false), $submitlabel);
-if ($playerid) {
-    $form->add_field(new hidden_field('id', request::TYPE_INT, $playerid));
-}
+$form = new form($url, $submitlabel);
 $form->add_field(new text_field('firstname', 'First name', request::TYPE_RAW));
 $form->add_field(new text_field('lastname', 'Last name', request::TYPE_RAW));
 $form->add_field(new text_field('email', 'Email', request::TYPE_EMAIL));
 $form->add_field(new group_select_field('part', 'Part', $parts));
 if ($assignableroles) {
     $form->add_field(new select_field('role', 'Role', $assignableroles));
-    $form->get_field('role')->note = 'Controls what this person is allowed to do';
+    $form->get_field('role')->set_note('Controls what this person is allowed to do');
 }
-$form->add_field(new password_field('changepw', 'New password', request::TYPE_RAW));
-$form->add_field(new password_field('confirmchangepw', 'Comfirm new password', request::TYPE_RAW));
-$form->get_field('changepw')->note = 'Leave blank for no change';
+if ($user->can_set_passwords()) {
+    $form->add_field(new password_field('changepw', 'New password', request::TYPE_RAW));
+    $form->add_field(new password_field('confirmchangepw', 'Comfirm new password', request::TYPE_RAW));
+    $form->get_field('changepw')->set_note('Leave blank for no change');
+}
 $form->set_required_fields('firstname', 'lastname', 'email');
 
 $form->set_initial_data($player);
+$form->parse_request($or);
+if ($user->can_set_passwords() && $form->get_field_value('changepw') != $form->get_field_value('confirmchangepw')) {
+    $form->set_field_error('changepw', '');
+    $form->set_field_error('confirmchangepw', 'The two passwords did not match');
+}
 
-switch ($form->parse_request($or)) {
+switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('players.php');
 
     case form::SUBMITTED:
-        // TODO save
-        die;
+        $newplayer = $form->get_submitted_data('player');
+
+        if ($playerid) {
+            $newplayer->id = $playerid;
+            if (!$assignableroles) {
+                $newplayer->role = $player->role;
+            }
+            $or->update_player($newplayer);
+
+        } else {
+            $or->create_player($newplayer);
+        }
+
+        if ($user->can_set_passwords() && ($newpassword = $form->get_field_value('changepw'))) {
+            $or->set_player_password($newplayer->id, $newpassword);
+        }
         $or->redirect('players.php');
 }
 
