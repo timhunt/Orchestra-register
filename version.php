@@ -22,4 +22,4 @@
  */
 
 $version->id = 2009111700;
-$version->name = '0.5 alpha';
+$version->name = '0.5+ alpha';

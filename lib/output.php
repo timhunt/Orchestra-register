@@ -23,6 +23,7 @@
  */
 
 class html_output {
+    const EXTRA_STYLES = 'styles-extra.css';
     protected $or;
     protected $javascriptcode = array();
 
@@ -35,17 +36,27 @@ class html_output {
         if ($subhead) {
             $title = $subhead . ' - ' . $title;
         }
+        $stylesheets = array($this->or->url('styles.css', false));
+        if (is_readable(dirname(__FILE__) . '/../' . self::EXTRA_STYLES)) {
+            $stylesheets[] = $this->or->url(self::EXTRA_STYLES, false);
+        }
     ?>
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-            "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-    <html>
-    <head>
-    <title><?php echo $title; ?></title>
-    <link rel="stylesheet" type="text/css" href="<?php echo $this->or->url('styles.css', false); ?>" />
-    </head>
-    <body>
-    <div class="logininfo"><?php echo $this->or->get_login_info(); ?></div>
-    <h1><?php echo $this->or->get_title(); ?></h1>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title><?php echo $title; ?></title>
+    <?php
+    foreach ($stylesheets as $stylesheet) {
+        ?>
+<link rel="stylesheet" type="text/css" href="<?php echo $stylesheet; ?>" />
+        <?php
+    }
+    ?>
+</head>
+<body>
+<div class="logininfo"><?php echo $this->or->get_login_info(); ?></div>
+<h1><?php echo $this->or->get_title(); ?></h1>
     <?php
         if ($subhead) {
             echo '<h2>' . $subhead . '</h2>';
@@ -54,16 +65,16 @@ class html_output {
 
     public function footer() {
     ?>
-    <div class="footer"><?php echo $this->or->version_string(); ?></div>
-    <script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false); ?>"></script>
-    <script type="text/javascript" src="<?php echo $this->or->url('script.js', false); ?>"></script>
+<div class="footer"><?php echo $this->or->version_string(); ?></div>
+<script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->or->url('script.js', false); ?>"></script>
     <?php
     if ($this->javascriptcode) {
         echo '<script type="text/javascript">' . implode("\n", $this->javascriptcode) . '</script>';
     }
     ?>
-    </body>
-    </html>
+</body>
+</html>
     <?php
     }
 
