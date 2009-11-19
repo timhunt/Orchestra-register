@@ -33,6 +33,13 @@ function init_edit_event_page() {
     document.getElementById('name').focus();
 }
 
+function init_logs_page() {
+}
+
+function init_config_page() {
+    document.getElementById('title').focus();
+}
+
 function init_date_hint(fieldid) {
     YUI().use('event', function(Y) {
         var field = document.getElementById(fieldid);

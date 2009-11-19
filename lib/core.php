@@ -290,6 +290,18 @@ class orchestra_register {
         exit(0);
     }
 
+    public function get_config() {
+        return $this->config;
+    }
+
+    public function set_config($name, $value) {
+        if (!in_array($name, array('title', 'timezone', 'helpurl', 'wikiediturl'))) {
+            throw new coding_error('Cannot set that configuration variable.',
+                    'Name: ' . $name . ', Value: ' . $value);
+        }
+        $this->db->set_config($name, $value, $this->config);
+    }
+
     public function get_wiki_edit_url() {
         return $this->config->wikiediturl;
     }
@@ -475,10 +487,11 @@ class db_config {
 
     public $icalguid;
 
-    public $title = 'OU Orchestra Register';
+    public $title = 'Orchestra Register';
     public $timezone = 'Europe/London';
 
-    public $wikiediturl = 'http://www.open.ac.uk/wikis/ouocmc/index.php?title=Orchestra_rehearsals&action=edit';
+    public $helpurl = null;
+    public $wikiediturl = null;
 }
 
 class version {

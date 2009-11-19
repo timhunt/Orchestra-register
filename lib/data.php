@@ -475,7 +475,7 @@ class database {
         $pwsalt = self::random_string(40);
         $this->set_config('pwsalt', $pwsalt);
         $this->set_config('icalguid', self::random_string(40));
-        $this->set_config('title', 'OU Orchestra Register');
+        $this->set_config('title', 'Orchestra Register');
         $this->set_config('timezone', 'Europe/London');
 
         $sections = self::load_csv('data/sections.txt');

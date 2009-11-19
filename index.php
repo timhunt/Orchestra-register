@@ -55,7 +55,7 @@ $actions->add($or->url('?print=1'), 'Printable view');
 $actions->add($or->url('players.php', false), 'Edit the list of players', $user->can_edit_players());
 $actions->add($or->url('events.php', false), 'Edit the list of events', $user->can_edit_events());
 $actions->add($or->url('wikiformat.php', false), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
-//$actions->add($or->url('admin.php', false), 'Edit the system configuration', $user->can_edit_config());
+$actions->add($or->url('admin.php', false), 'Edit the system configuration', $user->can_edit_config());
 $actions->add($or->url('logs.php', false), 'View the system logs', $user->can_view_logs());
 
 $output = $or->get_output();

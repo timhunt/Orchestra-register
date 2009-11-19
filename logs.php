@@ -39,12 +39,12 @@ if ($page > $numpages) {
 }
 
 $topactions = new actions();
-$topactions->add($or->url('', false), 'Back to the register');
-$topactions->add($or->url('logs.php?page=' . ($page - 1), false), '< Previous page', $page > 1);
+$topactions->add($or->url(''), 'Back to the register');
+$topactions->add($or->url('logs.php?page=' . ($page - 1)), '< Previous page', $page > 1);
 
 $bottomactions = new actions();
-$bottomactions->add($or->url('logs.php?page=' . ($page + 1), false), 'Next page >', $page < $numpages);
-$bottomactions->add($or->url('', false), 'Back to the register');
+$bottomactions->add($or->url('logs.php?page=' . ($page + 1)), 'Next page >', $page < $numpages);
+$bottomactions->add($or->url(''), 'Back to the register');
 
 $logs = $or->load_logs(($page - 1) * LOG_PAGE_SIZE, LOG_PAGE_SIZE);
 
@@ -87,5 +87,5 @@ foreach ($logs as $log) {
 </table>
 <?php
 echo $bottomactions->output($output);
-$output->call_to_js('init_edit_players_page');
+$output->call_to_js('init_logs_page');
 $output->footer();

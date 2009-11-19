@@ -35,7 +35,7 @@ class form {
     protected $submitlabel;
     protected $hascancel;
 
-    public function __construct($actionurl, $submitlabel = 'Save', $hascancel = true) {
+    public function __construct($actionurl, $submitlabel = 'Save changes', $hascancel = true) {
         $this->actionurl = $actionurl;
         $this->submitlabel = $submitlabel;
         $this->hascancel = $hascancel;
@@ -342,5 +342,12 @@ class group_select_field extends single_value_field {
 
     public function output_field(html_output $output) {
         return $output->group_select($this->name, $this->choices, $this->get_current());
+    }
+}
+
+class timezone_field extends select_field {
+    public function __construct($name, $label, $default = null) {
+        $zones = DateTimeZone::listIdentifiers();
+        parent::__construct($name, $label, array_combine($zones, $zones), $default);
     }
 }

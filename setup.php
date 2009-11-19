@@ -32,5 +32,3 @@ set_exception_handler('early_exception_handler');
 require_once(dirname(__FILE__) . '/lib/core.php');
 require_once(dirname(__FILE__) . '/lib/data.php');
 require_once(dirname(__FILE__) . '/lib/output.php');
-
-//ini_set('display_errors', 0);
