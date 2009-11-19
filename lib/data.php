@@ -30,7 +30,7 @@ class database {
             throw new database_connect_exception($this->get_last_error());
         }
         if (!mysql_select_db($dbname)) {
-            throw new database_connect_exception('Could not select the database ' . $dbname);
+            throw new database_connect_exception('Could not select the database ' . $dbname, $this->get_last_error());
         }
     }
 
@@ -222,7 +222,7 @@ class database {
      */
     public function load_config() {
         if (!$this->table_exists('config')) {
-            $this->install();
+            return null;
         }
         $result = $this->execute_sql('SELECT * FROM config');
         $config = new db_config();
@@ -356,7 +356,7 @@ class database {
         return $data;
     }
 
-    public function check_installed(db_config $config, $codeversion) {
+    public function check_installed($config, $codeversion) {
         $donesomething = false;
         if (is_null($config)) {
             $this->install();
