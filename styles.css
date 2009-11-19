@@ -1,5 +1,5 @@
 body {
-    font: 12px/1.2 Verdana, sans-serif;
+    font: 14px/1.2 Verdana, sans-serif;
 }
 h1 {
     font-weight: bold;
@@ -28,6 +28,7 @@ th span {
 .eventdatetime,
 .eventvenue {
     font-weight: normal;
+    font-size: 0.8em;
 }
 .r1 {
     background: #eee;
@@ -91,4 +92,28 @@ pre {
 }
 .r1 .unsure {
     background: #f4f4b0;
+}
+
+.print .logininfo {
+    display: none;
+}
+.print .footer a {
+    display: none;
+}
+.print td,
+.print th {
+    border: 1px solid black;
+}
+.print .yes {
+    font-weight: bold;
+}
+.print .r1,
+.print .headingrow,
+.print .yes,
+.print .no,
+.print .unsure,
+.print .r1 .yes,
+.print .r1 .no,
+.print .r1 .unsure {
+    background: #fff;
 }
