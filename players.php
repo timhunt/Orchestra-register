@@ -35,6 +35,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $player = $or->get_player($id);
     if ($player && $player->deleted == 0) {
         $or->delete_player($player);
+        $or->log('delete player ' . $id);
     }
     $or->redirect('players.php');
 
@@ -43,6 +44,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $player = $or->get_player($id, true);
     if ($player && $player->deleted == 1) {
         $or->undelete_player($player);
+        $or->log('undelete player ' . $id);
     }
     $or->redirect('players.php');
 

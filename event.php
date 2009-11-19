@@ -78,9 +78,11 @@ switch ($form->get_outcome()) {
         if ($eventid) {
             $newevent->id = $eventid;
             $or->update_event($newevent);
+            $or->log('edit event ' . $newevent->id);
 
         } else {
             $or->create_event($newevent);
+            $or->log('add event ' . $newevent->id);
         }
 
         $or->redirect('events.php');

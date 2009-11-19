@@ -29,9 +29,19 @@ if ($or->get_param('cancel', request::TYPE_BOOL)) {
     $or->redirect('');
 }
 
-$ok = $or->verify_login();
-if ($ok) {
-    $or->redirect('');
+$email = $or->get_param('email', request::TYPE_RAW);
+$password = $or->get_param('password', request::TYPE_RAW);
+
+$ok = null;
+if (!is_null($email) && !is_null($password)) {
+    $ok = $or->verify_login($email, $password);
+    if ($ok) {
+        $or->log('log in');
+        $or->redirect('');
+
+    } else {
+        $or->log_failed_login($email);
+    }
 }
 
 $or->refresh_sesskey();
@@ -40,7 +50,7 @@ $output = $or->get_output();
 $output->header('Login');
 
 if ($ok === false) {
-    echo '<p class="loginfailure">Email and or password not recognised.</p>';
+    echo '<p class="error">Email and or password not recognised.</p>';
 }
 
 ?>

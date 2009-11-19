@@ -58,6 +58,20 @@ class database {
         return $result;
     }
 
+    protected function get_record_select($table, $where, $class) {
+        return $this->get_record_sql("SELECT * FROM $table WHERE $where", $class);
+    }
+
+    protected function get_record_sql($sql, $class) {
+        $object = null;
+        $result = $this->execute_sql($sql);
+        if (mysql_num_rows($result) == 1) {
+            $object = mysql_fetch_object($result, $class);
+        }
+        mysql_free_result($result);
+        return $object;
+    }
+
     protected function get_records($table, $class, $order = '') {
         if ($order) {
             $order = ' ORDER BY ' . $order;
@@ -87,6 +101,14 @@ class database {
         }
         mysql_free_result($result);
         return $objects;
+    }
+
+    protected function count_records($table) {
+        $record = $this->get_record_sql('SELECT COUNT(1) AS count FROM ' . $table, 'stdClass');
+        if (!$record) {
+            throw new database_exception('Failed to count data in the databse.', 'Table ' . $table);
+        }
+        return $record->count;
     }
 
     protected function update($sql) {
@@ -152,20 +174,6 @@ class database {
             FROM parts
             JOIN sections ON parts.section = sections.section
             ORDER BY sectionsort, partsort", 'stdClass');
-    }
-
-    protected function get_record_select($table, $where, $class) {
-        return $this->get_record_sql("SELECT * FROM $table WHERE $where", $class);
-    }
-
-    protected function get_record_sql($sql, $class) {
-        $object = null;
-        $result = $this->execute_sql($sql);
-        if (mysql_num_rows($result) == 1) {
-            $object = mysql_fetch_object($result, $class);
-        }
-        mysql_free_result($result);
-        return $object;
     }
 
     public function find_player_by_id($playerid, $includedeleted = false) {
@@ -287,7 +295,7 @@ class database {
         $sql = "INSERT INTO events (name, description, venue, timestart, timeend, timemodified)
                 VALUES (" . $this->escape($event->name) . ", " . $this->escape($event->description) . ", " .
                 $this->escape($event->venue) . ", " . $this->escape($event->timestart) . ", " .
-                $this->escape($event->timeend) . ", " . time() . ")";
+                $this->escape($event->timeend) . ", " . $this->escape(time()) . ")";
         $this->update($sql);
         $event->id = $this->get_last_insert_id();
     }
@@ -302,7 +310,7 @@ class database {
                 venue = " . $this->escape($event->venue) . ",
                 timestart = " . $this->escape($event->timestart) . ",
                 timeend = " . $this->escape($event->timeend) . ",
-                timemodified = " . time() . "
+                timemodified = " . $this->escape(time()) . "
                 WHERE " . $this->where_clause(array('id' => $event->id));
         $this->update($sql);
     }
@@ -318,6 +326,27 @@ class database {
                 VALUES (" . $this->escape($part) . ", " . $this->escape($section) . ", " .
                 $this->escape($sort) . ")";
         $this->update($sql);
+    }
+
+    public function insert_log($userid, $authlevel, $action) {
+        $sql = "INSERT INTO logs (timestamp, userid, authlevel, ipaddress, action)
+                VALUES (" . $this->escape(time()) . ", " . $this->escape($userid) . ", " .
+                $this->escape($authlevel) . ", " . $this->escape(request::get_ip_address()) . ", " .
+                $this->escape($action) . ")";
+        $this->update($sql);
+    }
+
+    public function count_logs() {
+        return $this->count_records('logs');
+    }
+
+    public function load_logs($from, $limit) {
+        $sql = "SELECT l.timestamp, p.firstname, p.lastname, p.email, l.authlevel, l.ipaddress, l.action
+                FROM logs l
+                LEFT JOIN players p ON p.id = l.userid
+                ORDER BY l.timestamp DESC, l.id DESC
+                LIMIT $from, $limit";
+        return $this->get_records_sql($sql, 'stdCLass');
     }
 
     public static function random_string($length) {
@@ -360,10 +389,12 @@ class database {
         $donesomething = false;
         if (is_null($config)) {
             $this->install();
+            $this->insert_log(null, user::AUTH_NONE, 'install version ' . $codeversion);
             $donesomething = true;
 
         } else if ($config->version < $codeversion) {
             $this->upgrade($config->version);
+            $this->insert_log(null, user::AUTH_NONE, 'upgrade to version ' . $codeversion);
             $donesomething = true;
         }
 
@@ -430,6 +461,16 @@ class database {
                 CONSTRAINT PRIMARY KEY (playerid, eventid)
             ) ENGINE = InnoDB
         ");
+        $this->execute_sql("
+            CREATE TABLE logs (
+                id INT(10) AUTO_INCREMENT PRIMARY KEY,
+                timestamp INT(10) NOT NULL,
+                userid INT(10) NULL REFERENCES players (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+                authlevel INT(10) NOT NULL,
+                ipaddress VARCHAR(40) NOT NULL,
+                action VARCHAR(100) NOT NULL
+            ) ENGINE = InnoDB
+        ");
 
         $pwsalt = self::random_string(40);
         $this->set_config('pwsalt', $pwsalt);
@@ -473,12 +514,27 @@ class database {
             $event->timeend = strtotime($data[3] . ' ' . $data[5]);
             $this->insert_event($event);
         }
+
+        
     }
 
     protected function upgrade($fromversion) {
         if ($fromversion < 2009111800) {
             $this->update('ALTER TABLE events ADD COLUMN
                     deleted INT(1) NOT NULL DEFAULT 0');
+        }
+
+        if ($fromversion < 2009111901) {
+            $this->execute_sql("
+                CREATE TABLE logs (
+                    id INT(10) AUTO_INCREMENT PRIMARY KEY,
+                    timestamp INT(10) NOT NULL,
+                    userid INT(10) NULL REFERENCES players (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+                    authlevel INT(10) NOT NULL,
+                    ipaddress VARCHAR(40) NOT NULL,
+                    action VARCHAR(100) NOT NULL
+                ) ENGINE = InnoDB
+            ");
         }
     }
 }

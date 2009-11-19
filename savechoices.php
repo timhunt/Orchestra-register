@@ -31,6 +31,12 @@ $or->load_attendance();
 
 $or->require_sesskey();
 
+if ($user->can_edit_events()) {
+    $banned = '';
+} else {
+    $banned = attendance::NOTREQUIRED;
+}
+
 foreach ($players as $player) {
     if (!$user->can_edit_attendance($player)) {
         continue;
@@ -39,9 +45,11 @@ foreach ($players as $player) {
     foreach ($events as $event) {
         $attendance = $player->get_attendance($event);
         $newattendance = $or->get_param($attendance->get_field_name(), request::TYPE_ATTENDANCE);
-        if ($newattendance && $newattendance != $attendance &&
-                $newattendance != attendance::NOTREQUIRED && $attendance != attendance::NOTREQUIRED) {
+        if ($newattendance && $newattendance != $attendance->status &&
+                $newattendance != $banned && $attendance->status != $banned) {
             $or->set_attendance($player, $event, $newattendance);
+            $or->log('changed attendance for player ' . $player->id . ' at event ' .
+                    $event->id . ' to ' . $newattendance);
         }
     }
 }

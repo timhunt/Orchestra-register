@@ -238,17 +238,15 @@ class orchestra_register {
         return $this->get_current_user()->sesskey;
     }
 
-    public function verify_login() {
-        $email = $this->request->get_param('email', request::TYPE_EMAIL);
-        $password = $this->request->get_param('password', request::TYPE_RAW);
-        if (is_null($email) || is_null($password)) {
-            return null;
-        }
+    public function verify_login($email, $password) {
         $this->require_sesskey();
         $player = $this->db->check_user_auth($email, $this->config->pwsalt . $password);
         if ($player) {
             session_regenerate_id(true);
             $_SESSION['userid'] = $player->id;
+            $this->user = new user();
+            $this->user->player = $player;
+            $this->user->authlevel = user::AUTH_LOGIN;
             return true;
         }
         return false;
@@ -294,6 +292,25 @@ class orchestra_register {
 
     public function get_wiki_edit_url() {
         return $this->config->wikiediturl;
+    }
+
+    public function log($action) {
+        if (empty($this->user->player->id)) {
+            throw new coding_error('Cannot log an un-authenicated action.');
+        }
+        $this->db->insert_log($this->user->player->id, $this->user->authlevel, $action);
+    }
+
+    public function log_failed_login($email) {
+        $this->db->insert_log(null, user::AUTH_NONE, 'failed attempt to log in as ' . $email);
+    }
+
+    public function get_num_logs() {
+        return $this->db->count_logs();
+    }
+
+    public function load_logs($from, $limit) {
+        return $this->db->load_logs($from, $limit);
     }
 }
 
@@ -350,6 +367,16 @@ class request {
                 return preg_match($type, $raw);
         }
     }
+
+    public static function get_ip_address() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            return $_SERVER['HTTP_CLIENT_IP']; // share internet
+        } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            return $_SERVER['HTTP_X_FORWARDED_FOR']; // pass from proxy
+        } else {
+            return $_SERVER['REMOTE_ADDR'];
+        }
+    }
 }
 
 class user {
@@ -375,6 +402,16 @@ class user {
             $this->refresh_sesskey();
         }
     }
+    public static function auth_name($level) {
+        switch ($level) {
+            case self::AUTH_NONE:
+                return 'None';
+            case self::AUTH_TOKEN:
+                return 'Token';
+            case self::AUTH_LOGIN:
+                return 'Logged in';
+        }
+    }
     public function refresh_sesskey() {
         $this->sesskey = database::random_string(40);
         $_SESSION['sesskey'] = $this->sesskey;
@@ -390,6 +427,12 @@ class user {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
     public function can_set_passwords() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
+    }
+    public function can_edit_config() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
+    }
+    public function can_view_logs() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
     }
     public function is_logged_in() {
@@ -510,7 +553,7 @@ class attendance {
         self::NO => 'No',
         self::UNSURE => 'Unsure',
         self::YES => 'Yes',
-        self::NOTREQUIRED => '- Not needed',
+        self::NOTREQUIRED => '[Not needed]',
     );
     public $eventid;
     public $playerid;
@@ -537,5 +580,17 @@ class attendance {
         }
         $output .= '</select>';
         return $output;
+    }
+}
+
+class actions {
+    protected $actions = array();
+    public function add($url, $linktext, $allowed = true) {
+        if ($allowed) {
+            $this->actions[$url] = $linktext;
+        }
+    }
+    public function output(html_output $output) {
+        return $output->action_menu($this->actions);
     }
 }

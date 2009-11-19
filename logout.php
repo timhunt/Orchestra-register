@@ -26,4 +26,5 @@ require_once(dirname(__FILE__) . '/setup.php');
 $or = new orchestra_register();
 $or->get_current_user();
 $or->logout();
+$or->log('log out');
 $or->redirect('');

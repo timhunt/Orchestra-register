@@ -85,13 +85,16 @@ switch ($form->get_outcome()) {
                 $newplayer->role = $player->role;
             }
             $or->update_player($newplayer);
+            $or->log('edit player ' . $newplayer->id);
 
         } else {
             $or->create_player($newplayer);
+            $or->log('add player ' . $newplayer->id);
         }
 
         if ($user->can_set_passwords() && ($newpassword = $form->get_field_value('changepw'))) {
             $or->set_player_password($newplayer->id, $newpassword);
+            $or->log('change password ' . $newplayer->id);
         }
         $or->redirect('players.php');
 }

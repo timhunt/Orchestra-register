@@ -35,6 +35,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $event = $or->get_event($id);
     if ($event && $event->deleted == 0) {
         $or->delete_event($event);
+        $or->log('delete event ' . $id);
     }
     $or->redirect('events.php');
 
@@ -43,6 +44,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $event = $or->get_event($id, true);
     if ($event && $event->deleted == 1) {
         $or->undelete_event($event);
+        $or->log('undelete event ' . $id);
     }
     $or->redirect('events.php');
 

@@ -184,6 +184,18 @@ class html_output {
         return $output;
     }
 
+    public function action_menu($actions) {
+        if (empty($actions)) {
+            return '';
+        }
+        $output = "<ul>\n";
+        foreach ($actions as $url => $linktext) {
+            $output .= '<li><a href="' . $url . '">' . $linktext . "</a></li>\n";
+        }
+        $output .= "</ul>\n";
+        return $output;
+    }
+
     public function call_to_js($function, $arguments = array()) {
         $quotedargs = array();
         foreach ($arguments as $arg) {
