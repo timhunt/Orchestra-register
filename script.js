@@ -33,6 +33,18 @@ function init_edit_event_page() {
     document.getElementById('name').focus();
 }
 
+function init_date_hint(fieldid) {
+    YUI().use('event', function(Y) {
+        var field = document.getElementById(fieldid);
+        var hintspan = document.createElement('span');
+        hintspan.className = 'postfix';
+        field.parentNode.appendChild(hintspan);
+        Y.on('change', date_field_change, field, null, field, hintspan);
+        Y.on('keyup', date_field_change, field, null, field, hintspan);
+        date_field_change(null, field, hintspan);
+    });
+}
+
 function init_wiki_format_page() {
     YUI().use('event', function(Y) {
         Y.on('click', onclick_select, '#wikimarkup');
@@ -44,12 +56,24 @@ function onclick_select() {
     this.select();
 }
 
+function date_field_change(e, field, hintspan) {
+    var day = 'Not a valid date';
+    var date = new Date(field.value);
+    if (date.getYear()) {
+        day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()];
+    }
+    while (hintspan.hasChildNodes()) {
+        hintspan.removeChild(hintspan.firstChild);
+    }
+    hintspan.appendChild(document.createTextNode(' (' + day + ') '));
+}
+
 function register_keydown(e, eventids, playerids) {
     switch (e.keyCode) {
     case 38: // Up
         move_register_focus(e.currentTarget.get('id'), -1, 1, playerids);
         break;
-    case 40: // Down 
+    case 40: // Down
         move_register_focus(e.currentTarget.get('id'), 1, 1, playerids);
         break;
     case 37: // Left

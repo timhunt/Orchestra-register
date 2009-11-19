@@ -292,6 +292,21 @@ class database {
         $event->id = $this->get_last_insert_id();
     }
 
+    public function update_event($event) {
+        if (empty($event->id)) {
+            throw new Exception('Event not in the database. Cannot update.');
+        }
+        $sql = "UPDATE events SET
+                name = " . $this->escape($event->name) . ",
+                description = " . $this->escape($event->description) . ",
+                venue = " . $this->escape($event->venue) . ",
+                timestart = " . $this->escape($event->timestart) . ",
+                timeend = " . $this->escape($event->timeend) . ",
+                timemodified = " . time() . "
+                WHERE " . $this->where_clause(array('id' => $event->id));
+        $this->update($sql);
+    }
+
     public function insert_section($section, $sort) {
         $sql = "INSERT INTO sections (section, sectionsort)
                 VALUES (" . $this->escape($section) . ", " . $this->escape($sort) . ")";

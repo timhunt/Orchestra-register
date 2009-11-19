@@ -266,6 +266,22 @@ class text_field extends single_value_field {
     }
 }
 
+class date_field extends text_field {
+    public function __construct($name, $label, $default = null) {
+        parent::__construct($name, $label, request::TYPE_DATE, $default);
+    }
+    public function output(html_output $output) {
+        $output->call_to_js('init_date_hint', array($this->name));
+        return parent::output($output);
+    }
+}
+
+class time_field extends text_field {
+    public function __construct($name, $label, $default = null) {
+        parent::__construct($name, $label, request::TYPE_TIME, $default);
+    }
+}
+
 class password_field extends single_value_field {
     public function output_field(html_output $output) {
         return '<input type="password" id="' . $this->name . '" name="' . $this->name .

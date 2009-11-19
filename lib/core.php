@@ -155,6 +155,14 @@ class orchestra_register {
         $this->db->set_password($playerid, $this->config->pwsalt . $newpassword);
     }
 
+    public function create_event($event) {
+        $this->db->insert_event($event);
+    }
+
+    public function update_event($event) {
+        $this->db->update_event($event);
+    }
+
     public function delete_event($event) {
         $this->db->set_event_deleted($event->id, 1);
     }
@@ -286,16 +294,20 @@ class request {
     const TYPE_ATTENDANCE = 2;
     const TYPE_EMAIL = 3;
     const TYPE_BOOL = 4;
+    const TYPE_DATE = 5;
     const TYPE_RAW = 666;
     const TYPE_AUTHTOKEN = '/[a-zA-Z0-9]{40}/';
+    const TYPE_TIME = '/\d\d?:\d\d?(?::\d\d?)?/';
     public static $typenames = array(
         self::TYPE_INT => 'integer',
         self::TYPE_ATTENDANCE => 'attendance status',
         self::TYPE_EMAIL => 'email address',
+        self::TYPE_DATE => 'date',
         self::TYPE_BOOL => 'boolean',
         self::TYPE_RAW => 'anything',
         self::TYPE_AUTHTOKEN => 'authentication token',
-    );
+        self::TYPE_TIME => 'time',
+        );
     public function get_param($name, $type, $default = null, $postonly = true) {
         if (array_key_exists($name, $_POST)) {
             $raw = $_POST[$name];
@@ -322,6 +334,8 @@ class request {
                 return array_key_exists($raw, attendance::$symbols);
             case self::TYPE_EMAIL:
                 return filter_var($raw, FILTER_VALIDATE_EMAIL);
+            case self::TYPE_DATE:
+                return strtotime($raw . ' 00:00') !== false;
             case self::TYPE_RAW:
                 return true;
             default:

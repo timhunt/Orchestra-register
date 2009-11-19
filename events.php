@@ -21,6 +21,8 @@
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
 
 require_once(dirname(__FILE__) . '/lib/core.php');
 $or = new orchestra_register();
@@ -86,8 +88,8 @@ foreach ($events as $event) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
-<td><?php echo htmlspecialchars($event->name); ?></td>
-<th><?php echo htmlspecialchars($event->venue); ?></th>
+<th><?php echo htmlspecialchars($event->name); ?></th>
+<td><?php echo htmlspecialchars($event->venue); ?></td>
 <td><?php echo strftime(event::DATE_FORMAT, $event->timestart); ?></td>
 <td><?php echo strftime(event::TIME_FORMAT, $event->timestart); ?></td>
 <td><?php echo strftime(event::TIME_FORMAT, $event->timeend); ?></td>

@@ -21,5 +21,5 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$version->id = 2009111800;
-$version->name = '0.5+ alpha';
+$version->id = 2009111900;
+$version->name = '0.7 beta';
