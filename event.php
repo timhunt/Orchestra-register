@@ -20,16 +20,14 @@
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
 
-require_once(dirname(__FILE__) . '/lib/core.php');
+require_once(dirname(__FILE__) . '/setup.php');
 require_once(dirname(__FILE__) . '/lib/form.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
 if (!$user->can_edit_events()) {
-    throw new permission_exception('You don\'t have permission to edit the list of events.');
+    throw new permission_exception('You don\'t have permission to edit events.');
 }
 
 $eventid = $or->get_param('id', request::TYPE_INT, 0, false);
@@ -88,7 +86,7 @@ switch ($form->get_outcome()) {
         $or->redirect('events.php');
 }
 
-$output = new html_output($or);
+$output = $or->get_output();
 $output->header($title);
 echo $form->output($output);
 $output->call_to_js('init_edit_event_page');

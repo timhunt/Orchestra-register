@@ -26,12 +26,31 @@ class html_output {
     const EXTRA_STYLES = 'styles-extra.css';
     protected $or;
     protected $javascriptcode = array();
+    protected $headeroutput = false;
 
     public function __construct(orchestra_register $or) {
         $this->or = $or;
     }
 
-    public function header($subhead = '', $bodyclass = '') {
+    public function exception($e) {
+        $summary = prepare_exception($e);
+
+        $this->javascriptcode = array();
+        if (!$this->headeroutput) {
+            $this->header('', '', false);
+        }
+
+        echo '<div class="errorbox">';
+        echo '<h2>' . $summary . '</h2>';
+        echo '<p>' . $e->getMessage() . '</p>';
+        echo '</div>';
+        echo '<p><a href="' . $this->or->url('') . '">Continue</a></p>';
+
+        $this->footer();
+        die;
+    }
+
+    public function header($subhead = '', $bodyclass = '', $showlogin = true) {
         $title = $this->or->get_title();
         if ($subhead) {
             $title = $subhead . ' - ' . $title;
@@ -43,6 +62,12 @@ class html_output {
         if (is_readable(dirname(__FILE__) . '/../' . self::EXTRA_STYLES)) {
             $stylesheets[] = $this->or->url(self::EXTRA_STYLES, false);
         }
+        if ($showlogin) {
+            $logininfo = $this->or->get_login_info();
+        } else {
+            $logininfo = '';
+        }
+        $this->headeroutput = true;
     ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -58,7 +83,7 @@ class html_output {
     ?>
 </head>
 <body<?php echo $bodyclass; ?>>
-<div class="logininfo"><?php echo $this->or->get_login_info(); ?></div>
+<div class="logininfo"><?php echo $logininfo; ?></div>
 <h1><?php echo $this->or->get_title(); ?></h1>
     <?php
         if ($subhead) {

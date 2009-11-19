@@ -21,13 +21,13 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/lib/core.php');
+require_once(dirname(__FILE__) . '/setup.php');
 require_once(dirname(__FILE__) . '/lib/form.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
 if (!$user->can_edit_players()) {
-    throw new permission_exception('You don\'t have permission to edit the list of players.');
+    throw new permission_exception('You don\'t have permission to edit players.');
 }
 
 $playerid = $or->get_param('id', request::TYPE_INT, 0, false);
@@ -96,7 +96,7 @@ switch ($form->get_outcome()) {
         $or->redirect('players.php');
 }
 
-$output = new html_output($or);
+$output = $or->get_output();
 $output->header($title);
 echo $form->output($output);
 $output->call_to_js('init_edit_player_page');

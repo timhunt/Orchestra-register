@@ -21,11 +21,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/data.php');
-require_once(dirname(__FILE__) . '/output.php');
-
-class permission_exception extends Exception {
-}
 
 class orchestra_register {
     private $user;
@@ -33,6 +28,7 @@ class orchestra_register {
     private $events = null;
     private $parts = null;
     private $request;
+    private $output = null;
     /** @var sys_config */
     private $sysconfig;
     /** @var db_config */
@@ -42,9 +38,6 @@ class orchestra_register {
     private $attendanceloaded = false;
 
     public function __construct() {
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
-
         $config = new sys_config();
         include(dirname(__FILE__) . '/../config.php');
         $this->sysconfig = $config;
@@ -59,6 +52,9 @@ class orchestra_register {
         $this->config = $this->db->load_config();
         $this->config = $this->db->check_installed($this->config, $this->version->id);
 
+        $this->output = new html_output($this);
+        set_exception_handler(array($this->output, 'exception'));
+
         $this->request = new request();
 
         session_start();
@@ -70,8 +66,16 @@ class orchestra_register {
         return $this->request;
     }
 
+    public function get_output() {
+        return $this->output;
+    }
+
     public function get_player($id, $includedeleted = false) {
-        return $this->db->find_player_by_id($id, $includedeleted);
+        $player = $this->db->find_player_by_id($id, $includedeleted);
+        if (!$player) {
+            throw new not_found_exception('Unknown player.', $id);
+        }
+        return $player;
     }
 
     public function get_players($includedeleted = false, $currentsection = '', $currentpart = '') {
@@ -82,7 +86,11 @@ class orchestra_register {
     }
 
     public function get_event($id, $includedeleted = false) {
-        return $this->db->find_event_by_id($id, $includedeleted);
+        $event = $this->db->find_event_by_id($id, $includedeleted);
+        if (!$event) {
+            throw new not_found_exception('Unknown event.', $id);
+        }
+        return $event;
     }
 
     public function get_events($includepast = false, $includedeleted = false) {
@@ -218,7 +226,7 @@ class orchestra_register {
 
     public function require_sesskey() {
         if ($this->get_sesskey() != $this->get_param('sesskey', request::TYPE_AUTHTOKEN)) {
-            throw new Exception('Invalid request (sesskey does not match)');
+            throw new forbidden_operation_exception('Invalid request (sesskey does not match)');
         }
     }
 

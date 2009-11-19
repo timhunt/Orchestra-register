@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/lib/core.php');
+require_once(dirname(__FILE__) . '/setup.php');
 $or = new orchestra_register();
 $events = $or->get_events();
 
@@ -38,7 +38,7 @@ foreach ($events as $event) {
 
 $wikiediturl = $or->get_wiki_edit_url();
 
-$output = new html_output($or);
+$output = $or->get_output();
 $output->header('Export events for the wiki');
 if ($wikiediturl) {
     echo '<p>Copy the rehearsal list below to the <a href="' . $wikiediturl .

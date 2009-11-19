@@ -102,7 +102,8 @@ class form {
 
     public function get_outcome() {
         if (is_null($this->state)) {
-            throw new Exception('Must call parse_request before calling get_outcome on a form.');
+            throw new coding_error('Call to form::get_outcome without first calling ' .
+                    'form::parse_request.');
         }
         return $this->state;
     }
@@ -183,7 +184,7 @@ abstract class form_field {
 
     public function get_submitted() {
         if (is_null($this->submitted)) {
-            throw new Exception('No submitted data.');
+            throw new coding_error('No submitted data.');
         }
         return $this->submitted;
     }

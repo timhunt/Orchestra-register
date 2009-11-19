@@ -68,6 +68,12 @@ pre {
 .error {
     color: #800;
 }
+.errorbox {
+    margin: 2em 20%;
+    padding: 0 2em 1.5em;
+    border: 1px solid #800;
+    background: #ffe4e4;
+}
 .unknown {
 }
 .yes {

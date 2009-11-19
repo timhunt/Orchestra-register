@@ -27,10 +27,10 @@ class database {
     public function __construct($dbhost, $dbuser, $dbpass, $dbname) {
         $this->conn = mysql_connect($dbhost, $dbuser, $dbpass);
         if (!$this->conn) {
-            throw new Exception('Could not connect to the database.');
+            throw new database_connect_exception($this->get_last_error());
         }
         if (!mysql_select_db($dbname)) {
-            throw new Exception('Could not select the right database.');
+            throw new database_connect_exception('Could not select the database ' . $dbname);
         }
     }
 
@@ -52,8 +52,8 @@ class database {
     protected function execute_sql($sql) {
         $result = mysql_query($sql, $this->conn);
         if (!$result) {
-            throw new Exception('Query failed: ' . mysql_error($this->conn) .
-                    ', SQL: ' . $sql);
+            throw new database_exception('Failed to load or save data from the databse.',
+                    $this->get_last_error() . '. SQL: ' . $sql);
         }
         return $result;
     }
@@ -271,7 +271,7 @@ class database {
 
     public function update_player($player) {
         if (empty($player->id)) {
-            throw new Exception('Player not in the database. Cannot update.');
+            throw new coding_error('Trying to update a player who is not in the database.');
         }
         $sql = "UPDATE players SET
                 firstname = " . $this->escape($player->firstname) . ",
@@ -294,7 +294,7 @@ class database {
 
     public function update_event($event) {
         if (empty($event->id)) {
-            throw new Exception('Event not in the database. Cannot update.');
+            throw new coding_error('Trying to update an event that is not in the database.');
         }
         $sql = "UPDATE events SET
                 name = " . $this->escape($event->name) . ",
@@ -334,6 +334,10 @@ class database {
 
     protected function get_last_insert_id() {
         return mysql_insert_id($this->conn);
+    }
+
+    protected function get_last_error() {
+        return mysql_error($this->conn);
     }
 
     public static function load_csv($filename, $skipheader = true) {

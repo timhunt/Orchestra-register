@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/lib/core.php');
+require_once(dirname(__FILE__) . '/setup.php');
 
 $or = new orchestra_register();
 
@@ -36,7 +36,7 @@ if ($ok) {
 
 $or->refresh_sesskey();
 
-$output = new html_output($or);
+$output = $or->get_output();
 $output->header('Login');
 
 if ($ok === false) {

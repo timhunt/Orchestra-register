@@ -22,12 +22,12 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/lib/core.php');
+require_once(dirname(__FILE__) . '/setup.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
 if (!$user->can_edit_players()) {
-    throw new permission_exception('You don\'t have permission to edit the list of players.');
+    throw new permission_exception('You don\'t have permission to edit players.');
 }
 
 if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
@@ -50,7 +50,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
 
 $players = $or->get_players(true);
 
-$output = new html_output($or);
+$output = $or->get_output();
 $output->header('Edit players');
 
 ?>
