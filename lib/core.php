@@ -532,7 +532,7 @@ class attendance {
                 continue;
             }
             $selected = $this->status == $value ? ' selected="selected"' : '';
-            $output .= '<option class="' . $value . '" value" value="' . $value . '"' .
+            $output .= '<option class="' . $value . '" value="' . $value . '"' .
                     $selected . '>' . $symbol . '</option>';
         }
         $output .= '</select>';
