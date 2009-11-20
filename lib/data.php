@@ -514,8 +514,6 @@ class database {
             $event->timeend = strtotime($data[3] . ' ' . $data[5]);
             $this->insert_event($event);
         }
-
-        
     }
 
     protected function upgrade($fromversion) {

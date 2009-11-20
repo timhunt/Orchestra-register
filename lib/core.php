@@ -193,11 +193,6 @@ class orchestra_register {
         }
     }
 
-    public function version_string() {
-        return 'Orchestra Register ' . $this->version->name . ' (' . $this->version->id .
-                ') <a href="doc/">Documentation</a>';
-    }
-
     public function get_event_guid($event) {
         return 'event' . $event->id . '@' . $this->config->icalguid;
     }
@@ -300,6 +295,14 @@ class orchestra_register {
                     'Name: ' . $name . ', Value: ' . $value);
         }
         $this->db->set_config($name, $value, $this->config);
+    }
+
+    public function version_string() {
+        return 'Orchestra Register ' . $this->version->name . ' (' . $this->version->id . ')';
+    }
+
+    public function get_help_url() {
+        return $this->config->helpurl;
     }
 
     public function get_wiki_edit_url() {

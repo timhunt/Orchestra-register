@@ -55,11 +55,12 @@ switch ($form->parse_request($or)) {
             }
         }
 
-        $or->redirect('admin.php');
+        $or->redirect('');
 }
 
 $output = $or->get_output();
 $output->header('Edit system configuration');
 echo $form->output($output);
 $output->call_to_js('init_config_page');
+echo '<p>This is ' . $or->version_string() . '</p>';
 $output->footer();

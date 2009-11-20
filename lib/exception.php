@@ -62,7 +62,7 @@ class not_found_exception extends register_exception {
 
 class database_connect_exception extends register_exception {
     public function __construct($debuginfo = null) {
-        parent::__construct('The database may be overloaded or otherwise not running properly. ' . 
+        parent::__construct('The database may be overloaded or otherwise not running properly. ' .
                 'The site administrator should also check that the database details ' .
                 'have been correctly specified in config.php.', $debuginfo, 500);
     }

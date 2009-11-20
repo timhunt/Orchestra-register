@@ -92,8 +92,14 @@ class html_output {
     }
 
     public function footer() {
+        if ($helpurl = $this->or->get_help_url()) {
+            $helplink = ' <a href="' . $helpurl . '">Get help</a> -';
+        } else {
+            $helplink = '';
+        }
     ?>
-<div class="footer"><?php echo $this->or->version_string(); ?></div>
+<div class="footer"><a href="doc/">Documentation</a> -<?php echo $helplink; ?>
+    Powered by <a href="http://timhunt.github.com/Orchestra-register/">Orchestra register</a></div>
 <script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->or->url('script.js', false); ?>"></script>
     <?php
