@@ -30,13 +30,19 @@ $printview = $or->get_param('print', request::TYPE_BOOL, false, false);
 
 $events = $or->get_events($includepast);
 $user = $or->get_current_user();
-if (!empty($user->player->part)) {
-    $players = $or->get_players(false, $user->player->section, $user->player->part);
+
+if ($user->is_authenticated()) {
     $savechangesbutton = '<p><input type="submit" name="save" value="Save changes" /></p>';
 } else {
-    $players = $or->get_players(false);
     $savechangesbutton = '';
 }
+
+if ($printview || empty($user->player->part)) {
+    $players = $or->get_players(false);
+} else {
+    $players = $or->get_players(false, $user->player->section, $user->player->part);
+}
+
 $or->load_attendance();
 $subtotals = $or->load_subtotals();
 
