@@ -53,7 +53,7 @@ $output->header('Logs page ' . $page);
 echo $topactions->output($output);
 
 ?>
-<table>
+<table class="logs">
 <thead>
 <tr class="headingrow">
 <th>Time</th>
