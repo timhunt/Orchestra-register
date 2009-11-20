@@ -16,7 +16,7 @@ h3 {
     font-size: 100%;
     margin: 1em 0 0.5em;
 }
-p {
+p, ul, ol {
     margin: 0.5em 0;
 }
 th {
