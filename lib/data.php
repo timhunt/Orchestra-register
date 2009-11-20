@@ -34,9 +34,12 @@ class database {
         }
     }
 
-    protected function escape($value) {
+    protected function escape($value, $maxlength = null) {
         if (is_null($value)) {
             return 'NULL';
+        }
+        if ($maxlength) {
+            $value = substr($value, 0, $maxlength);
         }
         return "'" . mysql_real_escape_string($value, $this->conn) . "'";
     }
@@ -332,7 +335,7 @@ class database {
         $sql = "INSERT INTO logs (timestamp, userid, authlevel, ipaddress, action)
                 VALUES (" . $this->escape(time()) . ", " . $this->escape($userid) . ", " .
                 $this->escape($authlevel) . ", " . $this->escape(request::get_ip_address()) . ", " .
-                $this->escape($action) . ")";
+                $this->escape($action, 255) . ")";
         $this->update($sql);
     }
 
@@ -468,7 +471,7 @@ class database {
                 userid INT(10) NULL REFERENCES players (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
                 authlevel INT(10) NOT NULL,
                 ipaddress VARCHAR(40) NOT NULL,
-                action VARCHAR(100) NOT NULL
+                action VARCHAR(255) NOT NULL
             ) ENGINE = InnoDB
         ");
 
@@ -532,6 +535,13 @@ class database {
                     ipaddress VARCHAR(40) NOT NULL,
                     action VARCHAR(100) NOT NULL
                 ) ENGINE = InnoDB
+            ");
+        }
+
+
+        if ($fromversion < 2009111901) {
+            $this->execute_sql("
+                ALTER TABLE MODIFY COLUMN action VARCHAR(255) NOT NULL
             ");
         }
     }
