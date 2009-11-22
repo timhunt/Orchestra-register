@@ -574,11 +574,11 @@ class attendance {
     const NO = 'no';
     const NOTREQUIRED = 'notrequired';
     public static $symbols = array(
-        self::UNKNOWN => '-',
+        self::UNKNOWN => ' ',
         self::YES => 'Yes',
         self::NO => 'No',
-        self::UNSURE => 'Unsure',
-        self::NOTREQUIRED => '[Not needed]',
+        self::UNSURE => '?',
+        self::NOTREQUIRED => '-',
     );
     public $eventid;
     public $playerid;

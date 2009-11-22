@@ -105,17 +105,40 @@ if (!$printview && $user->is_authenticated()) {
 <table id="register">
 <thead>
 <tr class="headingrow">
-<th>Section</th>
-<th>Part</th>
-<th>Name</th>
+<th rowspan="4">Section</th>
+<th rowspan="4">Part</th>
+<th rowspan="4">Name</th>
 <?php
 foreach ($events as $event) {
     ?>
-<th>
-<span class="eventname"><?php echo htmlspecialchars($event->name); ?></span>
-<span class="eventdatetime"><?php echo $event->get_nice_datetime(); ?></span>
-<span class="eventvenue"><?php echo htmlspecialchars($event->venue); ?></span>
-</th>
+<th class="eventname"><?php echo htmlspecialchars($event->name); ?></th>
+    <?php
+}
+?>
+</tr>
+<tr class="headingrow">
+<?php
+foreach ($events as $event) {
+    ?>
+<th class="eventdesc"><?php echo htmlspecialchars($event->description); ?></th>
+    <?php
+}
+?>
+</tr>
+<tr class="headingrow">
+<?php
+foreach ($events as $event) {
+    ?>
+<th class="eventvenue"><?php echo htmlspecialchars($event->venue); ?></th>
+    <?php
+}
+?>
+</tr>
+<tr class="headingrow">
+<?php
+foreach ($events as $event) {
+    ?>
+<th class="eventdatetime"><?php echo $event->get_nice_datetime(); ?></th>
     <?php
 }
 ?>

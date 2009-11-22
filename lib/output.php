@@ -98,7 +98,7 @@ class html_output {
             $helplink = '';
         }
     ?>
-<div class="footer"><a href="doc/">Documentation</a> -<?php echo $helplink; ?>
+<div class="footer"><span class="helplinks"><a href="doc/">Documentation</a> -<?php echo $helplink; ?></span>
     Powered by <a href="http://timhunt.github.com/Orchestra-register/">Orchestra register</a></div>
 <script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->or->url('script.js', false); ?>"></script>

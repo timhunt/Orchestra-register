@@ -25,11 +25,13 @@ th, td {
 th {
     text-align: left;
 }
-th span {
-    display: block;
+.eventname {
+    font-weight: bold;
+    font-size: 0.8em;
 }
-.eventdatetime,
-.eventvenue {
+.eventdesc,
+.eventvenue,
+.eventdatetime {
     font-weight: normal;
     font-size: 0.8em;
 }
@@ -110,8 +112,12 @@ pre {
 .print .logininfo {
     display: none;
 }
-.print .footer a {
+.print .footer .helplinks {
     display: none;
+}
+.print .footer a {
+    color: black;
+    text-decoration: none;
 }
 .print td,
 .print th {
