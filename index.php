@@ -46,6 +46,20 @@ if ($printview || empty($user->player->part)) {
 $or->load_attendance();
 $subtotals = $or->load_subtotals();
 
+$totalplayers = array();
+$totalattending = array();
+foreach ($events as $event) {
+    $totalplayers[$event->id] = 0;
+    $totalattending[$event->id] = 0;
+    foreach ($subtotals as $part => $subtotal) {
+        if ($subtotal->numplayers[$event->id]) {
+            $totalplayers[$event->id] += $subtotal->numplayers[$event->id];
+            $totalattending[$event->id] += $subtotal->attending[$event->id];
+        }
+    }
+}
+
+
 if ($includepast) {
     $showhidepasturl = $or->url('');
     $showhidepastlabel = 'Hide events in the past';
@@ -139,7 +153,7 @@ foreach ($players as $player) {
 </tbody>
 <tbody id="subtotals">
 <tr class="headingrow">
-<th colspan="3">Totals by part</th>
+<th colspan="3">Numbers by part</th>
 <?php
 foreach ($events as $event) {
     ?>
@@ -172,6 +186,16 @@ foreach ($subtotals as $part => $subtotal) {
     }
     ?>
 </tr>
+<?php
+}
+?>
+<tr class="headingrow">
+<th colspan="3">Total numbers</th>
+<?php
+foreach ($events as $event) {
+    ?>
+<td><span class="total"><?php echo $totalattending[$event->id];
+        ?></span><span class="outof">/<?php echo $totalplayers[$event->id]; ?></span></td>
     <?php
 }
 ?>
