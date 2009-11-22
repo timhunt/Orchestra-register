@@ -19,14 +19,19 @@ h3 {
 p, ul, ol {
     margin: 0.5em 0;
 }
+th, td {
+    padding: 0.1em 0.2em;
+}
 th {
     text-align: left;
 }
-th span {
-    display: block;
+.eventname {
+    font-weight: bold;
+    font-size: 0.8em;
 }
-.eventdatetime,
-.eventvenue {
+.eventdesc,
+.eventvenue,
+.eventdatetime {
     font-weight: normal;
     font-size: 0.8em;
 }
@@ -100,11 +105,19 @@ pre {
     background: #f4f4b0;
 }
 
+.logs td {
+    font-size: 0.8em;
+    padding: 0.1em 0.25em;
+}
 .print .logininfo {
     display: none;
 }
-.print .footer a {
+.print .footer .helplinks {
     display: none;
+}
+.print .footer a {
+    color: black;
+    text-decoration: none;
 }
 .print td,
 .print th {
