@@ -221,7 +221,10 @@ class orchestra_register {
 
     public function require_sesskey() {
         if ($this->get_sesskey() != $this->get_param('sesskey', request::TYPE_AUTHTOKEN)) {
-            throw new forbidden_operation_exception('Invalid request (sesskey does not match)');
+            throw new forbidden_operation_exception(
+                    'The request you just made could not be verified. ' .
+                    'Please click back, reload the page, and try again. ' .
+                    '(The session-key did not match.)');
         }
     }
 
@@ -238,6 +241,9 @@ class orchestra_register {
         $player = $this->db->check_user_auth($email, $this->config->pwsalt . $password);
         if ($player) {
             session_regenerate_id(true);
+            if ($this->config->changesesskeyonloginout) {
+                $this->refresh_sesskey();
+            }
             $_SESSION['userid'] = $player->id;
             $this->user = new user();
             $this->user->player = $player;
@@ -250,7 +256,9 @@ class orchestra_register {
     public function logout() {
         unset($_SESSION['userid']);
         session_regenerate_id(true);
-        $this->refresh_sesskey();
+        if ($this->config->changesesskeyonloginout) {
+            $this->refresh_sesskey();
+        }
     }
 
     /** @return user */
@@ -487,6 +495,7 @@ class db_config {
     public $version;
 
     public $pwsalt;
+    public $changesesskeyonloginout = 0;
 
     public $icalguid;
 

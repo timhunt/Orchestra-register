@@ -41,7 +41,7 @@ class forbidden_operation_exception extends register_exception {
         parent::__construct($message, $debuginfo, 403);
     }
     public function get_summary() {
-        return 'Forbidden operation';
+        return 'Request forbidden';
     }
 }
 
