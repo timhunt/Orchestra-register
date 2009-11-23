@@ -29,3 +29,8 @@ $config->dbname = 'register';  // Your database name, for example 'register';
 
 // Web site location - what will the URL of this register be?
 $config->wwwroot = 'http://my.server.com/register/'; // Must include the final /.
+
+// Set this to a random string of at least 40 characters. Used when encrypting
+// Passwords for storage in the database.
+// You could copy and paste a string from http://dev.moodle.org/gensalt.php.
+$config->pwsalt = '0123456789012345678901234567890123456789';

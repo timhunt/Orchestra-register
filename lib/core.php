@@ -16,7 +16,6 @@
 /**
  * Library functions.
  *
- * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -40,6 +39,7 @@ class orchestra_register {
     public function __construct() {
         $config = new sys_config();
         include(dirname(__FILE__) . '/../config.php');
+        $config->check();
         $this->sysconfig = $config;
 
         $version = new version();
@@ -160,7 +160,7 @@ class orchestra_register {
     }
 
     public function set_player_password($playerid, $newpassword) {
-        $this->db->set_password($playerid, $this->config->pwsalt . $newpassword);
+        $this->db->set_password($playerid, $this->sysconfig->pwsalt . $newpassword);
     }
 
     public function create_event($event) {
@@ -234,7 +234,7 @@ class orchestra_register {
 
     public function verify_login($email, $password) {
         $this->require_sesskey();
-        $player = $this->db->check_user_auth($email, $this->config->pwsalt . $password);
+        $player = $this->db->check_user_auth($email, $this->sysconfig->pwsalt . $password);
         if ($player) {
             session_regenerate_id(true);
             if ($this->config->changesesskeyonloginout) {
@@ -500,12 +500,25 @@ class sys_config {
     public $dbname;
 
     public $wwwroot;
+
+    public $pwsalt;
+
+    public function check() {
+        if (empty($this->wwwroot)) {
+            throw new configuration_exception('Web site location ($config->wwwroot) not set in config.php.');
+        }
+        if (empty($this->pwsalt) || $this->pwsalt == '0123456789012345678901234567890123456789') {
+            throw new configuration_exception('Password salt ($config->pwsalt) not set in config.php.');
+        }
+        if (strlen($this->pwsalt) < 40) {
+            throw new configuration_exception('Password salt ($config->pwsalt) set in config.php must be at least 40 characters long.');
+        }
+    }
 }
 
 class db_config {
     public $version;
 
-    public $pwsalt;
     public $changesesskeyonloginout = 0;
 
     public $icalguid;

@@ -388,10 +388,10 @@ class database {
         return $data;
     }
 
-    public function check_installed($config, $codeversion) {
+    public function check_installed($config, $codeversion, $pwsalt) {
         $donesomething = false;
         if (is_null($config)) {
-            $this->install();
+            $this->install($pwsalt);
             $this->insert_log(null, user::AUTH_NONE, 'install version ' . $codeversion);
             $donesomething = true;
 
@@ -409,7 +409,7 @@ class database {
         return $config;
     }
 
-    protected function install() {
+    protected function install($pwsalt) {
         $this->execute_sql("
             CREATE TABLE config (
                 name VARCHAR(32) NOT NULL PRIMARY KEY,
@@ -475,8 +475,6 @@ class database {
             ) ENGINE = InnoDB
         ");
 
-        $pwsalt = self::random_string(40);
-        $this->set_config('pwsalt', $pwsalt);
         $this->set_config('icalguid', self::random_string(40));
         $this->set_config('title', 'Orchestra Register');
         $this->set_config('timezone', 'Europe/London');
@@ -544,6 +542,12 @@ class database {
             ");
             $this->execute_sql("
                 ALTER TABLE config MODIFY COLUMN value TEXT NOT NULL
+            ");
+        }
+
+        if ($fromversion < 2009112303) {
+            $this->execute_sql("
+                DELETE FROM config WHERE name = 'pwsalt';
             ");
         }
     }

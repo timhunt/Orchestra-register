@@ -36,6 +36,16 @@ class register_exception extends Exception {
     }
 }
 
+class configuration_exception extends register_exception {
+    protected $debuginfo;
+    public function __construct($message, $debuginfo = null, $code = 500) {
+        parent::__construct($message, $debuginfo, 500);
+    }
+    public function get_summary() {
+        return 'Configuration problem';
+    }
+}
+
 class forbidden_operation_exception extends register_exception {
     public function __construct($message, $debuginfo = null) {
         parent::__construct($message, $debuginfo, 403);
