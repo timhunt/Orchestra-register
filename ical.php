@@ -24,6 +24,7 @@
 require_once(dirname(__FILE__) . '/setup.php');
 $or = new orchestra_register();
 $events = $or->get_events(true);
+$debug = $or->get_param('debug', request::TYPE_BOOL, false, false);
 
 function ical_foramt_timestamp($timestamp) {
     return gmstrftime('%Y%m%dT%H%M%SZ', $timestamp);
@@ -45,12 +46,17 @@ function output_event_as_ical(event $event, orchestra_register $or) {
     output_ical_property('END', 'VEVENT');
 }
 
-header('Content-type: text/calendar; charset=utf-8');
-header('Content-Disposition: attachment; filename="orchestra.ics"');
+if (!$debug) {
+    header('Content-type: text/calendar; charset=utf-8');
+    header('Content-Disposition: attachment; filename="orchestra.ics"');
+} else {
+    header('Content-type: text/plain; charset=utf-8');
+}
 
 output_ical_property('BEGIN', 'VCALENDAR');
 output_ical_property('PRODID', '-//Tim Hunt//Orchestra Register Version 1.0//EN');
 output_ical_property('VERSION', '2.0');
+output_ical_property('METHOD', 'PUBLISH');
 
 foreach ($events as $event) {
     output_event_as_ical($event, $or);
