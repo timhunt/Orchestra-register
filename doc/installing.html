@@ -61,12 +61,17 @@ it easier to update to future releases when the time comes.</p>
 
 <p>In the place where you put the the Orchestra register code, you need to
 create a file called config.php that contains the information needed to
-connect to the database.</p>
+connect to the database, and a couple of other values.</p>
 
 <p>The easiest way to create config.php is to edit make a copy of the example
 file config-example.php, and then edit that copy. You need to fill in the
-database information, and also the URL that points to this instance of
-Orchestra register.</p>
+database information, the URL that points to this instance of
+Orchestra register, and a 'password salt'.</p>
+
+<p>Password salt is used for extra security when storing passwords in the database.
+You should set it to a 40-character random value. There are useful online scripts
+that can help you generate such a value, for example <a href="http://dev.moodle.org/gensalt.php">This
+one provided by the Moodle project</a>.</p>
 
 <p>Using the example values from above, a config.php file would look something like:</p>
 <pre>
@@ -78,6 +83,8 @@ $config-&gt;dbpass = 'secret!';
 $config-&gt;dbname = 'register';
 
 $config-&gt;wwwroot = 'http://example.com/register/';
+
+$config-&gt;pwsalt = 'J1sb132ZkIouCNPEAek95ZRDuEUZy9ofIp65U15W';
 </pre>
 
 
@@ -115,7 +122,7 @@ in as that player and going to the edit players page.</p>
 
 <h2>Customising the appearance</h2>
 
-<p>If yoou want to adjust how Orchestra register looks, you can create a new
+<p>If you want to adjust how Orchestra register looks, you can create a new
 CSS file <tt>styles-extra.css</tt> in the same folder as <tt>styles.css</tt>.
 This will then be linked ot as well as styles.css, and you can put your own
 style rules in there.</p>
