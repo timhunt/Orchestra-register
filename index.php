@@ -225,10 +225,9 @@ foreach ($events as $event) {
 </tbody>
 </table>
 <?php
+echo $savechangesbutton;
 if (!$printview && $user->is_authenticated()) {
     ?>
-
-<input type="submit" name="save" value="Save changes" />
 </div>
 </form>
     <?php
