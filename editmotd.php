@@ -14,7 +14,7 @@
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A page to edit the system configuration.
+ * A page to edit the introductory message.
  *
  * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
@@ -26,30 +26,30 @@ require_once(dirname(__FILE__) . '/lib/form.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
-if (!$user->can_edit_config()) {
-    throw new permission_exception('You don\'t have permission to edit the system configuration.');
+if (!$user->can_edit_motd()) {
+    throw new permission_exception('You don\'t have permission to edit the introductory message.');
 }
 
-$currentconfig = $or->get_config();
+$form = new form($or->url('editmotd.php'));
+$form->add_field(new text_field('motdheading', 'Heading', request::TYPE_RAW));
+$form->add_field(new textarea_field('motd', 'Message', request::TYPE_RAW, 10, 50));
+$form->get_field('motd')->set_note('Uses <a href="http://daringfireball.net/projects/markdown/syntax">MarkDown</a> formatting.');
 
-$form = new form($or->url('admin.php'));
-$form->add_field(new text_field('title', 'Register title', request::TYPE_RAW));
-$form->add_field(new timezone_field('timezone', 'Time zone'));
-$form->add_field(new text_field('helpurl', 'Help URL', request::TYPE_RAW));
-$form->add_field(new text_field('wikiediturl', 'Rehearsals wiki page edit URL', request::TYPE_RAW));
-$form->set_required_fields('title');
-$form->get_field('helpurl')->set_note('Could be a mailto: or a http: url');
+$current = array(
+    'motdheading' => $or->get_motd_heading(),
+    'motd' => $or->get_motd(),
+);
 
-$form->set_initial_data($currentconfig);
+$form->set_initial_data($current);
 
 switch ($form->parse_request($or)) {
     case form::CANCELLED:
         $or->redirect('');
 
     case form::SUBMITTED:
-        foreach (array('title', 'timezone', 'helpurl', 'wikiediturl') as $field) {
+        foreach (array('motdheading', 'motd') as $field) {
             $newvalue = $form->get_field_value($field);
-            if ($newvalue != $currentconfig->$field) {
+            if ($newvalue != $current[$field]) {
                 $or->set_config($field, $newvalue);
                 $or->log('set config variable ' . $field . ' to ' . $newvalue);
             }
@@ -59,8 +59,7 @@ switch ($form->parse_request($or)) {
 }
 
 $output = $or->get_output();
-$output->header('Edit system configuration');
+$output->header('Edit introductory message');
 echo $form->output($output);
-$output->call_to_js('init_admin_page');
-echo '<p>This is ' . $or->version_string() . '</p>';
+$output->call_to_js('init_editmotd_page');
 $output->footer();

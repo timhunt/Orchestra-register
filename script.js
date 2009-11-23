@@ -33,11 +33,15 @@ function init_edit_event_page() {
     document.getElementById('name').focus();
 }
 
-function init_logs_page() {
+function init_editmotd_page() {
+    document.getElementById('motd').focus();
 }
 
-function init_config_page() {
+function init_admin_page() {
     document.getElementById('title').focus();
+}
+
+function init_logs_page() {
 }
 
 function init_date_hint(fieldid) {

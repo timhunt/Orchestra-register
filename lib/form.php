@@ -267,6 +267,21 @@ class text_field extends single_value_field {
     }
 }
 
+class textarea_field extends single_value_field {
+    protected $rows;
+    protected $cols;
+    public function __construct($name, $label, $type, $rows, $cols, $default = null) {
+        parent::__construct($name, $label, $type, $default);
+        $this->rows = $rows;
+        $this->cols = $cols;
+    }
+    public function output_field(html_output $output) {
+        return '<textarea id="' . $this->name . '" name="' . $this->name .
+                '" rows="' . $this->rows . '" cols="' . $this->cols . '">' .
+                htmlspecialchars($this->get_current()) . '</textarea>';
+    }
+}
+
 class date_field extends text_field {
     public function __construct($name, $label, $default = null) {
         parent::__construct($name, $label, request::TYPE_DATE, $default);

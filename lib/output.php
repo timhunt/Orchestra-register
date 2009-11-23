@@ -27,6 +27,7 @@ class html_output {
     protected $or;
     protected $javascriptcode = array();
     protected $headeroutput = false;
+    protected $markdownparser = null;
 
     public function __construct(orchestra_register $or) {
         $this->or = $or;
@@ -208,5 +209,15 @@ class html_output {
             $quotedargs[] = json_encode($arg);
         }
         $this->javascriptcode[] = $function . '(' . implode(', ', $quotedargs) . ');';
+    }
+
+    public function markdown($content) {
+        if (is_null($this->markdownparser)) {
+            require_once(dirname(__FILE__) . '/../thirdparty/markdown/markdown.php');
+            $this->markdownparser = new Markdown_Parser();
+            $this->markdownparser->no_markup = true;
+            $this->markdownparser->no_entities = true;
+        }
+        return $this->markdownparser->transform($content);
     }
 }

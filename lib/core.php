@@ -179,10 +179,6 @@ class orchestra_register {
         $this->db->set_event_deleted($event->id, 0);
     }
 
-    public function get_title() {
-        return $this->config->title;
-    }
-
     public function get_login_info() {
         $this->get_current_user();
         if ($this->user->is_logged_in()) {
@@ -298,7 +294,7 @@ class orchestra_register {
     }
 
     public function set_config($name, $value) {
-        if (!in_array($name, array('title', 'timezone', 'helpurl', 'wikiediturl'))) {
+        if (!in_array($name, array('title', 'timezone', 'helpurl', 'wikiediturl', 'motdheading', 'motd'))) {
             throw new coding_error('Cannot set that configuration variable.',
                     'Name: ' . $name . ', Value: ' . $value);
         }
@@ -307,6 +303,18 @@ class orchestra_register {
 
     public function version_string() {
         return 'Orchestra Register ' . $this->version->name . ' (' . $this->version->id . ')';
+    }
+
+    public function get_title() {
+        return $this->config->title;
+    }
+
+    public function get_motd_heading() {
+        return $this->config->motdheading;
+    }
+
+    public function get_motd() {
+        return $this->config->motd;
     }
 
     public function get_help_url() {
@@ -449,6 +457,9 @@ class user {
     public function can_edit_events() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
+    public function can_edit_motd() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+    }
     public function can_set_passwords() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
     }
@@ -504,6 +515,9 @@ class db_config {
 
     public $helpurl = null;
     public $wikiediturl = null;
+
+    public $motdheading = 'Note';
+    public $motd = 'This & <that';
 }
 
 class version {

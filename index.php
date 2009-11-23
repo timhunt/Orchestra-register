@@ -72,19 +72,35 @@ $actions = new actions();
 $actions->add($showhidepasturl, $showhidepastlabel);
 $actions->add($or->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
 $actions->add($or->url('?print=1'), 'Printable view');
-$actions->add($or->url('players.php', false), 'Edit the list of players', $user->can_edit_players());
-$actions->add($or->url('events.php', false), 'Edit the list of events', $user->can_edit_events());
-$actions->add($or->url('wikiformat.php', false), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
-$actions->add($or->url('admin.php', false), 'Edit the system configuration', $user->can_edit_config());
-$actions->add($or->url('logs.php', false), 'View the system logs', $user->can_view_logs());
+$actions->add($or->url('players.php'), 'Edit the list of players', $user->can_edit_players());
+$actions->add($or->url('events.php'), 'Edit the list of events', $user->can_edit_events());
+$actions->add($or->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
+$actions->add($or->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
+$actions->add($or->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());
+$actions->add($or->url('logs.php'), 'View the system logs', $user->can_view_logs());
 
-$output = $or->get_output();
+$motdheading = $or->get_motd_heading();
+$motd = $or->get_motd();
+
 
 $bodyclass = '';
 if ($printview) {
     $bodyclass = 'print';
 }
+
+$output = $or->get_output();
 $output->header('', $bodyclass);
+
+if ($motdheading || $motd) {
+    echo '<div class="motd">';
+    if ($motdheading) {
+        echo "<h2>$motdheading</h2>\n\n";
+    }
+    if ($motd) {
+        echo $output->markdown($motd);
+    }
+    echo "</div>\n\n";
+}
 
 if (!$printview && $user->is_authenticated()) {
 ?>

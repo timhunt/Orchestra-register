@@ -39,7 +39,7 @@ class database {
             return 'NULL';
         }
         if ($maxlength) {
-            $value = substr($value, 0, $maxlength);
+            $value = substr($value, 0, $maxlength - 1);
         }
         return "'" . mysql_real_escape_string($value, $this->conn) . "'";
     }
@@ -413,7 +413,7 @@ class database {
         $this->execute_sql("
             CREATE TABLE config (
                 name VARCHAR(32) NOT NULL PRIMARY KEY,
-                value VARCHAR(255) NOT NULL
+                value TEXT NOT NULL
             ) ENGINE = InnoDB
         ");
         $this->execute_sql("
@@ -538,10 +538,12 @@ class database {
             ");
         }
 
-
-        if ($fromversion < 2009111901) {
+        if ($fromversion < 2009112302) {
             $this->execute_sql("
-                ALTER TABLE MODIFY COLUMN action VARCHAR(255) NOT NULL
+                ALTER TABLE logs MODIFY COLUMN action VARCHAR(255) NOT NULL
+            ");
+            $this->execute_sql("
+                ALTER TABLE config MODIFY COLUMN value TEXT NOT NULL
             ");
         }
     }
