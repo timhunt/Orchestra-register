@@ -50,7 +50,7 @@ class orchestra_register {
                 $this->sysconfig->dbpass, $this->sysconfig->dbname);
 
         $this->config = $this->db->load_config();
-        $this->config = $this->db->check_installed($this->config, $this->version->id);
+        $this->config = $this->db->check_installed($this->config, $this->version->id, $this->sysconfig->pwsalt);
 
         $this->output = new html_output($this);
         set_exception_handler(array($this->output, 'exception'));
