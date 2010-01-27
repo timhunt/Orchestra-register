@@ -241,8 +241,8 @@ foreach ($events as $event) {
 </tbody>
 </table>
 <?php
-echo $savechangesbutton;
 if (!$printview && $user->is_authenticated()) {
+    echo $savechangesbutton;
     ?>
 </div>
 </form>
