@@ -387,7 +387,7 @@ class request {
             case self::TYPE_INT:
                 return strval(intval($raw)) === $raw;
             case self::TYPE_ATTENDANCE:
-                return array_key_exists($raw, attendance::$symbols);
+                return array_key_exists($raw, attendance::$symbols) || $raw === 'nochange';
             case self::TYPE_EMAIL:
                 return filter_var($raw, FILTER_VALIDATE_EMAIL);
             case self::TYPE_DATE:
@@ -626,8 +626,14 @@ class attendance {
             if (!$includenoneeded && $value == self::NOTREQUIRED) {
                 continue;
             }
-            $selected = $this->status == $value ? ' selected="selected"' : '';
-            $output .= '<option class="' . $value . '" value="' . $value . '"' .
+            if ($this->status == $value) {
+                $selected = ' selected="selected"';
+                $actualvalue = 'nochange';
+            } else {
+                $selected = '';
+                $actualvalue = $value;
+            }
+            $output .= '<option class="' . $value . '" value="' . $actualvalue . '"' .
                     $selected . '>' . $symbol . '</option>';
         }
         $output .= '</select>';

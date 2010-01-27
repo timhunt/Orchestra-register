@@ -31,11 +31,7 @@ $or->load_attendance();
 
 $or->require_sesskey();
 
-if ($user->can_edit_events()) {
-    $banned = '';
-} else {
-    $banned = attendance::NOTREQUIRED;
-}
+$canchangenotrequired = $user->can_edit_events();
 
 foreach ($players as $player) {
     if (!$user->can_edit_attendance($player)) {
@@ -45,8 +41,7 @@ foreach ($players as $player) {
     foreach ($events as $event) {
         $attendance = $player->get_attendance($event);
         $newattendance = $or->get_param($attendance->get_field_name(), request::TYPE_ATTENDANCE);
-        if ($newattendance && $newattendance != $attendance->status &&
-                $newattendance != $banned && $attendance->status != $banned) {
+        if ($newattendance && has_really_changed($newattendance, $attendance->status, $canchangenotrequired)) {
             $or->set_attendance($player, $event, $newattendance);
             $or->log('changed attendance for player ' . $player->id . ' at event ' .
                     $event->id . ' to ' . $newattendance);
@@ -58,4 +53,15 @@ if ($includepast) {
     $or->redirect('?past=1');
 } else {
     $or->redirect('');
+}
+
+function has_really_changed($newattendance, $oldattendance, $canchangenotrequired) {
+    if ($newattendance == 'nochange' || $newattendance == $oldattendance) {
+        return false;
+    }
+    if (!$canchangenotrequired &&
+            ($newattendance == attendance::NOTREQUIRED || $oldattendance == attendance::NOTREQUIRED)) {
+        return false;
+    }
+    return true;
 }
