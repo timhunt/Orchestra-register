@@ -550,11 +550,21 @@ class event {
     public $timemodified;
     public $deleted = 0;
 
-    public function get_nice_datetime($dateformat = self::DATE_FORMAT) {
+    protected function wrap_in_span($content, $class) {
+        return '<span class="' . $class . '">' . $content . '</span>';
+    }
+
+    public function get_nice_datetime($dateformat = self::DATE_FORMAT, $html = true) {
         $startdate = strftime($dateformat, $this->timestart);
         $enddate = strftime($dateformat, $this->timeend);
         $starttime = strftime(self::TIME_FORMAT, $this->timestart);
         $endtime = strftime(self::TIME_FORMAT, $this->timeend);
+        if ($html) {
+            $startdate = $this->wrap_in_span($startdate, 'date');
+            $enddate = $this->wrap_in_span($enddate, 'date');
+            $starttime = $this->wrap_in_span($starttime, 'time');
+            $endtime = $this->wrap_in_span($endtime, 'time');
+        }
         if ($startdate == $enddate) {
             return $starttime . ' - ' . $endtime . ', ' . $startdate;
         } else {

@@ -167,8 +167,8 @@ foreach ($players as $player) {
     $editable = $user->can_edit_attendance($player);
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
-<td><?php echo htmlspecialchars($player->section); ?></td>
-<td><?php echo htmlspecialchars($player->part); ?></td>
+<td class="sectcol"><?php echo htmlspecialchars($player->section); ?></td>
+<td class="partcol"><?php echo htmlspecialchars($player->part); ?></td>
 <th><?php echo htmlspecialchars($player->get_public_name()); ?></th>
     <?php
     foreach ($events as $event) {
@@ -196,7 +196,7 @@ foreach ($players as $player) {
 <?php
 foreach ($events as $event) {
     ?>
-<th><span class="eventdatetime"><?php echo htmlspecialchars($event->get_nice_datetime()); ?></span></th>
+<th><span class="eventdatetime"><?php echo $event->get_nice_datetime(); ?></span></th>
     <?php
 }
 ?>
@@ -206,8 +206,8 @@ $rowparity = 1;
 foreach ($subtotals as $part => $subtotal) {
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
-<td><?php echo htmlspecialchars($subtotal->section); ?></td>
-<th colspan="2"><?php echo htmlspecialchars($part); ?></th>
+<td class="sectcol"><?php echo htmlspecialchars($subtotal->section); ?></td>
+<th class="partcol" colspan="2"><?php echo htmlspecialchars($part); ?></th>
     <?php
     foreach ($events as $event) {
         ?>
