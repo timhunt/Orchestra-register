@@ -31,15 +31,24 @@ th {
 .headingrow {
     background: #ddd;
 }
-.eventname {
-    font-weight: bold;
-    font-size: 0.8em;
-}
+.eventname,
 .eventdesc,
 .eventvenue,
 .eventdatetime {
+    font-size: 0.8em;
+}
+.sectcol,
+.partcol {
+    font-size: 0.8em;
+}
+.eventdesc,
+.eventdatetime {
     font-weight: normal;
     font-size: 0.8em;
+}
+.eventdatetime .date {
+    font-weight: bold;
+    white-space: nowrap;
 }
 .r1 {
     background: #eee;
