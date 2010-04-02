@@ -13,15 +13,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
- * Database access functions.
+ * Low-level database functions.
+ *
+ * This class should only be used by the other classes in this file, it should
+ * not be used more widely.
  *
  * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-class database {
+class database_connection {
     private $conn;
 
     public function __construct($dbhost, $dbuser, $dbpass, $dbname) {
@@ -34,7 +37,7 @@ class database {
         }
     }
 
-    protected function escape($value, $maxlength = null) {
+    public function escape($value, $maxlength = null) {
         if (is_null($value)) {
             return 'NULL';
         }
@@ -44,15 +47,15 @@ class database {
         return "'" . mysql_real_escape_string($value, $this->conn) . "'";
     }
 
-    protected function where_clause($tests) {
-        $clauses = array();
-        foreach ($tests as $field => $value) {
-            $clauses[] = $field . " = " . $this->escape($value);
-        }
-        return implode(' AND ', $clauses);
+    public function get_last_insert_id() {
+        return mysql_insert_id($this->conn);
     }
 
-    protected function execute_sql($sql) {
+    public function get_last_error() {
+        return mysql_error($this->conn);
+    }
+
+    public function execute_sql($sql) {
         $result = mysql_query($sql, $this->conn);
         if (!$result) {
             throw new database_exception('Failed to load or save data from the databse.',
@@ -61,11 +64,22 @@ class database {
         return $result;
     }
 
-    protected function get_record_select($table, $where, $class) {
+    public function update($sql) {
+        $this->execute_sql($sql);
+    }
+
+    public function table_exists($name) {
+        $result = $this->execute_sql("SHOW TABLES LIKE 'config'");
+        $exists = mysql_num_rows($result);
+        mysql_free_result($result);
+        return $exists;
+    }
+
+    public function get_record_select($table, $where, $class) {
         return $this->get_record_sql("SELECT * FROM $table WHERE $where", $class);
     }
 
-    protected function get_record_sql($sql, $class) {
+    public function get_record_sql($sql, $class) {
         $object = null;
         $result = $this->execute_sql($sql);
         if (mysql_num_rows($result) == 1) {
@@ -75,14 +89,14 @@ class database {
         return $object;
     }
 
-    protected function get_records($table, $class, $order = '') {
+    public function get_records($table, $class, $order = '') {
         if ($order) {
             $order = ' ORDER BY ' . $order;
         }
         return $this->get_records_sql('SELECT * FROM ' . $table . $order, $class);
     }
 
-    protected function get_records_select($table, $where, $class, $order = '') {
+    public function get_records_select($table, $where, $class, $order = '') {
         if ($where) {
             $where = ' WHERE ' . $where;
         }
@@ -92,7 +106,7 @@ class database {
         return $this->get_records_sql('SELECT * FROM ' . $table . $where . $order, $class);
     }
 
-    protected function get_records_sql($sql, $class) {
+    public function get_records_sql($sql, $class) {
         $result = $this->execute_sql($sql);
         $objects = array();
         while ($object = mysql_fetch_object($result, $class)) {
@@ -106,16 +120,34 @@ class database {
         return $objects;
     }
 
-    protected function count_records($table) {
+    public function count_records($table) {
         $record = $this->get_record_sql('SELECT COUNT(1) AS count FROM ' . $table, 'stdClass');
         if (!$record) {
             throw new database_exception('Failed to count data in the databse.', 'Table ' . $table);
         }
         return $record->count;
     }
+}
 
-    protected function update($sql) {
-        $this->execute_sql($sql);
+/**
+ * Database access functions.
+ *
+ * @package orchestraregister
+ * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class database {
+    /**
+     * @var database_connection
+     */
+    private $connection;
+
+    public function __construct($dbhost, $dbuser, $dbpass, $dbname) {
+        $this->connection = new database_connection($dbhost, $dbuser, $dbpass, $dbname);
+    }
+
+    protected function escape($value, $maxlength = null) {
+        return $this->connection->escape($value, $maxlength);
     }
 
     public function load_players($includedeleted = false, $currentsection = '', $currentpart = '') {
@@ -124,7 +156,7 @@ class database {
         } else {
             $where = 'WHERE deleted = 0';
         }
-        return $this->get_records_sql("
+        return $this->connection->get_records_sql("
             SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role, deleted
             FROM players
             JOIN parts ON players.part = parts.part
@@ -146,15 +178,15 @@ class database {
         if (!$includepast) {
             $conditions[] = 'timeend > ' . $this->escape(time());
         }
-        return $this->get_records_select('events', implode(' AND ', $conditions), 'event', 'timestart');
+        return $this->connection->get_records_select('events', implode(' AND ', $conditions), 'event', 'timestart');
     }
 
     public function load_attendances() {
-        return $this->get_records('attendances', 'attendance');
+        return $this->connection->get_records('attendances', 'attendance');
     }
 
     public function load_subtotals() {
-        return $this->get_records_sql("
+        return $this->connection->get_records_sql("
             SELECT
                 parts.part,
                 parts.section,
@@ -172,7 +204,7 @@ class database {
     }
 
     public function load_parts() {
-        return $this->get_records_sql("
+        return $this->connection->get_records_sql("
             SELECT parts.part, parts.section
             FROM parts
             JOIN sections ON parts.section = sections.section
@@ -184,7 +216,7 @@ class database {
         if (!$includedeleted) {
             $conditions['deleted'] = 0;
         }
-        return $this->get_record_sql("
+        return $this->connection->get_record_sql("
                 SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role, deleted
                 FROM players
                 JOIN parts ON players.part = parts.part
@@ -192,7 +224,7 @@ class database {
     }
 
     public function find_player_by_token($token) {
-        return $this->get_record_sql("
+        return $this->connection->get_record_sql("
                 SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
                 FROM players
                 JOIN parts ON players.part = parts.part
@@ -204,27 +236,27 @@ class database {
         if (!$includedeleted) {
             $conditions['deleted'] = 0;
         }
-        return $this->get_record_select('events', $this->where_clause($conditions), 'event');
+        return $this->connection->get_record_select('events', $this->where_clause($conditions), 'event');
     }
 
     public function check_user_auth($email, $saltedpassword) {
-        return $this->get_record_select('players',
+        return $this->connection->get_record_select('players',
                 "email = " . $this->escape($email) . " AND pwhash = SHA1(CONCAT(" .
                 $this->escape($saltedpassword) . ", pwsalt)) AND deleted = 0", 'player');
     }
 
     public function set_password($playerid, $saltedpassword) {
-        $this->update("UPDATE players SET pwhash = SHA1(CONCAT(" .
+        $this->connection->update("UPDATE players SET pwhash = SHA1(CONCAT(" .
             $this->escape($saltedpassword) . ", pwsalt)) WHERE id = " . $this->escape($playerid));
     }
 
     public function set_player_deleted($playerid, $deleted) {
-        $this->update("UPDATE players SET deleted = " . $this->escape($deleted) .
+        $this->connection->update("UPDATE players SET deleted = " . $this->escape($deleted) .
                 " WHERE id = " . $this->escape($playerid));
     }
 
     public function set_event_deleted($eventid, $deleted) {
-        $this->update("UPDATE events SET deleted = " . $this->escape($deleted) .
+        $this->connection->update("UPDATE events SET deleted = " . $this->escape($deleted) .
                 " WHERE id = " . $this->escape($eventid));
     }
 
@@ -232,10 +264,10 @@ class database {
      * @return db_config
      */
     public function load_config() {
-        if (!$this->table_exists('config')) {
+        if (!$this->connection->table_exists('config')) {
             return null;
         }
-        $result = $this->execute_sql('SELECT * FROM config');
+        $result = $this->connection->execute_sql('SELECT * FROM config');
         $config = new db_config();
         while ($row = mysql_fetch_object($result)) {
             $config->{$row->name} = $row->value;
@@ -244,26 +276,19 @@ class database {
         return $config;
     }
 
-    public function table_exists($name) {
-        $result = $this->execute_sql("SHOW TABLES LIKE 'config'");
-        $exists = mysql_num_rows($result);
-        mysql_free_result($result);
-        return $exists;
-    }
-
     public function set_attendance($playerid, $eventid, $newstatus) {
         $sql = "INSERT INTO attendances (playerid, eventid, status)
                 VALUES (" . $this->escape($playerid) . ", " . $this->escape($eventid) . ", " .
                         $this->escape($newstatus) . ")
                 ON DUPLICATE KEY UPDATE status = " . $this->escape($newstatus);
-        $this->update($sql);
+        $this->connection->update($sql);
     }
 
     public function set_config($name, $value, $config = null) {
         $sql = "INSERT INTO config (name, value)
                 VALUES (" . $this->escape($name) . ", " . $this->escape($value) . ")
                 ON DUPLICATE KEY UPDATE value = " . $this->escape($value);
-        $this->update($sql);
+        $this->connection->update($sql);
         if ($config) {
             $config->$name = $value;
         }
@@ -276,8 +301,8 @@ class database {
                 $this->escape(self::random_string(40)) . ", NULL, " .
                 $this->escape(self::random_string(40)) . ", " . $this->escape($player->role) . ", " .
                 $this->escape($player->deleted) . ")";
-        $this->update($sql);
-        $player->id = $this->get_last_insert_id();
+        $this->connection->update($sql);
+        $player->id = $this->connection->get_last_insert_id();
     }
 
     public function update_player($player) {
@@ -291,7 +316,16 @@ class database {
                 part = " . $this->escape($player->part) . ",
                 role = " . $this->escape($player->role) . "
                 WHERE " . $this->where_clause(array('id' => $player->id));
-        $this->update($sql);
+        $this->connection->update($sql);
+    }
+
+    public function insert_series($series) {
+        $sql = "INSERT INTO series (name, description, deleted)
+                VALUES (" . $this->escape($series->name) . ", " .
+                $this->escape($series->description) . ", " .
+                $this->escape($series->deleted) . ")";
+        $this->connection->update($sql);
+        $series->id = $this->connection->get_last_insert_id();
     }
 
     public function insert_event($event) {
@@ -299,8 +333,8 @@ class database {
                 VALUES (" . $this->escape($event->name) . ", " . $this->escape($event->description) . ", " .
                 $this->escape($event->venue) . ", " . $this->escape($event->timestart) . ", " .
                 $this->escape($event->timeend) . ", " . $this->escape(time()) . ")";
-        $this->update($sql);
-        $event->id = $this->get_last_insert_id();
+        $this->connection->update($sql);
+        $event->id = $this->connection->get_last_insert_id();
     }
 
     public function update_event($event) {
@@ -315,20 +349,20 @@ class database {
                 timeend = " . $this->escape($event->timeend) . ",
                 timemodified = " . $this->escape(time()) . "
                 WHERE " . $this->where_clause(array('id' => $event->id));
-        $this->update($sql);
+        $this->connection->update($sql);
     }
 
     public function insert_section($section, $sort) {
         $sql = "INSERT INTO sections (section, sectionsort)
                 VALUES (" . $this->escape($section) . ", " . $this->escape($sort) . ")";
-        $this->update($sql);
+        $this->connection->update($sql);
     }
 
     public function insert_part($part, $section, $sort) {
         $sql = "INSERT INTO parts (part, section, partsort)
                 VALUES (" . $this->escape($part) . ", " . $this->escape($section) . ", " .
                 $this->escape($sort) . ")";
-        $this->update($sql);
+        $this->connection->update($sql);
     }
 
     public function insert_log($userid, $authlevel, $action) {
@@ -336,11 +370,11 @@ class database {
                 VALUES (" . $this->escape(time()) . ", " . $this->escape($userid) . ", " .
                 $this->escape($authlevel) . ", " . $this->escape(request::get_ip_address()) . ", " .
                 $this->escape($action, 255) . ")";
-        $this->update($sql);
+        $this->connection->update($sql);
     }
 
     public function count_logs() {
-        return $this->count_records('logs');
+        return $this->connection->count_records('logs');
     }
 
     public function load_logs($from, $limit) {
@@ -349,7 +383,7 @@ class database {
                 LEFT JOIN players p ON p.id = l.userid
                 ORDER BY l.timestamp DESC, l.id DESC
                 LIMIT $from, $limit";
-        return $this->get_records_sql($sql, 'stdCLass');
+        return $this->connection->get_records_sql($sql, 'stdCLass');
     }
 
     public static function random_string($length) {
@@ -364,12 +398,16 @@ class database {
         return $string;
     }
 
-    protected function get_last_insert_id() {
-        return mysql_insert_id($this->conn);
+    protected function where_clause($tests) {
+        $clauses = array();
+        foreach ($tests as $field => $value) {
+            $clauses[] = $field . " = " . $this->escape($value);
+        }
+        return implode(' AND ', $clauses);
     }
 
     protected function get_last_error() {
-        return mysql_error($this->conn);
+        return $this->connection->get_last_error();
     }
 
     public static function load_csv($filename, $skipheader = true) {
@@ -388,15 +426,20 @@ class database {
         return $data;
     }
 
+    protected function get_installer() {
+        require_once(dirname(__FILE__) . '/installer.php');
+        return new installer($this, $this->connection);
+    }
+
     public function check_installed($config, $codeversion, $pwsalt) {
         $donesomething = false;
         if (is_null($config)) {
-            $this->install($pwsalt);
+            $this->get_installer()->install($pwsalt);
             $this->insert_log(null, user::AUTH_NONE, 'install version ' . $codeversion);
             $donesomething = true;
 
         } else if ($config->version < $codeversion) {
-            $this->upgrade($config->version);
+            $this->get_installer()->upgrade($config->version);
             $this->insert_log(null, user::AUTH_NONE, 'upgrade to version ' . $codeversion);
             $donesomething = true;
         }
@@ -407,148 +450,5 @@ class database {
         }
 
         return $config;
-    }
-
-    protected function install($pwsalt) {
-        $this->execute_sql("
-            CREATE TABLE config (
-                name VARCHAR(32) NOT NULL PRIMARY KEY,
-                value TEXT NOT NULL
-            ) ENGINE = InnoDB
-        ");
-        $this->execute_sql("
-            CREATE TABLE sections (
-                section VARCHAR(100) NOT NULL PRIMARY KEY,
-                sectionsort INT(10) NOT NULL UNIQUE
-            ) ENGINE = InnoDB
-        ");
-        $this->execute_sql("
-            CREATE TABLE parts (
-                part VARCHAR(100) NOT NULL PRIMARY KEY,
-                section VARCHAR(100) NOT NULL REFERENCES sections (section) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                partsort INT(10) NOT NULL,
-                CONSTRAINT UNIQUE (section, partsort)
-            ) ENGINE = InnoDB
-        ");
-        $this->execute_sql("
-            CREATE TABLE players (
-                id INT(10) AUTO_INCREMENT PRIMARY KEY,
-                firstname VARCHAR(100) NOT NULL,
-                lastname VARCHAR(100) NOT NULL,
-                email VARCHAR(100) NOT NULL,
-                part VARCHAR(100) NOT NULL REFERENCES parts (part) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                authkey VARCHAR(40) NOT NULL,
-                pwhash VARCHAR(40) NULL,
-                pwsalt VARCHAR(40) NULL,
-                role VARCHAR(40) NOT NULL,
-                deleted INT(1) NOT NULL DEFAULT 0
-            ) ENGINE = InnoDB
-        ");
-        $this->execute_sql("
-            CREATE TABLE events (
-                id INT(10) AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                description TEXT NOT NULL,
-                venue VARCHAR(100) NOT NULL,
-                timestart INT(10) NOT NULL,
-                timeend INT(10) NOT NULL,
-                timemodified INT(10) NOT NULL,
-                deleted INT(1) NOT NULL DEFAULT 0
-            ) ENGINE = InnoDB
-        ");
-        $this->execute_sql("
-            CREATE TABLE attendances (
-                playerid INT(10) NOT NULL REFERENCES players (id) ON DELETE CASCADE ON UPDATE RESTRICT,
-                eventid INT(10) NOT NULL REFERENCES events (id) ON DELETE CASCADE ON UPDATE RESTRICT,
-                status VARCHAR(32) NOT NULL,
-                CONSTRAINT PRIMARY KEY (playerid, eventid)
-            ) ENGINE = InnoDB
-        ");
-        $this->execute_sql("
-            CREATE TABLE logs (
-                id INT(10) AUTO_INCREMENT PRIMARY KEY,
-                timestamp INT(10) NOT NULL,
-                userid INT(10) NULL REFERENCES players (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                authlevel INT(10) NOT NULL,
-                ipaddress VARCHAR(40) NOT NULL,
-                action VARCHAR(255) NOT NULL
-            ) ENGINE = InnoDB
-        ");
-
-        $this->set_config('icalguid', self::random_string(40));
-        $this->set_config('title', 'Orchestra Register');
-        $this->set_config('timezone', 'Europe/London');
-
-        $sections = self::load_csv('data/sections.txt');
-        foreach ($sections as $section) {
-            $this->insert_section($section[1], $section[0]);
-        }
-        $parts = self::load_csv('data/parts.txt');
-        foreach ($parts as $part) {
-            $this->insert_part($part[2], $part[0], $part[1]);
-        }
-        $players = self::load_csv('data/players.txt');
-        $firstplayer = true;
-        foreach ($players as $data) {
-            $player = new player();
-            $player->firstname = $data[0];
-            $player->lastname = $data[1];
-            $player->email = $data[2];
-            $player->part = $data[3];
-            $player->role = 'player';
-            if ($firstplayer) {
-                $player->role = 'admin';
-            }
-            $this->insert_player($player);
-            if ($firstplayer) {
-                $this->set_password($this->get_last_insert_id(), $pwsalt . 'mozart');
-                $firstplayer = false;
-            }
-        }
-        $events = self::load_csv('data/events.txt');
-        foreach ($events as $data) {
-            $event = new event();
-            $event->name = $data[0];
-            $event->description = $data[1];
-            $event->venue = $data[2];
-            $event->timestart = strtotime($data[3] . ' ' . $data[4]);
-            $event->timeend = strtotime($data[3] . ' ' . $data[5]);
-            $this->insert_event($event);
-        }
-    }
-
-    protected function upgrade($fromversion) {
-        if ($fromversion < 2009111800) {
-            $this->update('ALTER TABLE events ADD COLUMN
-                    deleted INT(1) NOT NULL DEFAULT 0');
-        }
-
-        if ($fromversion < 2009111901) {
-            $this->execute_sql("
-                CREATE TABLE logs (
-                    id INT(10) AUTO_INCREMENT PRIMARY KEY,
-                    timestamp INT(10) NOT NULL,
-                    userid INT(10) NULL REFERENCES players (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                    authlevel INT(10) NOT NULL,
-                    ipaddress VARCHAR(40) NOT NULL,
-                    action VARCHAR(100) NOT NULL
-                ) ENGINE = InnoDB
-            ");
-        }
-
-        if ($fromversion < 2009112302) {
-            $this->execute_sql("
-                ALTER TABLE logs MODIFY COLUMN action VARCHAR(255) NOT NULL
-            ");
-            $this->execute_sql("
-                ALTER TABLE config MODIFY COLUMN value TEXT NOT NULL
-            ");
-        }
-
-        if ($fromversion < 2009112303) {
-            $this->execute_sql("
-                DELETE FROM config WHERE name = 'pwsalt';
-            ");
-        }
     }
 }

@@ -538,6 +538,13 @@ class version {
     public $name;
 }
 
+class series {
+    public $id;
+    public $name;
+    public $description;
+    public $deleted = 0;
+}
+
 class event {
     const DATE_FORMAT = '%a %e %b';
     const TIME_FORMAT = '%H:%M';
