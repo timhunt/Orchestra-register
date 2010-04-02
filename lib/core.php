@@ -35,6 +35,7 @@ class orchestra_register {
     private $version;
     private $db;
     private $attendanceloaded = false;
+    private $seriesid = 1;
 
     public function __construct() {
         $config = new sys_config();
@@ -50,7 +51,8 @@ class orchestra_register {
                 $this->sysconfig->dbpass, $this->sysconfig->dbname);
 
         $this->config = $this->db->load_config();
-        $this->config = $this->db->check_installed($this->config, $this->version->id, $this->sysconfig->pwsalt);
+        $this->config = $this->db->check_installed($this->config,
+                $this->version->id, $this->sysconfig->pwsalt);
 
         $this->output = new html_output($this);
         set_exception_handler(array($this->output, 'exception'));
@@ -71,7 +73,7 @@ class orchestra_register {
     }
 
     public function get_player($id, $includedeleted = false) {
-        $player = $this->db->find_player_by_id($id, $includedeleted);
+        $player = $this->db->find_player_by_id($id, $this->seriesid, $includedeleted);
         if (!$player) {
             throw new not_found_exception('Unknown player.', $id);
         }
@@ -80,7 +82,8 @@ class orchestra_register {
 
     public function get_players($includedeleted = false, $currentsection = '', $currentpart = '') {
         if (is_null($this->players)) {
-            $this->players = $this->db->load_players($includedeleted, $currentsection, $currentpart);
+            $this->players = $this->db->load_players($this->seriesid, $includedeleted,
+                    $currentsection, $currentpart);
         }
         return $this->players;
     }
@@ -95,7 +98,7 @@ class orchestra_register {
 
     public function get_events($includepast = false, $includedeleted = false) {
         if (is_null($this->events)) {
-            $this->events = $this->db->load_events($includepast, $includedeleted);
+            $this->events = $this->db->load_events($this->seriesid, $includepast, $includedeleted);
         }
         return $this->events;
     }
@@ -115,7 +118,7 @@ class orchestra_register {
         if ($this->attendanceloaded) {
             return;
         }
-        $attendances = $this->db->load_attendances();
+        $attendances = $this->db->load_attendances($this->seriesid);
         foreach ($attendances as $a) {
             $this->players[$a->playerid]->attendance[$a->eventid] = $a;
         }
@@ -123,7 +126,7 @@ class orchestra_register {
     }
 
     public function load_subtotals() {
-        $data = $this->db->load_subtotals();
+        $data = $this->db->load_subtotals($this->seriesid);
         $subtotals = array();
         foreach ($data as $row) {
             if (!array_key_exists($row->part, $subtotals)) {
@@ -140,27 +143,19 @@ class orchestra_register {
     }
 
     public function set_attendance($player, $event, $newattendance) {
-        $this->db->set_attendance($player->id, $event->id, $newattendance);
+        $this->db->set_attendance($player->id, $this->seriesid, $event->id, $newattendance);
     }
 
-    public function create_player($player) {
-        $this->db->insert_player($player);
+    public function create_user($user) {
+        $this->db->insert_user($user);
     }
 
-    public function update_player($player) {
-        $this->db->update_player($player);
+    public function update_user($user) {
+        $this->db->update_user($user);
     }
 
-    public function delete_player($player) {
-        $this->db->set_player_deleted($player->id, 1);
-    }
-
-    public function undelete_player($player) {
-        $this->db->set_player_deleted($player->id, 0);
-    }
-
-    public function set_player_password($playerid, $newpassword) {
-        $this->db->set_password($playerid, $this->sysconfig->pwsalt . $newpassword);
+    public function set_user_password($userid, $newpassword) {
+        $this->db->set_password($userid, $this->sysconfig->pwsalt . $newpassword);
     }
 
     public function create_event($event) {
@@ -262,24 +257,27 @@ class orchestra_register {
         if ($this->user) {
             return $this->user;
         }
-        $this->user = new user();
+
         if (!empty($_SESSION['userid'])) {
-            $player = $this->db->find_player_by_id($_SESSION['userid']);
-            if ($player) {
-                $this->user->player = $player;
+            $user = $this->db->find_user_by_id($_SESSION['userid']);
+            if ($user) {
+                $this->user = $user;
                 $this->user->authlevel = user::AUTH_LOGIN;
                 return $this->user;
             }
         }
+
         $token = $this->request->get_param('t', request::TYPE_AUTHTOKEN, null, false);
         if ($token) {
-            $player = $this->db->find_player_by_token($token);
-            if ($player) {
-                $this->user->player = $player;
+            $user = $this->db->find_user_by_token($token);
+            if ($user) {
+                $this->user = $user;
                 $this->user->authlevel = user::AUTH_TOKEN;
                 return $this->user;
             }
         }
+
+        $this->user = new user();
         return $this->user;
     }
 
@@ -294,7 +292,9 @@ class orchestra_register {
     }
 
     public function set_config($name, $value) {
-        if (!in_array($name, array('title', 'timezone', 'helpurl', 'wikiediturl', 'motdheading', 'motd'))) {
+        $configclass = new ReflectionClass('db_config');
+        if (!in_array($name, $configclass->getStaticProperties()) ||
+                in_array($name. array('icalguid', 'version'))) {
             throw new coding_error('Cannot set that configuration variable.',
                     'Name: ' . $name . ', Value: ' . $value);
         }
@@ -326,10 +326,10 @@ class orchestra_register {
     }
 
     public function log($action) {
-        if (empty($this->user->player->id)) {
+        if (empty($this->user->id)) {
             throw new coding_error('Cannot log an un-authenicated action.');
         }
-        $this->db->insert_log($this->user->player->id, $this->user->authlevel, $action);
+        $this->db->insert_log($this->user->id, $this->user->authlevel, $action);
     }
 
     public function log_failed_login($email) {
@@ -423,7 +423,15 @@ class user {
         self::ADMIN => 'Administrator',
     );
     /** @var player */
-    public $player;
+    public $id;
+    public $firstname;
+    public $lastname;
+    public $email;
+    public $authkey;
+    public $username;
+    public $pwhash;
+    public $pwsalt;
+    public $role = user::PLAYER;
     public $authlevel = self::AUTH_NONE;
     public $sesskey;
     public function __construct() {
@@ -529,8 +537,8 @@ class db_config {
     public $helpurl = null;
     public $wikiediturl = null;
 
-    public $motdheading = 'Note';
-    public $motd = 'This & <that';
+    public $motdheading = '';
+    public $motd = '';
 }
 
 class version {
@@ -549,6 +557,7 @@ class event {
     const DATE_FORMAT = '%a %e %b';
     const TIME_FORMAT = '%H:%M';
     public $id;
+    public $seriesid;
     public $name;
     public $description;
     public $venue;
@@ -582,18 +591,21 @@ class event {
 
 class player {
     public $id;
+    public $seriesid;
+    public $part;
+    public $section;
+
     public $firstname;
     public $lastname;
     public $email;
-    public $part;
-    public $section;
     public $authkey;
     public $username;
     public $pwhash;
     public $pwsalt;
     public $role = user::PLAYER;
-    public $deleted = 0;
+
     public $attendance = array(); // $eventid => attendance.
+
     public function get_attendance($event) {
         if (!array_key_exists($event->id, $this->attendance)) {
             $attendance = new attendance();
@@ -625,7 +637,8 @@ class attendance {
         self::NOTREQUIRED => '-',
     );
     public $eventid;
-    public $playerid;
+    public $userid;
+    public $seriesid;
     public $status = self::UNKNOWN;
     public function get_symbol() {
         return self::$symbols[$this->status];

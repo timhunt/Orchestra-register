@@ -150,15 +150,17 @@ class database {
         return $this->connection->escape($value, $maxlength);
     }
 
-    public function load_players($includedeleted = false, $currentsection = '', $currentpart = '') {
+    public function load_players($seriesid, $includedeleted = false,
+            $currentsection = '', $currentpart = '') {
         if ($includedeleted) {
             $where = '';
         } else {
-            $where = 'WHERE deleted = 0';
+            $where = 'WHERE players.part IS NOT NULL';
         }
         return $this->connection->get_records_sql("
-            SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role, deleted
+            SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
             FROM players
+            JOIN users ON users.id = players.userid
             JOIN parts ON players.part = parts.part
             JOIN sections ON parts.section = sections.section
             $where
@@ -170,8 +172,8 @@ class database {
         ", 'player');
     }
 
-    public function load_events($includepast = false, $includedeleted = false) {
-        $conditions = array();
+    public function load_events($seriesid, $includepast = false, $includedeleted = false) {
+        $conditions = array('seriesid = ' . $this->escape($seriesid));
         if (!$includedeleted) {
             $conditions[] = 'deleted = 0';
         }
@@ -181,11 +183,12 @@ class database {
         return $this->connection->get_records_select('events', implode(' AND ', $conditions), 'event', 'timestart');
     }
 
-    public function load_attendances() {
-        return $this->connection->get_records('attendances', 'attendance');
+    public function load_attendances($seriesid) {
+        return $this->connection->get_records_select('attendances',
+                'seriesid = ' . $this->escape($seriesid), 'attendance');
     }
 
-    public function load_subtotals() {
+    public function load_subtotals($seriesid) {
         return $this->connection->get_records_sql("
             SELECT
                 parts.part,
@@ -196,9 +199,12 @@ class database {
             FROM players
             JOIN parts ON players.part = parts.part
             JOIN sections ON parts.section = sections.section
-            JOIN events
-            LEFT JOIN attendances ON playerid = players.id AND eventid = events.id
-            WHERE players.deleted = 0
+            JOIN events ON events.seriesid = players.seriesid
+            LEFT JOIN attendances ON attendances.userid = players.userid AND
+                    attendances.seriesid = players.seriesid AND attendances.eventid = events.id
+            WHERE
+                events.deleted = 0 AND
+                players.seriesid = ' . $this->escape($seriesid) . '
             GROUP BY events.id, parts.part, parts.section
             ORDER BY sectionsort, partsort", 'stdClass');
     }
@@ -211,24 +217,27 @@ class database {
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
-    public function find_player_by_id($playerid, $includedeleted = false) {
-        $conditions = array('id' => $playerid);
+    public function find_player_by_id($userid, $seriesid, $includedeleted = false) {
+        $where = 'userid = ' . $this->escape($userid) . ' AND seriesid = ' .
+                $this->escape($seriesid);
         if (!$includedeleted) {
-            $conditions['deleted'] = 0;
+            $where .= ' AND part IS NOT NULL';
         }
         return $this->connection->get_record_sql("
-                SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role, deleted
+                SELECT users.id, users.firstname, users.lastname, users.email,
+                    players.part, parts.section, users.authkey, users.pwhash,
+                    users.pwsalt, users.role
                 FROM players
-                JOIN parts ON players.part = parts.part
-                WHERE " . $this->where_clause($conditions), 'player');
+                JOIN users ON users.id = players.userid
+                LEFT JOIN parts ON players.part = parts.part
+                WHERE " . $where . 'player');
     }
 
-    public function find_player_by_token($token) {
-        return $this->connection->get_record_sql("
-                SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
-                FROM players
-                JOIN parts ON players.part = parts.part
-                WHERE " . $this->where_clause(array('authkey' => $token, 'deleted' => 0)), 'player');
+    public function find_user_by_token($token) {
+        return $this->connection->get_record_sql('
+                SELECT id, firstname, lastname, email, authkey, pwhash, pwsalt, role
+                FROM users
+                WHERE authkey = ' . $this->escape($token) . " AND role <> 'disabled'", 'user');
     }
 
     public function find_event_by_id($eventid, $includedeleted = false) {
@@ -240,19 +249,14 @@ class database {
     }
 
     public function check_user_auth($email, $saltedpassword) {
-        return $this->connection->get_record_select('players',
+        return $this->connection->get_record_select('users',
                 "email = " . $this->escape($email) . " AND pwhash = SHA1(CONCAT(" .
-                $this->escape($saltedpassword) . ", pwsalt)) AND deleted = 0", 'player');
+                $this->escape($saltedpassword) . ", pwsalt)) AND role <> 'disabled'", 'user');
     }
 
-    public function set_password($playerid, $saltedpassword) {
-        $this->connection->update("UPDATE players SET pwhash = SHA1(CONCAT(" .
-            $this->escape($saltedpassword) . ", pwsalt)) WHERE id = " . $this->escape($playerid));
-    }
-
-    public function set_player_deleted($playerid, $deleted) {
-        $this->connection->update("UPDATE players SET deleted = " . $this->escape($deleted) .
-                " WHERE id = " . $this->escape($playerid));
+    public function set_password($userid, $saltedpassword) {
+        $this->connection->update("UPDATE users SET pwhash = SHA1(CONCAT(" .
+            $this->escape($saltedpassword) . ", pwsalt)) WHERE id = " . $this->escape($userid));
     }
 
     public function set_event_deleted($eventid, $deleted) {
@@ -276,10 +280,10 @@ class database {
         return $config;
     }
 
-    public function set_attendance($playerid, $eventid, $newstatus) {
-        $sql = "INSERT INTO attendances (playerid, eventid, status)
-                VALUES (" . $this->escape($playerid) . ", " . $this->escape($eventid) . ", " .
-                        $this->escape($newstatus) . ")
+    public function set_attendance($userid, $seriesid, $eventid, $newstatus) {
+        $sql = "INSERT INTO attendances (userid, seriesid, eventid, status)
+                VALUES (" . $this->escape($userid) . ", " . $this->escape($seriesid) . ", " .
+                        $this->escape($eventid) . ", " . $this->escape($newstatus) . ")
                 ON DUPLICATE KEY UPDATE status = " . $this->escape($newstatus);
         $this->connection->update($sql);
     }
@@ -294,28 +298,36 @@ class database {
         }
     }
 
-    public function insert_player($player) {
+    public function insert_user($user) {
         $sql = "INSERT INTO players (firstname, lastname, email, part, authkey, pwhash, pwsalt, role, deleted)
-                VALUES (" . $this->escape($player->firstname) . ", " . $this->escape($player->lastname) . ", " .
-                $this->escape($player->email) . ", " . $this->escape($player->part) . ", " .
+                VALUES (" . $this->escape($user->firstname) . ", " .
+                $this->escape($user->lastname) . ", " .
+                $this->escape($user->email) . ", " .
                 $this->escape(self::random_string(40)) . ", NULL, " .
-                $this->escape(self::random_string(40)) . ", " . $this->escape($player->role) . ", " .
-                $this->escape($player->deleted) . ")";
+                $this->escape(self::random_string(40)) . ", " .
+                $this->escape($user->role) . ")";
+        $this->connection->update($sql);
+        $user->id = $this->connection->get_last_insert_id();
+    }
+
+    public function insert_player($player, $seriesid) {
+        $sql = "INSERT INTO players (userid, seriesid, part)
+                VALUES (" . $this->escape($player->id) . ", " . $this->escape($seriesid) . ", " .
+                $this->escape($player->part) . ")";
         $this->connection->update($sql);
         $player->id = $this->connection->get_last_insert_id();
     }
 
-    public function update_player($player) {
-        if (empty($player->id)) {
+    public function update_user($user) {
+        if (empty($user->id)) {
             throw new coding_error('Trying to update a player who is not in the database.');
         }
         $sql = "UPDATE players SET
-                firstname = " . $this->escape($player->firstname) . ",
-                lastname = " . $this->escape($player->lastname) . ",
-                email = " . $this->escape($player->email) . ",
-                part = " . $this->escape($player->part) . ",
-                role = " . $this->escape($player->role) . "
-                WHERE " . $this->where_clause(array('id' => $player->id));
+                firstname = " . $this->escape($user->firstname) . ",
+                lastname = " . $this->escape($user->lastname) . ",
+                email = " . $this->escape($user->email) . ",
+                role = " . $this->escape($user->role) . "
+                WHERE " . $this->where_clause(array('id' => $user->id));
         $this->connection->update($sql);
     }
 
@@ -329,8 +341,9 @@ class database {
     }
 
     public function insert_event($event) {
-        $sql = "INSERT INTO events (name, description, venue, timestart, timeend, timemodified)
-                VALUES (" . $this->escape($event->name) . ", " . $this->escape($event->description) . ", " .
+        $sql = "INSERT INTO events (seriesid, name, description, venue, timestart, timeend, timemodified)
+                VALUES (" . $this->escape($event->seriesid) . ", " .
+                $this->escape($event->name) . ", " . $this->escape($event->description) . ", " .
                 $this->escape($event->venue) . ", " . $this->escape($event->timestart) . ", " .
                 $this->escape($event->timeend) . ", " . $this->escape(time()) . ")";
         $this->connection->update($sql);
@@ -342,6 +355,7 @@ class database {
             throw new coding_error('Trying to update an event that is not in the database.');
         }
         $sql = "UPDATE events SET
+                seriesid = " . $this->escape($event->seriesid) . ",
                 name = " . $this->escape($event->name) . ",
                 description = " . $this->escape($event->description) . ",
                 venue = " . $this->escape($event->venue) . ",
@@ -378,9 +392,9 @@ class database {
     }
 
     public function load_logs($from, $limit) {
-        $sql = "SELECT l.timestamp, p.firstname, p.lastname, p.email, l.authlevel, l.ipaddress, l.action
+        $sql = "SELECT l.timestamp, u.firstname, u.lastname, u.email, l.authlevel, l.ipaddress, l.action
                 FROM logs l
-                LEFT JOIN players p ON p.id = l.userid
+                LEFT JOIN users u ON u.id = l.userid
                 ORDER BY l.timestamp DESC, l.id DESC
                 LIMIT $from, $limit";
         return $this->connection->get_records_sql($sql, 'stdCLass');
