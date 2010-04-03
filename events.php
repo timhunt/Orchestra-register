@@ -14,8 +14,8 @@
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A page to show admins a list of users, with options to detele/undelete and
- * edit. Also shows the magic URL for users to edit their attendance.
+ * A page to show admins a list of events in the current rehearsal series,
+ * with options to detele/undelete and edit them.
  *
  * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
