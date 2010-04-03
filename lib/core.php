@@ -595,6 +595,7 @@ class db_config {
     public $changesesskeyonloginout = 0;
 
     public $icalguid;
+    public $icaleventnameprefix = '';
 
     public $title = 'Orchestra Register';
     public $timezone = 'Europe/London';

@@ -35,13 +35,17 @@ function output_ical_property($name, $value) {
 }
 
 function output_event_as_ical(event $event, orchestra_register $or) {
+    $name = $event->name;
+    if ($or->get_config()->icaleventnameprefix) {
+        $name = $or->get_config()->icaleventnameprefix . ' ' . $name;
+    }
     output_ical_property('BEGIN', 'VEVENT');
     output_ical_property('DTSTAMP', ical_foramt_timestamp($event->timemodified));
     output_ical_property('UID', $or->get_event_guid($event));
     output_ical_property('DTSTART', ical_foramt_timestamp($event->timestart));
     output_ical_property('DTEND', ical_foramt_timestamp($event->timeend));
     output_ical_property('CATEGORIES', 'REHEARSAL');
-    output_ical_property('SUMMARY', $event->name);
+    output_ical_property('SUMMARY', $name);
     output_ical_property('DESCRIPTION', $event->description);
     output_ical_property('END', 'VEVENT');
 }

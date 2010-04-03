@@ -32,12 +32,15 @@ if (!$user->can_edit_config()) {
 
 $currentconfig = $or->get_config();
 
+$fields = array('title', 'defaultseriesid', 'timezone', 'helpurl', 'wikiediturl', 'icaleventnameprefix');
+
 $form = new form($or->url('admin.php'));
 $form->add_field(new text_field('title', 'Register title', request::TYPE_RAW));
 $form->add_field(new select_field('defaultseriesid', 'Current rehearsal series', $or->get_series_options()));
 $form->add_field(new timezone_field('timezone', 'Time zone'));
 $form->add_field(new text_field('helpurl', 'Help URL', request::TYPE_RAW));
 $form->add_field(new text_field('wikiediturl', 'Rehearsals wiki page edit URL', request::TYPE_RAW));
+$form->add_field(new text_field('icaleventnameprefix', 'Prefix to add to event names when exporting as iCal', request::TYPE_RAW));
 $form->set_required_fields('title');
 $form->get_field('helpurl')->set_note('Could be a mailto: or a http: url');
 
@@ -48,7 +51,7 @@ switch ($form->parse_request($or)) {
         $or->redirect('');
 
     case form::SUBMITTED:
-        foreach (array('title', 'timezone', 'helpurl', 'wikiediturl') as $field) {
+        foreach ($fields as $field) {
             $newvalue = $form->get_field_value($field);
             if ($newvalue != $currentconfig->$field) {
                 $or->set_config($field, $newvalue);
