@@ -518,9 +518,12 @@ class user {
         return ($this->authlevel >= self::AUTH_TOKEN && $this->id == $player->id) ||
                 $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
+    public function can_edit_users() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+    }
     public function can_edit_players() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
-    }    
+    }
     public function can_edit_series() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
@@ -768,5 +771,8 @@ class actions {
     }
     public function output(html_output $output) {
         return $output->action_menu($this->actions);
+    }
+    public function is_empty() {
+        return empty($this->actions);
     }
 }

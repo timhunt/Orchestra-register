@@ -69,17 +69,20 @@ if ($includepast) {
     $showhidepastlabel = 'Show events in the past';
 }
 
-$actions = new actions();
-$actions->add($showhidepasturl, $showhidepastlabel);
-$actions->add($or->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
-$actions->add($or->url('?print=1'), 'Printable view');
-$actions->add($or->url('players.php'), 'Edit the list of players', $user->can_edit_players());
-$actions->add($or->url('serieslist.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
-$actions->add($or->url('events.php'), 'Edit the list of events', $user->can_edit_events());
-$actions->add($or->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
-$actions->add($or->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
-$actions->add($or->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());
-$actions->add($or->url('logs.php'), 'View the system logs', $user->can_view_logs());
+$seriesactions = new actions();
+$seriesactions->add($showhidepasturl, $showhidepastlabel);
+$seriesactions->add($or->url('?print=1'), 'Printable view');
+$seriesactions->add($or->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
+$seriesactions->add($or->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
+$seriesactions->add($or->url('players.php'), 'Edit the list of players', $user->can_edit_players());
+$seriesactions->add($or->url('events.php'), 'Edit the list of events', $user->can_edit_events());
+
+$systemactions = new actions();
+$systemactions->add($or->url('users'), 'Edit the list of users', $user->can_edit_users());
+$systemactions->add($or->url('serieslist.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
+$systemactions->add($or->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
+$systemactions->add($or->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());
+$systemactions->add($or->url('logs.php'), 'View the system logs', $user->can_view_logs());
 
 $motdheading = $or->get_motd_heading();
 $motd = $or->get_motd();
@@ -275,7 +278,14 @@ if ($printview) {
         echo '<p>Other series of rehearsals: ' . implode(' - ', $links) . '</p>';
     }
 
-    echo $actions->output($output);
+    echo '<h3>Options</h3>';
+    echo $seriesactions->output($output);
+
+    if (!$systemactions->is_empty()) {
+        echo '<h3>System configuration</h3>';
+        echo $systemactions->output($output);
+    }
+
     $output->call_to_js('init_index_page', array(array_keys($events), array_keys($players)));
 }
 
