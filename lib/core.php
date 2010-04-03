@@ -120,7 +120,7 @@ class orchestra_register {
         }
         $attendances = $this->db->load_attendances($this->seriesid);
         foreach ($attendances as $a) {
-            $this->players[$a->playerid]->attendance[$a->eventid] = $a;
+            $this->players[$a->userid]->attendance[$a->eventid] = $a;
         }
         $this->attendanceloaded = true;
     }
@@ -190,8 +190,8 @@ class orchestra_register {
 
     public function url($relativeurl, $withtoken = true, $xmlescape = true) {
         $extra = '';
-        if ($withtoken && empty($_SESSION['userid']) && !empty($this->user->player->authkey)) {
-            $extra = 't=' . $this->user->player->authkey;
+        if ($withtoken && empty($_SESSION['userid']) && !empty($this->user->authkey)) {
+            $extra = 't=' . $this->user->authkey;
             if (strpos($relativeurl, '?') !== false) {
                 $extra = '&' . $extra;
             } else {
@@ -229,15 +229,14 @@ class orchestra_register {
 
     public function verify_login($email, $password) {
         $this->require_sesskey();
-        $player = $this->db->check_user_auth($email, $this->sysconfig->pwsalt . $password);
-        if ($player) {
+        $user = $this->db->check_user_auth($email, $this->sysconfig->pwsalt . $password);
+        if ($user) {
             session_regenerate_id(true);
             if ($this->config->changesesskeyonloginout) {
                 $this->refresh_sesskey();
             }
-            $_SESSION['userid'] = $player->id;
-            $this->user = new user();
-            $this->user->player = $player;
+            $_SESSION['userid'] = $user->id;
+            $this->user = $user;
             $this->user->authlevel = user::AUTH_LOGIN;
             return true;
         }
@@ -456,7 +455,7 @@ class user {
         $_SESSION['sesskey'] = $this->sesskey;
     }
     public function can_edit_attendance($player) {
-        return ($this->authlevel >= self::AUTH_TOKEN && $this->player->id == $player->id) ||
+        return ($this->authlevel >= self::AUTH_TOKEN && $this->id == $player->id) ||
                 $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
     public function can_edit_players() {
@@ -484,17 +483,17 @@ class user {
         return $this->authlevel >= self::AUTH_TOKEN;
     }
     protected function is_organiser() {
-        return in_array($this->player->role, array(self::ORGANISER, self::ADMIN));
+        return in_array($this->role, array(self::ORGANISER, self::ADMIN));
     }
     protected function is_admin() {
-        return $this->player->role == self::ADMIN;
+        return $this->role == self::ADMIN;
     }
     public function get_name() {
-        return $this->player->get_name();
+        return $this->firstname . ' ' . $this->lastname;
     }
     public function assignable_roles($playerid) {
         if ($this->authlevel < self::AUTH_LOGIN || !$this->is_admin() ||
-                $this->player->id == $playerid) {
+                $this->id == $playerid) {
             return array();
         }
         return self::$roles;
@@ -610,7 +609,8 @@ class player {
         if (!array_key_exists($event->id, $this->attendance)) {
             $attendance = new attendance();
             $attendance->eventid = $event->id;
-            $attendance->playerid = $this->id;
+            $attendance->userid = $this->id;
+            $attendance->seriesid = $this->seriesid;
             $this->attendance[$event->id] = $attendance;
         }
         return $this->attendance[$event->id];
@@ -644,7 +644,7 @@ class attendance {
         return self::$symbols[$this->status];
     }
     public function get_field_name() {
-        return 'att_' . $this->playerid . '_' . $this->eventid;
+        return 'att_' . $this->userid . '_' . $this->eventid;
     }
     public function get_select($includenoneeded) {
         if (!$includenoneeded && $this->status == attendance::NOTREQUIRED) {

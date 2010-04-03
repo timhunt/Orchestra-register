@@ -204,7 +204,7 @@ class database {
                     attendances.seriesid = players.seriesid AND attendances.eventid = events.id
             WHERE
                 events.deleted = 0 AND
-                players.seriesid = ' . $this->escape($seriesid) . '
+                players.seriesid = {$this->escape($seriesid)}
             GROUP BY events.id, parts.part, parts.section
             ORDER BY sectionsort, partsort", 'stdClass');
     }
@@ -233,11 +233,14 @@ class database {
                 WHERE " . $where . 'player');
     }
 
+    public function find_user_by_id($userid) {
+        return $this->connection->get_record_select('users', 
+                "id = {$userid} AND role <> 'disabled'", 'user');
+    }
+
     public function find_user_by_token($token) {
-        return $this->connection->get_record_sql('
-                SELECT id, firstname, lastname, email, authkey, pwhash, pwsalt, role
-                FROM users
-                WHERE authkey = ' . $this->escape($token) . " AND role <> 'disabled'", 'user');
+        return $this->connection->get_record_select('users', 
+                "authkey = {$this->escape($token)} AND role <> 'disabled'", 'user');
     }
 
     public function find_event_by_id($eventid, $includedeleted = false) {
