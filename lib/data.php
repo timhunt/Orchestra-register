@@ -151,25 +151,36 @@ class database {
     }
 
     public function load_players($seriesid, $includedeleted = false,
-            $currentsection = '', $currentpart = '') {
+            $currentuserid = null) {
         if ($includedeleted) {
-            $where = '';
+            $deletedtest = '';
         } else {
-            $where = 'WHERE players.part IS NOT NULL';
+            $deletedtest = 'AND players.part IS NOT NULL';
         }
-        return $this->connection->get_records_sql("
+        $sql = "
             SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
             FROM players
             JOIN users ON users.id = players.userid
             JOIN parts ON players.part = parts.part
             JOIN sections ON parts.section = sections.section
-            $where
+            WHERE
+                players.seriesid = {$this->escape($seriesid)}
+                $deletedtest
             ORDER BY
-                CASE WHEN parts.section = " . $this->escape($currentsection) . " THEN -1 ELSE sectionsort END,
-                CASE WHEN players.part = " . $this->escape($currentpart) . " THEN -1 ELSE partsort END,
+                CASE WHEN parts.section = (
+                    SELECT section
+                    FROM parts JOIN players ON players.part = parts.part
+                    WHERE players.seriesid = {$this->escape($seriesid)}
+                        AND players.userid = {$this->escape($currentuserid)}
+                ) THEN -1 ELSE sectionsort END,
+                CASE WHEN players.part = (
+                    SELECT part FROM players
+                    WHERE players.seriesid = {$this->escape($seriesid)}
+                        AND players.userid = {$this->escape($currentuserid)}
+                ) THEN -1 ELSE partsort END,
                 lastname,
-                firstname
-        ", 'player');
+                firstname";
+        return $this->connection->get_records_sql($sql, 'player');
     }
 
     public function load_series($includedeleted = false) {
@@ -178,7 +189,7 @@ class database {
             $conditions['deleted'] = 0;
         }
         return $this->connection->get_records_select('series',
-                $this->where_clause($conditions), 'series');
+                $this->where_clause($conditions), 'series', 'id');
     }
 
     public function load_events($seriesid, $includepast = false, $includedeleted = false) {

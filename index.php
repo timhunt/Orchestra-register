@@ -30,6 +30,7 @@ $printview = $or->get_param('print', request::TYPE_BOOL, false, false);
 
 $events = $or->get_events($includepast);
 $user = $or->get_current_user();
+$series = $or->get_series_list();
 
 if ($user->is_authenticated()) {
     $savechangesbutton = '<p><input type="submit" name="save" value="Save changes" /></p>';
@@ -37,10 +38,10 @@ if ($user->is_authenticated()) {
     $savechangesbutton = '';
 }
 
-if ($printview || empty($user->player->part)) {
+if ($printview || empty($user->id)) {
     $players = $or->get_players(false);
 } else {
-    $players = $or->get_players(false, $user->player->section, $user->player->part);
+    $players = $or->get_players(false, $user->id);
 }
 
 $or->load_attendance();
@@ -89,8 +90,13 @@ if ($printview) {
     $bodyclass = 'print';
 }
 
+$title = '';
+if (count($series) > 1) {
+    $title = 'Rehearsals for ' . $series[$or->get_config()->defaultseriesid]->name;
+}
+
 $output = $or->get_output();
-$output->header('', $bodyclass);
+$output->header($title, $bodyclass);
 
 if ($motdheading || $motd) {
     echo '<div class="motd">';
@@ -254,7 +260,21 @@ if ($printview) {
     ?>
 <p>From <?php echo $or->url('', false); ?> at <?php echo strftime('%H:%M, %d %B %Y') ?>.</p>
     <?php
+
 } else {
+    if (count($series) > 1) {
+        $links = array();
+        foreach ($series as $s) {
+            if ($s->id == $or->get_current_seriesid()) {
+                $links[] = '<b>' . htmlspecialchars($s->name) . '</b>';
+            } else {
+                $links[] = '<a href="' . $or->url('', true, true, $s->id) . '">' .
+                        htmlspecialchars($s->name) . '</a>';
+            }
+        }
+        echo '<p>Other series of rehearsals: ' . implode(' - ', $links) . '</p>';
+    }
+
     echo $actions->output($output);
     $output->call_to_js('init_index_page', array(array_keys($events), array_keys($players)));
 }

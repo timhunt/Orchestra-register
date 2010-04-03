@@ -35,7 +35,7 @@ class orchestra_register {
     private $version;
     private $db;
     private $attendanceloaded = false;
-    private $seriesid = 1;
+    private $seriesid;
 
     public function __construct() {
         $config = new sys_config();
@@ -63,7 +63,7 @@ class orchestra_register {
 
         date_default_timezone_set($this->config->timezone);
 
-        $this->seriesid = $this->request->get_param('s', request::TYPE_INT);
+        $this->seriesid = $this->request->get_param('s', request::TYPE_INT, null, false);
         if (is_null($this->seriesid)) {
             $this->seriesid = $this->config->defaultseriesid;
         }
@@ -85,10 +85,10 @@ class orchestra_register {
         return $player;
     }
 
-    public function get_players($includedeleted = false, $currentsection = '', $currentpart = '') {
+    public function get_players($includedeleted = false, $currentuserid = null) {
         if (is_null($this->players)) {
             $this->players = $this->db->load_players($this->seriesid, $includedeleted,
-                    $currentsection, $currentpart);
+                    $currentuserid);
         }
         return $this->players;
     }
@@ -232,14 +232,19 @@ class orchestra_register {
 
     public function url($relativeurl, $withtoken = true, $xmlescape = true, $seriesid = null) {
         $extra = array();
-        if ($seriesid && $seriesid != $this->config->defaultseriesid) {
+
+        if (is_null($seriesid)) {
+            $seriesid = $this->seriesid;
+        }
+        if ($seriesid != $this->config->defaultseriesid) {
             $extra[] = 's=' . $seriesid;
         }
+
         if ($withtoken && empty($_SESSION['userid']) && !empty($this->user->authkey)) {
             $extra[] = 't=' . $this->user->authkey;
         }
-        $extra = implode('&', $extra);
 
+        $extra = implode('&', $extra);
         if ($extra) {
             if (strpos($relativeurl, '?') !== false) {
                 $extra = '&' . $extra;
@@ -301,6 +306,10 @@ class orchestra_register {
         }
     }
 
+    public function get_current_seriesid() {
+        return $this->seriesid;
+    }
+
     /** @return user */
     public function get_current_user() {
         if ($this->user) {
@@ -336,6 +345,9 @@ class orchestra_register {
         exit(0);
     }
 
+    /**
+     * @return db_config
+     */
     public function get_config() {
         return $this->config;
     }
