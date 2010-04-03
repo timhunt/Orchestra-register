@@ -260,6 +260,14 @@ class database {
         return $this->connection->get_record_select('events', $this->where_clause($conditions), 'event');
     }
 
+    public function find_series_by_id($seriesid, $includedeleted = false) {
+        $conditions = array('id' => $seriesid);
+        if (!$includedeleted) {
+            $conditions['deleted'] = 0;
+        }
+        return $this->connection->get_record_select('series', $this->where_clause($conditions), 'series');
+    }
+
     public function check_user_auth($email, $saltedpassword) {
         return $this->connection->get_record_select('users',
                 "email = " . $this->escape($email) . " AND pwhash = SHA1(CONCAT(" .
@@ -274,6 +282,11 @@ class database {
     public function set_event_deleted($eventid, $deleted) {
         $this->connection->update("UPDATE events SET deleted = " . $this->escape($deleted) .
                 " WHERE id = " . $this->escape($eventid));
+    }
+
+    public function set_series_deleted($seriesid, $deleted) {
+        $this->connection->update("UPDATE series SET deleted = " . $this->escape($deleted) .
+                " WHERE id = " . $this->escape($seriesid));
     }
 
     /**
@@ -360,6 +373,18 @@ class database {
                 $this->escape($event->timeend) . ", " . $this->escape(time()) . ")";
         $this->connection->update($sql);
         $event->id = $this->connection->get_last_insert_id();
+    }
+
+    public function update_series($series) {
+        if (empty($series->id)) {
+            throw new coding_error('Trying to update a series that is not in the database.');
+        }
+        $sql = "UPDATE series SET
+                name = " . $this->escape($series->name) . ",
+                description = " . $this->escape($series->description) . ",
+                deleted = " . $this->escape($series->deleted) . "
+                WHERE " . $this->where_clause(array('id' => $series->id));
+        $this->connection->update($sql);
     }
 
     public function update_event($event) {

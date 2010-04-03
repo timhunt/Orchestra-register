@@ -33,6 +33,13 @@ function init_edit_event_page() {
     document.getElementById('name').focus();
 }
 
+function init_edit_series_list_page() {
+}
+
+function init_edit_series_page() {
+    document.getElementById('name').focus();
+}
+
 function init_editmotd_page() {
     document.getElementById('motd').focus();
 }

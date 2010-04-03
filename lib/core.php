@@ -119,6 +119,18 @@ class orchestra_register {
         return $this->parts;
     }
 
+    public function get_series($id, $includedeleted = false) {
+        $series = $this->db->find_series_by_id($id, $includedeleted);
+        if (!$series) {
+            throw new not_found_exception('Unknown series.', $id);
+        }
+        return $series;
+    }
+
+    public function get_series_list($includedeleted = false) {
+        return $this->db->load_series($includedeleted);
+    }
+
     public function get_series_options() {
         $series = $this->db->load_series();
         $options = array();
@@ -186,6 +198,22 @@ class orchestra_register {
 
     public function undelete_event($event) {
         $this->db->set_event_deleted($event->id, 0);
+    }
+
+    public function create_series($series) {
+        $this->db->insert_series($series);
+    }
+
+    public function update_series($series) {
+        $this->db->update_series($series);
+    }
+
+    public function delete_series($series) {
+        $this->db->set_series_deleted($series->id, 1);
+    }
+
+    public function undelete_series($series) {
+        $this->db->set_series_deleted($series->id, 0);
     }
 
     public function get_login_info() {
@@ -479,6 +507,9 @@ class user {
                 $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
     public function can_edit_players() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+    }    
+    public function can_edit_series() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
     public function can_edit_events() {

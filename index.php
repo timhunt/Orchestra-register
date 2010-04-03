@@ -73,6 +73,7 @@ $actions->add($showhidepasturl, $showhidepastlabel);
 $actions->add($or->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
 $actions->add($or->url('?print=1'), 'Printable view');
 $actions->add($or->url('players.php'), 'Edit the list of players', $user->can_edit_players());
+$actions->add($or->url('serieslist.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
 $actions->add($or->url('events.php'), 'Edit the list of events', $user->can_edit_events());
 $actions->add($or->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
 $actions->add($or->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
