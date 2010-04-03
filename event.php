@@ -77,10 +77,12 @@ switch ($form->get_outcome()) {
 
         if ($eventid) {
             $newevent->id = $eventid;
+            $newevent->seriesid = $or->get_current_seriesid();
             $or->update_event($newevent);
             $or->log('edit event ' . $newevent->id);
 
         } else {
+            $newevent->seriesid = $or->get_current_seriesid();
             $or->create_event($newevent);
             $or->log('add event ' . $newevent->id);
         }
