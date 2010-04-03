@@ -23,7 +23,7 @@
 
 require_once(dirname(__FILE__) . '/setup.php');
 $or = new orchestra_register();
-$events = $or->get_events();
+$events = $or->get_events(true);
 
 $content = '';
 $month = '';

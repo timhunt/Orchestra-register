@@ -291,9 +291,7 @@ class orchestra_register {
     }
 
     public function set_config($name, $value) {
-        $configclass = new ReflectionClass('db_config');
-        if (!in_array($name, $configclass->getStaticProperties()) ||
-                in_array($name. array('icalguid', 'version'))) {
+        if (!$this->config->is_settable_property($name)) {
             throw new coding_error('Cannot set that configuration variable.',
                     'Name: ' . $name . ', Value: ' . $value);
         }
@@ -538,6 +536,29 @@ class db_config {
 
     public $motdheading = '';
     public $motd = '';
+
+    protected $propertynames = null;
+
+    /**
+     * Is this a config property that can be set by the admin?
+     * @param string $name
+     * @return boolean
+     */
+    public function is_settable_property($name) {
+        if (in_array($name, array('icalguid', 'version'))) {
+            return false;
+        }
+
+        if (is_null($this->propertynames)) {
+            $class = new ReflectionClass('db_config');
+            $this->propertynames = array();
+            foreach ($class->getProperties() as $property) {
+                $this->propertynames[] = $property->name;
+            }
+        }
+
+        return in_array($name, $this->propertynames);
+    }
 }
 
 class version {
