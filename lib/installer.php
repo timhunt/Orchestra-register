@@ -133,9 +133,15 @@ class installer {
             ) ENGINE = InnoDB
         ");
 
+        $series = new series();
+        $series->name = 'Rehearsals';
+        $series->description = '';
+        $this->db->insert_series($series);
+
         $this->db->set_config('icalguid', self::random_string(40));
         $this->db->set_config('title', 'Orchestra Register');
         $this->db->set_config('timezone', 'Europe/London');
+        $this->db->set_config('defaultseriesid', $series->id);
 
         $sections = database::load_csv('data/sections.txt');
         foreach ($sections as $section) {
@@ -146,11 +152,6 @@ class installer {
         foreach ($parts as $part) {
             $this->db->insert_part($part[2], $part[0], $part[1]);
         }
-
-        $series = new series();
-        $series->name = 'Rehearsals';
-        $series->description = '';
-        $this->db->insert_series($series);
 
         $events = database::load_csv('data/events.txt');
         foreach ($events as $data) {
@@ -322,6 +323,12 @@ class installer {
             $this->connection->execute_sql('ALTER TABLE attendances ADD CONSTRAINT
                     fk_attendances_eventid FOREIGN KEY (eventid) REFERENCES events (id)
                     ON DELETE CASCADE ON UPDATE RESTRICT');
+        }
+
+        if ($fromversion < 2010040303) {
+            $row = $this->connection->get_record_sql(
+                    'SELECT MIN(id) AS id FROM series WHERE deleted = 0', 'stdClass');
+            $this->db->set_config('defaultseriesid', $row->id);
         }
     }
 }

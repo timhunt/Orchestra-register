@@ -62,6 +62,11 @@ class orchestra_register {
         session_start();
 
         date_default_timezone_set($this->config->timezone);
+
+        $this->seriesid = $this->request->get_param('s', request::TYPE_INT);
+        if (is_null($this->seriesid)) {
+            $this->seriesid = $this->config->defaultseriesid;
+        }
     }
 
     public function get_request() {
@@ -112,6 +117,15 @@ class orchestra_register {
             }
         }
         return $this->parts;
+    }
+
+    public function get_series_options() {
+        $series = $this->db->load_series();
+        $options = array();
+        foreach ($series as $s) {
+            $options[$s->id] = $s->name;
+        }
+        return $options;
     }
 
     public function load_attendance() {
@@ -188,16 +202,24 @@ class orchestra_register {
         return 'event' . $event->id . '@' . $this->config->icalguid;
     }
 
-    public function url($relativeurl, $withtoken = true, $xmlescape = true) {
-        $extra = '';
+    public function url($relativeurl, $withtoken = true, $xmlescape = true, $seriesid = null) {
+        $extra = array();
+        if ($seriesid && $seriesid != $this->config->defaultseriesid) {
+            $extra[] = 's=' . $seriesid;
+        }
         if ($withtoken && empty($_SESSION['userid']) && !empty($this->user->authkey)) {
-            $extra = 't=' . $this->user->authkey;
+            $extra[] = 't=' . $this->user->authkey;
+        }
+        $extra = implode('&', $extra);
+
+        if ($extra) {
             if (strpos($relativeurl, '?') !== false) {
                 $extra = '&' . $extra;
             } else {
                 $extra = '?' . $extra;
             }
         }
+
         $url = $this->sysconfig->wwwroot . $relativeurl . $extra;
         if ($xmlescape) {
             return htmlspecialchars($url);
@@ -536,6 +558,8 @@ class db_config {
 
     public $motdheading = '';
     public $motd = '';
+
+    public $defaultseriesid;
 
     protected $propertynames = null;
 

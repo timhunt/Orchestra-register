@@ -172,6 +172,15 @@ class database {
         ", 'player');
     }
 
+    public function load_series($includedeleted = false) {
+        $conditions = array();
+        if (!$includedeleted) {
+            $conditions['deleted'] = 0;
+        }
+        return $this->connection->get_records_select('series',
+                $this->where_clause($conditions), 'series');
+    }
+
     public function load_events($seriesid, $includepast = false, $includedeleted = false) {
         $conditions = array('seriesid = ' . $this->escape($seriesid));
         if (!$includedeleted) {
@@ -448,7 +457,14 @@ class database {
         return new installer($this, $this->connection);
     }
 
-    public function check_installed($config, $codeversion, $pwsalt) {
+    /**
+     * Check that the database is installed, and up-to-date. If not, rectify that.
+     * @param db_config $config
+     * @param string $codeversion
+     * @param string $pwsalt
+     * @return db_config the config, possibly updated.
+     */
+    public function check_installed(db_config $config, $codeversion, $pwsalt) {
         $donesomething = false;
         if (is_null($config)) {
             $this->get_installer()->install($pwsalt);

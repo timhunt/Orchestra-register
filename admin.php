@@ -34,6 +34,7 @@ $currentconfig = $or->get_config();
 
 $form = new form($or->url('admin.php'));
 $form->add_field(new text_field('title', 'Register title', request::TYPE_RAW));
+$form->add_field(new select_field('defaultseriesid', 'Current rehearsal series', $or->get_series_options()));
 $form->add_field(new timezone_field('timezone', 'Time zone'));
 $form->add_field(new text_field('helpurl', 'Help URL', request::TYPE_RAW));
 $form->add_field(new text_field('wikiediturl', 'Rehearsals wiki page edit URL', request::TYPE_RAW));
