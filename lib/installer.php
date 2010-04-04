@@ -278,7 +278,7 @@ class installer {
 
             // Prepare to drop the user.deleted column.
             $this->connection->update("
-                UPDATE users SET role = 'disabled' WHERE deleted = 1");
+                UPDATE users SET role = '" . user::DISABLED . "' WHERE deleted = 1");
 
             // Drop the users.part and users.deleted columns.
             $this->connection->execute_sql('ALTER TABLE users DROP COLUMN part');

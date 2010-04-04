@@ -16,13 +16,13 @@ function init_login_page() {
     document.getElementById('email').focus();
 }
 
-function init_edit_players_page() {
+function init_edit_users_page() {
     YUI().use('event', function(Y) {
         Y.on('click', onclick_select, 'input');
     });
 }
 
-function init_edit_player_page() {
+function init_edit_user_page() {
     document.getElementById('firstname').focus();
 }
 

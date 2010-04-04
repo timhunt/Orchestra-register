@@ -14,7 +14,7 @@
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A page to edit or show a player.
+ * A page to edit or show a user.
  *
  * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
@@ -25,82 +25,79 @@ require_once(dirname(__FILE__) . '/setup.php');
 require_once(dirname(__FILE__) . '/lib/form.php');
 $or = new orchestra_register();
 
-$user = $or->get_current_user();
-if (!$user->can_edit_players()) {
-    throw new permission_exception('You don\'t have permission to edit players.');
+$currentuser = $or->get_current_user();
+if (!$currentuser->can_edit_users()) {
+    throw new permission_exception('You don\'t have permission to edit users.');
 }
 
-$playerid = $or->get_param('id', request::TYPE_INT, 0, false);
+$userid = $or->get_param('id', request::TYPE_INT, 0, false);
 
-if ($playerid) {
-    $player = $or->get_player($playerid);
-    $title = 'Edit a player';
+if ($userid) {
+    $user = $or->get_user($userid, true);
+    $title = 'Edit a user';
     $submitlabel = 'Save changes';
-    $url = $or->url('player.php?id=' . $playerid, false, false);
+    $url = $or->url('user.php?id=' . $userid, false, false);
 
 } else {
-    $player = new player();
-    $title = 'Add a player';
-    $submitlabel = 'Create player';
-    $url = $or->url('player.php', false, false);
+    $user = new user();
+    $title = 'Add a user';
+    $submitlabel = 'Create user';
+    $url = $or->url('user.php', false, false);
 }
 
-$parts = $or->get_parts();
-
-$assignableroles = $user->assignable_roles($playerid);
+$assignableroles = $currentuser->assignable_roles($userid);
 
 $form = new form($url, $submitlabel);
 $form->add_field(new text_field('firstname', 'First name', request::TYPE_RAW));
 $form->add_field(new text_field('lastname', 'Last name', request::TYPE_RAW));
 $form->add_field(new text_field('email', 'Email', request::TYPE_EMAIL));
-$form->add_field(new group_select_field('part', 'Part', $parts));
 if ($assignableroles) {
     $form->add_field(new select_field('role', 'Role', $assignableroles));
     $form->get_field('role')->set_note('Controls what this person is allowed to do');
 }
-if ($user->can_set_passwords()) {
+if ($currentuser->can_set_passwords()) {
     $form->add_field(new password_field('changepw', 'New password', request::TYPE_RAW));
     $form->add_field(new password_field('confirmchangepw', 'Comfirm new password', request::TYPE_RAW));
     $form->get_field('changepw')->set_note('Leave blank for no change');
 }
 $form->set_required_fields('firstname', 'lastname', 'email');
 
-$form->set_initial_data($player);
+$form->set_initial_data($user);
 $form->parse_request($or);
-if ($user->can_set_passwords() && $form->get_field_value('changepw') != $form->get_field_value('confirmchangepw')) {
+if ($currentuser->can_set_passwords() && $form->get_field_value('changepw') != $form->get_field_value('confirmchangepw')) {
     $form->set_field_error('changepw', '');
     $form->set_field_error('confirmchangepw', 'The two passwords did not match');
 }
 
 switch ($form->get_outcome()) {
     case form::CANCELLED:
-        $or->redirect('players.php');
+        $or->redirect('users.php');
 
     case form::SUBMITTED:
-        $newplayer = $form->get_submitted_data('player');
+        $newuser = $form->get_submitted_data('user');
 
-        if ($playerid) {
-            $newplayer->id = $playerid;
+        if ($userid) {
+            $newuser->id = $userid;
             if (!$assignableroles) {
-                $newplayer->role = $player->role;
+                $newuser->role = $user->role;
             }
-            $or->update_player($newplayer);
-            $or->log('edit player ' . $newplayer->id);
+            $or->update_user($newuser);
+            $or->log('edit user ' . $newuser->id);
 
         } else {
-            $or->create_player($newplayer);
-            $or->log('add player ' . $newplayer->id);
+            $or->create_user($newuser);
+            $or->log('add user ' . $newuser->id);
         }
 
-        if ($user->can_set_passwords() && ($newpassword = $form->get_field_value('changepw'))) {
-            $or->set_player_password($newplayer->id, $newpassword);
-            $or->log('change password ' . $newplayer->id);
+        if ($currentuser->can_set_passwords() && ($newpassword = $form->get_field_value('changepw'))) {
+            $or->set_user_password($newuser->id, $newpassword);
+            $or->log('change password ' . $newuser->id);
         }
-        $or->redirect('players.php');
+        $or->redirect('users.php');
 }
 
 $output = $or->get_output();
 $output->header($title);
 echo $form->output($output);
-$output->call_to_js('init_edit_player_page');
+$output->call_to_js('init_edit_user_page');
 $output->footer();

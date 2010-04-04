@@ -150,6 +150,16 @@ class database {
         return $this->connection->escape($value, $maxlength);
     }
 
+    public function load_users($includedisabled = false) {
+        $order = 'firstname, lastname';
+        if ($includedisabled) {
+            return $this->connection->get_records('users', 'player', $order);
+        } else {
+            return $this->connection->get_records_select('users',
+                    'user.role <> ' . user::DISABLED, 'player', $order);
+        }
+    }
+
     public function load_players($seriesid, $includedeleted = false,
             $currentuserid = null) {
         if ($includedeleted) {
@@ -253,14 +263,18 @@ class database {
                 WHERE " . $where . 'player');
     }
 
-    public function find_user_by_id($userid) {
+    public function find_user_by_id($userid, $includedisabled = false) {
+        $disabledtest = '';
+        if (!$includedisabled) {
+            $disabledtest = " AND role <> '" . user::DISABLED . "'";
+        }
         return $this->connection->get_record_select('users', 
-                "id = {$userid} AND role <> 'disabled'", 'user');
+                "id = {$userid}$disabledtest", 'user');
     }
 
     public function find_user_by_token($token) {
         return $this->connection->get_record_select('users', 
-                "authkey = {$this->escape($token)} AND role <> 'disabled'", 'user');
+                "authkey = {$this->escape($token)} AND role <> '" . user::DISABLED . "'", 'user');
     }
 
     public function find_event_by_id($eventid, $includedeleted = false) {
@@ -282,7 +296,7 @@ class database {
     public function check_user_auth($email, $saltedpassword) {
         return $this->connection->get_record_select('users',
                 "email = " . $this->escape($email) . " AND pwhash = SHA1(CONCAT(" .
-                $this->escape($saltedpassword) . ", pwsalt)) AND role <> 'disabled'", 'user');
+                $this->escape($saltedpassword) . ", pwsalt)) AND role <> '" . user::DISABLED . "'", 'user');
     }
 
     public function set_password($userid, $saltedpassword) {
@@ -335,11 +349,12 @@ class database {
     }
 
     public function insert_user($user) {
-        $sql = "INSERT INTO players (firstname, lastname, email, part, authkey, pwhash, pwsalt, role, deleted)
+        $sql = "INSERT INTO users (firstname, lastname, email, authkey, pwhash, pwsalt, role)
                 VALUES (" . $this->escape($user->firstname) . ", " .
                 $this->escape($user->lastname) . ", " .
                 $this->escape($user->email) . ", " .
-                $this->escape(self::random_string(40)) . ", NULL, " .
+                $this->escape(self::random_string(40)) . ", " .
+                "NULL, " .
                 $this->escape(self::random_string(40)) . ", " .
                 $this->escape($user->role) . ")";
         $this->connection->update($sql);
@@ -358,7 +373,7 @@ class database {
         if (empty($user->id)) {
             throw new coding_error('Trying to update a player who is not in the database.');
         }
-        $sql = "UPDATE players SET
+        $sql = "UPDATE users SET
                 firstname = " . $this->escape($user->firstname) . ",
                 lastname = " . $this->escape($user->lastname) . ",
                 email = " . $this->escape($user->email) . ",

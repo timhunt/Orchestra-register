@@ -78,7 +78,7 @@ $seriesactions->add($or->url('players.php'), 'Edit the list of players', $user->
 $seriesactions->add($or->url('events.php'), 'Edit the list of events', $user->can_edit_events());
 
 $systemactions = new actions();
-$systemactions->add($or->url('users'), 'Edit the list of users', $user->can_edit_users());
+$systemactions->add($or->url('users.php'), 'Edit the list of users', $user->can_edit_users());
 $systemactions->add($or->url('serieslist.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
 $systemactions->add($or->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
 $systemactions->add($or->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());

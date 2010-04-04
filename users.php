@@ -25,46 +25,26 @@
 require_once(dirname(__FILE__) . '/setup.php');
 $or = new orchestra_register();
 
-$user = $or->get_current_user();
-if (!$user->can_edit_players()) {
+$currentuser = $or->get_current_user();
+if (!$currentuser->can_edit_users()) {
     throw new permission_exception('You don\'t have permission to edit players.');
 }
 
-if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
-    $or->require_sesskey();
-    $player = $or->get_player($id);
-    if ($player && $player->deleted == 0) {
-        $or->delete_player($player);
-        $or->log('delete player ' . $id);
-    }
-    $or->redirect('players.php');
-
-} else if ($id = $or->get_param('undelete', request::TYPE_INT, 0)) {
-    $or->require_sesskey();
-    $player = $or->get_player($id, true);
-    if ($player && $player->deleted == 1) {
-        $or->undelete_player($player);
-        $or->log('undelete player ' . $id);
-    }
-    $or->redirect('players.php');
-
-}
-
-$players = $or->get_players(true);
+$users = $or->get_users(true);
+$roles = user::get_all_roles();
 
 $output = $or->get_output();
-$output->header('Edit players');
+$output->header('Edit users');
 
 ?>
-<p><a href="<?php echo $or->url('player.php'); ?>">Add another player</a></p>
+<p><a href="<?php echo $or->url('user.php'); ?>">Add another user</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <table>
 <thead>
 <tr class="headingrow">
-<th>Section</th>
-<th>Part</th>
 <th>Name</th>
 <th>Email</th>
+<th>Role</th>
 <th>Actions</th>
 <th>URL</th>
 </tr>
@@ -72,36 +52,36 @@ $output->header('Edit players');
 <tbody>
 <?php
 $rowparity = 1;
-foreach ($players as $player) {
+foreach ($users as $user) {
     $actions = array();
-    if ($player->deleted) {
-        $actions[] = $output->action_button($or->url('players.php', false),
-                array('undelete' => $player->id), 'Un-delete');
+    if ($user->role == user::DISABLED) {
         $extrarowclass = ' deleted';
         $readonly = 'disabled="disabled"';
     } else {
-        $actions[] = '<a href="' . $or->url('player.php?id=' . $player->id, false) . '">Edit</a>';
-        $actions[] = $output->action_button($or->url('players.php', false),
-                array('delete' => $player->id), 'Delete');
         $extrarowclass = '';
         $readonly = 'readonly="readonly"';
     }
+    $actions[] = '<a href="' . $or->url('user.php?id=' . $user->id, false) . '">Edit</a>';
+    $role = '';
+    if ($user->role != user::PLAYER) {
+        $role = $roles[$user->role];
+    }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
-<td><?php echo htmlspecialchars($player->section); ?></td>
-<td><?php echo htmlspecialchars($player->part); ?></td>
-<th><?php echo htmlspecialchars($player->get_name()); ?></th>
-<td><?php echo htmlspecialchars($player->email); ?></td>
+<th><?php echo htmlspecialchars($user->get_name()); ?></th>
+<td><?php echo htmlspecialchars($user->email); ?></td>
+<td><?php echo htmlspecialchars($role); ?></td>
 <td><?php echo implode("\n", $actions); ?></td>
-<td><input type="text" size="60" <?php echo $readonly; ?> value="<?php echo $or->url('?t=' . $player->authkey, false); ?>" /></td>
+<td><input type="text" size="60" <?php echo $readonly; ?> value="<?php echo $or->url(
+            '?t=' . $user->authkey, false, $or->get_config()->defaultseriesid); ?>" /></td>
 </tr>
 <?php
 }
 ?>
 </tbody>
 </table>
-<p><a href="<?php echo $or->url('player.php'); ?>">Add another player</a></p>
+<p><a href="<?php echo $or->url('user.php'); ?>">Add another user</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
-$output->call_to_js('init_edit_players_page');
+$output->call_to_js('init_edit_users_page');
 $output->footer();

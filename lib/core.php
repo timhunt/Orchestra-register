@@ -93,6 +93,14 @@ class orchestra_register {
         return $this->players;
     }
 
+    public function get_user($userid, $includedisabled = false) {
+        return $this->db->find_user_by_id($userid, $includedisabled);
+    }
+
+    public function get_users($includedisabled = false) {
+        return $this->db->load_users($includedisabled);
+    }
+
     public function get_event($id, $includedeleted = false) {
         $event = $this->db->find_event_by_id($id, $includedeleted);
         if (!$event) {
@@ -473,10 +481,12 @@ class user {
     const AUTH_NONE = 0;
     const AUTH_TOKEN = 10;
     const AUTH_LOGIN = 20;
+    const DISABLED = 'disabled';
     const PLAYER = 'player';
     const ORGANISER = 'organiser';
     const ADMIN = 'admin';
     protected static $roles = array(
+        self::DISABLED => 'Disabled',
         self::PLAYER => 'Ordinary player',
         self::ORGANISER => 'Committee member',
         self::ADMIN => 'Administrator',
@@ -557,11 +567,14 @@ class user {
     public function get_name() {
         return $this->firstname . ' ' . $this->lastname;
     }
-    public function assignable_roles($playerid) {
+    public function assignable_roles($userid) {
         if ($this->authlevel < self::AUTH_LOGIN || !$this->is_admin() ||
-                $this->id == $playerid) {
+                $this->id == $userid) {
             return array();
         }
+        return self::$roles;
+    }
+    public static function get_all_roles() {
         return self::$roles;
     }
 }
