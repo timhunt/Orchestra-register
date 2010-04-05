@@ -75,6 +75,9 @@ pre {
 .total {
     font-weight: bold;
 }
+.defaultmarker {
+    color: #555;
+}
 .postfix {
     font-size: 0.8em;
     font-style: italic;

@@ -80,7 +80,7 @@ one provided by the Moodle project</a>.</p>
 $config-&gt;dbhost = 'localhost';
 $config-&gt;dbuser = 'registeruser';
 $config-&gt;dbpass = 'secret!';
-$config-&gt;dbname = 'register';
+$config-&gt;dbname = 'registerdb';
 
 $config-&gt;wwwroot = 'http://example.com/register/';
 
@@ -94,13 +94,13 @@ $config-&gt;pwsalt = 'J1sb132ZkIouCNPEAek95ZRDuEUZy9ofIp65U15W';
 load the list of sections, parts, players and events. To do this you need to
 edit the files in the <tt>data</tt> folder. There is a reasonable default
 set of parts and sections already set up. If you want to automatically create
-players or events, you will need to start with a copy of <tt>players-example.txt</tt>
-renamed to <tt>players.txt</tt> (or a copy of <tt>events-example.txt</tt> renamed
+players or events, you will need to start with a copy of <tt>users-example.txt</tt>
+renamed to <tt>users.txt</tt> (or a copy of <tt>events-example.txt</tt> renamed
 to <tt>events.txt</tt>).</p>
 
-<p>Actually, for now, it is pretty essential that you create <tt>players.txt</tt> file
-with at least one player in it. When Orchestra register installs itself, the
-first player is given administrator access, with the password <b>mozart</b>, and this
+<p>Actually, for now, it is pretty essential that you create <tt>users.txt</tt> file
+with at least one user in it. When Orchestra register installs itself, the
+first user is given administrator access, with the password <b>mozart</b>, and this
 is the only way to create the first administrator account.</p>
 
 
@@ -114,10 +114,10 @@ create the necessary database tables, and populate some of them with data.</p>
 <p>Once the installation is complete, you will see the register screen with all
 the attendance information blank. The system is now ready for use.</p>
 
-<p>During the installation, the first player in the <tt>data/player.txt</tt>
+<p>During the installation, the first player in the <tt>data/users.txt</tt>
 file is made an administrator, with the password <b>mozart</b>. You are strongly
 advised to change that password as soon as possible. You can do that by logging
-in as that player and going to the edit players page.</p>
+in as that user and going to the edit users page.</p>
 
 
 <h2>Customising the appearance</h2>
