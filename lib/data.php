@@ -156,7 +156,7 @@ class database {
             return $this->connection->get_records('users', 'player', $order);
         } else {
             return $this->connection->get_records_select('users',
-                    'user.role <> ' . user::DISABLED, 'player', $order);
+                    "users.role <> '" . user::DISABLED . "'", 'player', $order);
         }
     }
 
@@ -165,7 +165,7 @@ class database {
         if ($includenotplaying) {
             $deletedtest = '';
         } else {
-            $deletedtest = 'WHERE players.part IS NOT NULL';
+            $deletedtest = 'AND players.part IS NOT NULL';
         }
         $sql = "
             SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
@@ -173,7 +173,9 @@ class database {
             LEFT JOIN players ON users.id = players.userid AND players.seriesid = {$this->escape($seriesid)}
             LEFT JOIN parts ON players.part = parts.part
             LEFT JOIN sections ON parts.section = sections.section
-            $deletedtest
+            WHERE
+                users.role <> '" . user::DISABLED . "'
+                $deletedtest
             ORDER BY
                 CASE WHEN parts.section IS NULL THEN 1 ELSE 0 END,
                 CASE WHEN parts.section = (
@@ -226,6 +228,7 @@ class database {
                 sum(CASE WHEN status = '" . attendance::YES . "' THEN 1 ELSE 0 END) AS attending,
                 sum(CASE WHEN status = '" . attendance::NOTREQUIRED . "' THEN 0 ELSE 1 END) AS numplayers
             FROM players
+            JOIN users ON players.userid = users.id
             JOIN parts ON players.part = parts.part
             JOIN sections ON parts.section = sections.section
             JOIN events ON events.seriesid = players.seriesid
@@ -233,12 +236,15 @@ class database {
                     attendances.seriesid = players.seriesid AND attendances.eventid = events.id
             WHERE
                 events.deleted = 0 AND
+                users.role <> '" . user::DISABLED . "' AND
                 players.seriesid = {$this->escape($seriesid)}
             GROUP BY events.id, parts.part, parts.section
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
     public function load_selected_players($seriesid, $parts, $eventid, $statuses) {
+        $tests = array("users.role <> '" . user::DISABLED . "'");
+
         $extrajoin = '';
         $conditions = array();
         $partlist = array();
@@ -252,7 +258,7 @@ class database {
         if (!empty($partlist)) {
             $conditions[] = 'players.part IN (' . implode(',', $partlist) . ')';
         }
-        $tests = '(' . implode(' OR ', $conditions) . ')';
+        $tests[] = '(' . implode(' OR ', $conditions) . ')';
 
         if ($eventid) {
             $extrajoin = "LEFT JOIN attendances ON attendances.seriesid = {$this->escape($seriesid)} AND
@@ -265,8 +271,10 @@ class database {
                     $extra = ' OR attendances.status IS NULL';
                 }
             }
-            $tests .= " AND (attendances.status IN (" . implode(',', $statuslist) . ")$extra)";
+            $tests[] = "(attendances.status IN (" . implode(',', $statuslist) . ")$extra)";
         }
+
+        $tests = implode(' AND ', $tests);
 
         $sql = "
             SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
@@ -295,29 +303,13 @@ class database {
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
-    public function find_player_by_id($userid, $seriesid, $includedeleted = false) {
-        $where = 'userid = ' . $this->escape($userid) . ' AND seriesid = ' .
-                $this->escape($seriesid);
-        if (!$includedeleted) {
-            $where .= ' AND part IS NOT NULL';
-        }
-        return $this->connection->get_record_sql("
-                SELECT users.id, users.firstname, users.lastname, users.email,
-                    players.part, parts.section, users.authkey, users.pwhash,
-                    users.pwsalt, users.role
-                FROM players
-                JOIN users ON users.id = players.userid
-                LEFT JOIN parts ON players.part = parts.part
-                WHERE " . $where . 'player');
-    }
-
     public function find_user_by_id($userid, $includedisabled = false) {
         $disabledtest = '';
         if (!$includedisabled) {
             $disabledtest = " AND role <> '" . user::DISABLED . "'";
         }
         return $this->connection->get_record_select('users', 
-                "id = {$userid}$disabledtest", 'user');
+                "id = $userid" . $disabledtest, 'user');
     }
 
     public function find_user_by_token($token) {
