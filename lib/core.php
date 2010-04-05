@@ -111,12 +111,15 @@ class orchestra_register {
         return $this->events;
     }
 
-    public function get_parts() {
+    public function get_parts($includenotplaying = false) {
         if (is_null($this->parts)) {
             $partsdata = $this->db->load_parts();
             $this->parts = array();
             foreach ($partsdata as $part) {
                 $this->parts[$part->section][$part->part] = $part->part;
+            }
+            if ($includenotplaying) {
+                $this->parts['Not playing'][0] = 'Not playing';
             }
         }
         return $this->parts;
@@ -169,6 +172,10 @@ class orchestra_register {
             $subtotals[$row->part]->numplayers[$row->eventid] = $row->numplayers;
         }
         return $subtotals;
+    }
+
+    public function load_selected_players($parts, $eventid, $statuses) {
+        return $this->db->load_selected_players($this->seriesid, $parts, $eventid, $statuses);
     }
 
     public function set_player_part($player, $newpart) {
@@ -247,7 +254,7 @@ class orchestra_register {
         if (is_null($seriesid)) {
             $seriesid = $this->seriesid;
         }
-        if ($seriesid != $this->config->defaultseriesid) {
+        if ($seriesid != 'none' && $seriesid != $this->config->defaultseriesid) {
             $extra[] = 's=' . $seriesid;
         }
 
@@ -274,6 +281,10 @@ class orchestra_register {
 
     public function get_param($name, $type, $default = null, $postonly = true) {
         return $this->request->get_param($name, $type, $default, $postonly);
+    }
+
+    public function get_array_param($name, $type, $default = null, $postonly = true) {
+        return $this->request->get_array_param($name, $type, $default, $postonly);
     }
 
     public function require_sesskey() {
@@ -437,7 +448,8 @@ class request {
         self::TYPE_RAW => 'anything',
         self::TYPE_AUTHTOKEN => 'authentication token',
         self::TYPE_TIME => 'time',
-        );
+    );
+
     public function get_param($name, $type, $default = null, $postonly = true) {
         if (array_key_exists($name, $_POST)) {
             $raw = $_POST[$name];
@@ -447,13 +459,39 @@ class request {
             return $default;
         }
         if ($type == self::TYPE_BOOL) {
-            return $raw !== '' && $raw !== '0' && $raw !== 'false' && $raw !== 'no';
+            return $this->bool_value($raw);
         }
         if ($this->validate($raw, $type)) {
             return $raw;
         } else {
             return $default;
         }
+    }
+
+    protected function bool_value($raw) {
+        return $raw !== '' && $raw !== '0' && $raw !== 'false' && $raw !== 'no';
+    }
+
+    public function get_array_param($name, $type, $default = null, $postonly = true) {
+        if (array_key_exists($name, $_POST)) {
+            $raw = $_POST[$name];
+        } else if (!$postonly && array_key_exists($name, $_GET)) {
+            $raw = $_GET[$name];
+        } else {
+            return $default;
+        }
+        if (!is_array($raw)) {
+            return $default;
+        }
+        $clean = array();
+        foreach ($raw as $key => $value) {
+            if ($type == self::TYPE_BOOL) {
+                $clean[$key] = $this->bool_value($value);
+            } else if ($this->validate($value, $type)) {
+                $clean[$key] = $value;
+            }
+        }
+        return $clean;
     }
 
     public function validate($raw, $type) {

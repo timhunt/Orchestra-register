@@ -29,6 +29,9 @@ function init_edit_user_page() {
 function init_edit_events_page() {
 }
 
+function init_edit_players_page() {
+}
+
 function init_edit_event_page() {
     document.getElementById('name').focus();
 }
@@ -49,6 +52,21 @@ function init_admin_page() {
 }
 
 function init_logs_page() {
+}
+
+function init_extract_emails_page() {
+    init_disable_if('#event', '#attendance', 0);
+}
+
+function init_disable_if(control, dependant, testvalue) {
+    YUI().use('node', 'event', function(Y) {
+        Y.on('change', do_disable_if, control, null, Y.one(control), Y.one(dependant), testvalue);
+        do_disable_if(null, Y.one(control), Y.one(dependant), testvalue);
+    });
+}
+
+function do_disable_if(e, control, dependant, testvalue) {
+    dependant.set('disabled', control.get('value') == testvalue);
 }
 
 function init_date_hint(fieldid) {

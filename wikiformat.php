@@ -44,7 +44,8 @@ if ($wikiediturl) {
     echo '<p>Copy the rehearsal list below to the <a href="' . $wikiediturl .
             '">Orchestra Rehearsals page</a>.</p>';
 }
-echo '<textarea id="wikimarkup" readonly="readonly" cols="80" rows="25">' . $content . '</textarea>';
+echo '<textarea id="wikimarkup" readonly="readonly" cols="80" rows="25">' .
+        $content . '</textarea>';
 echo '<p><a href="' . $or->url('') . '">Back to the register</a></p>';
 $output->call_to_js('init_wiki_format_page');
 $output->footer();

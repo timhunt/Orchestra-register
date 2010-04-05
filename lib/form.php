@@ -360,6 +360,71 @@ class group_select_field extends single_value_field {
     }
 }
 
+class multi_select_field extends form_field {
+    public $choices;
+    public $size;
+
+    public function __construct($name, $label, $choices, $size = 10, $default = null) {
+        parent::__construct($name, $label);
+        $this->choices = $choices;
+        $this->default = $default;
+        $this->size = $size;
+    }
+
+    public function parse_request(orchestra_register $or) {
+        $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, array());
+
+        foreach ($this->submitted as $index => $value) {
+            if (!array_key_exists($value, $this->choices)) {
+                unset($this->submitted[$index]);
+            }
+        }
+
+        return true;
+    }
+
+    public function output_field(html_output $output) {
+        return $output->multi_select($this->name, $this->choices,
+                $this->get_current(), $this->size);
+    }
+}
+
+class group_multi_select_field extends form_field {
+    public $choices;
+    public $size;
+
+    public function __construct($name, $label, $choices, $size = 10, $default = null) {
+        parent::__construct($name, $label);
+        $this->choices = $choices;
+        $this->default = $default;
+        $this->size = $size;
+    }
+
+    public function parse_request(orchestra_register $or) {
+        $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, array());
+
+        foreach ($this->submitted as $index => $value) {
+            $ok = false;
+            foreach ($this->choices as $groupoptions) {
+                if (array_key_exists($value, $groupoptions)) {
+                    $ok = true;
+                    break;
+                }
+            }
+            if (!$ok) {
+                unset($this->submitted[$index]);
+            }
+        }
+
+        return true;
+    }
+
+    public function output_field(html_output $output) {
+        return $output->group_multi_select($this->name, $this->choices,
+                $this->get_current(), $this->size);
+    }
+}
+
 class timezone_field extends select_field {
     public function __construct($name, $label, $default = null) {
         $zones = DateTimeZone::listIdentifiers();

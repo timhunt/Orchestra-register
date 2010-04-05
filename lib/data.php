@@ -238,6 +238,55 @@ class database {
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
+    public function load_selected_players($seriesid, $parts, $eventid, $statuses) {
+        $extrajoin = '';
+        $conditions = array();
+        $partlist = array();
+        foreach ($parts AS $part) {
+            if (empty($part)) {
+                $conditions[] = 'players.part IS NULL';
+            } else {
+                $partlist[] = $this->escape($part);
+            }
+        }
+        if (!empty($partlist)) {
+            $conditions[] = 'players.part IN (' . implode(',', $partlist) . ')';
+        }
+        $tests = '(' . implode(' OR ', $conditions) . ')';
+
+        if ($eventid) {
+            $extrajoin = "LEFT JOIN attendances ON attendances.seriesid = {$this->escape($seriesid)} AND
+                    attendances.eventid = {$this->escape($eventid)} AND attendances.userid = players.userid";
+            $statuslist = array();
+            $extra = '';
+            foreach ($statuses AS $status) {
+                $statuslist[] = $this->escape($status);
+                if ($status == attendance::UNKNOWN) {
+                    $extra = ' OR attendances.status IS NULL';
+                }
+            }
+            $tests .= " AND (attendances.status IN (" . implode(',', $statuslist) . ")$extra)";
+        }
+
+        $sql = "
+            SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
+            FROM users
+            LEFT JOIN players ON users.id = players.userid AND players.seriesid = {$this->escape($seriesid)}
+            LEFT JOIN parts ON players.part = parts.part
+            LEFT JOIN sections ON parts.section = sections.section
+            $extrajoin
+            WHERE
+                $tests
+            ORDER BY
+                CASE WHEN parts.section IS NULL THEN 1 ELSE 0 END,
+                sectionsort,
+                partsort,
+                lastname,
+                firstname";
+                echo '<pre>'; var_dump($sql); echo '</pre>'; // DONOTCOMMIT
+        return $this->connection->get_records_sql($sql, 'player');
+    }
+
     public function load_parts() {
         return $this->connection->get_records_sql("
             SELECT parts.part, parts.section

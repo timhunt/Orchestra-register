@@ -76,6 +76,7 @@ $seriesactions->add($or->url('ical.php', false), 'Download iCal file (to add the
 $seriesactions->add($or->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
 $seriesactions->add($or->url('players.php'), 'Edit the list of players', $user->can_edit_players());
 $seriesactions->add($or->url('events.php'), 'Edit the list of events', $user->can_edit_events());
+$seriesactions->add($or->url('extractemails.php'), 'Get a list of email addresses', $user->can_edit_users());
 
 $systemactions = new actions();
 $systemactions->add($or->url('users.php'), 'Edit the list of users', $user->can_edit_users());

@@ -59,9 +59,9 @@ class html_output {
         if ($bodyclass) {
             $bodyclass = ' class="' . $bodyclass . '"';
         }
-        $stylesheets = array($this->or->url('styles.css', false));
+        $stylesheets = array($this->or->url('styles.css', false, true, 'none'));
         if (is_readable(dirname(__FILE__) . '/../' . self::EXTRA_STYLES)) {
-            $stylesheets[] = $this->or->url(self::EXTRA_STYLES, false);
+            $stylesheets[] = $this->or->url(self::EXTRA_STYLES, false, true, 'none');
         }
         if ($showlogin) {
             $logininfo = $this->or->get_login_info();
@@ -101,8 +101,8 @@ class html_output {
     ?>
 <div class="footer"><span class="helplinks"><a href="doc/">Documentation</a> -<?php echo $helplink; ?></span>
     Powered by <a href="http://timhunt.github.com/Orchestra-register/">Orchestra register</a></div>
-<script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false); ?>"></script>
-<script type="text/javascript" src="<?php echo $this->or->url('script.js', false); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false, true, 'none'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->or->url('script.js', false, true, 'none'); ?>"></script>
     <?php
     if ($this->javascriptcode) {
         echo '<script type="text/javascript">' . implode("\n", $this->javascriptcode) . '</script>';
@@ -167,19 +167,6 @@ class html_output {
         return $output;
     }
 
-    protected function options($choices, $default) {
-        $output = '';
-        foreach ($choices as $value => $label) {
-            if (((string)$value) === ((string)$default)) {
-                $selected = ' selected="selected"';
-            } else {
-                $selected = '';
-            }
-            $output .= '<option value="' . $value . '"' . $selected . '>' . htmlspecialchars($label) . '</option>';
-        }
-        return $output;
-    }
-
     public function group_select($name, $choices, $default = null) {
         $output = '<select id="' . $name . '" name="' . $name . '">';
         foreach ($choices as $group => $groupchoices) {
@@ -189,6 +176,47 @@ class html_output {
         }
         $output .= '</select>';
         return $output;
+    }
+
+    public function multi_select($name, $choices, $default = null, $size = 10) {
+        $output = '<select id="' . $name . '" name="' . $name .
+                '[]" multiple="multiple" size="' . $size . '">';
+        $output .= $this->options($choices, $default);
+        $output .= '</select>';
+        return $output;
+    }
+
+    public function group_multi_select($name, $choices, $default = null, $size = 10) {
+        $output = '<select id="' . $name . '" name="' . $name .
+                '[]" multiple="multiple" size="' . $size . '">';
+        foreach ($choices as $group => $groupchoices) {
+            $output .= '<optgroup label="' . $group . '">';
+            $output .= $this->options($groupchoices, $default);
+            $output .= '</optgroup>';
+        }
+        $output .= '</select>';
+        return $output;
+    }
+
+    protected function options($choices, $default) {
+        $output = '';
+        foreach ($choices as $value => $label) {
+            if ($this->option_is_selected($value, $default)) {
+                $selected = ' selected="selected"';
+            } else {
+                $selected = '';
+            }
+            $output .= '<option value="' . $value . '"' . $selected . '>' . htmlspecialchars($label) . '</option>';
+        }
+        return $output;
+    }
+
+    protected function option_is_selected($value, $default) {
+        if (!is_array($default)) {
+            return ((string)$value) === ((string)$default);
+        } else {
+            return in_array((string)$value, $default);
+        }
     }
 
     public function action_menu($actions) {

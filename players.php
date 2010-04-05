@@ -32,9 +32,7 @@ if (!$user->can_edit_players()) {
 
 $players = $or->get_players(true);
 $series = $or->get_series_list();
-
-$parts = $or->get_parts();
-$parts['Not playing'][0] = 'Not playing';
+$parts = $or->get_parts(true);
 
 if ($or->get_param('save', request::TYPE_BOOL, false)) {
     $or->require_sesskey();
@@ -115,7 +113,7 @@ foreach ($players as $player) {
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 
 <?php
-$output->call_to_js('init_players_page', array(array_keys($players)));
+$output->call_to_js('init_edit_players_page', array(array_keys($players)));
 
 $output->footer();
 
