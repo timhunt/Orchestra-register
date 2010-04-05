@@ -170,7 +170,7 @@ class html_output {
     protected function options($choices, $default) {
         $output = '';
         foreach ($choices as $value => $label) {
-            if ($value == $default) {
+            if (((string)$value) === ((string)$default)) {
                 $selected = ' selected="selected"';
             } else {
                 $selected = '';

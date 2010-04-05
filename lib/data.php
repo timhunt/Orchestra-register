@@ -160,23 +160,22 @@ class database {
         }
     }
 
-    public function load_players($seriesid, $includedeleted = false,
+    public function load_players($seriesid, $includenotplaying = false,
             $currentuserid = null) {
-        if ($includedeleted) {
+        if ($includenotplaying) {
             $deletedtest = '';
         } else {
-            $deletedtest = 'AND players.part IS NOT NULL';
+            $deletedtest = 'WHERE players.part IS NOT NULL';
         }
         $sql = "
             SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
-            FROM players
-            JOIN users ON users.id = players.userid
-            JOIN parts ON players.part = parts.part
-            JOIN sections ON parts.section = sections.section
-            WHERE
-                players.seriesid = {$this->escape($seriesid)}
-                $deletedtest
+            FROM users
+            LEFT JOIN players ON users.id = players.userid AND players.seriesid = {$this->escape($seriesid)}
+            LEFT JOIN parts ON players.part = parts.part
+            LEFT JOIN sections ON parts.section = sections.section
+            $deletedtest
             ORDER BY
+                CASE WHEN parts.section IS NULL THEN 1 ELSE 0 END,
                 CASE WHEN parts.section = (
                     SELECT section
                     FROM parts JOIN players ON players.part = parts.part
@@ -330,6 +329,14 @@ class database {
         return $config;
     }
 
+    public function set_player_part($userid, $seriesid, $newpart) {
+        $sql = "INSERT INTO players (userid, seriesid, part)
+                VALUES (" . $this->escape($userid) . ", " . $this->escape($seriesid) . ", " .
+                        $this->escape($newpart) . ")
+                ON DUPLICATE KEY UPDATE part = " . $this->escape($newpart);
+        $this->connection->update($sql);
+    }
+
     public function set_attendance($userid, $seriesid, $eventid, $newstatus) {
         $sql = "INSERT INTO attendances (userid, seriesid, eventid, status)
                 VALUES (" . $this->escape($userid) . ", " . $this->escape($seriesid) . ", " .
@@ -359,14 +366,6 @@ class database {
                 $this->escape($user->role) . ")";
         $this->connection->update($sql);
         $user->id = $this->connection->get_last_insert_id();
-    }
-
-    public function insert_player($player, $seriesid) {
-        $sql = "INSERT INTO players (userid, seriesid, part)
-                VALUES (" . $this->escape($player->id) . ", " . $this->escape($seriesid) . ", " .
-                $this->escape($player->part) . ")";
-        $this->connection->update($sql);
-        $player->id = $this->connection->get_last_insert_id();
     }
 
     public function update_user($user) {

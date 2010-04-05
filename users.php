@@ -27,7 +27,7 @@ $or = new orchestra_register();
 
 $currentuser = $or->get_current_user();
 if (!$currentuser->can_edit_users()) {
-    throw new permission_exception('You don\'t have permission to edit players.');
+    throw new permission_exception('You don\'t have permission to edit users.');
 }
 
 $users = $or->get_users(true);

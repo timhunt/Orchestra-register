@@ -73,22 +73,17 @@ class orchestra_register {
         return $this->request;
     }
 
+    /**
+     * @return html_output
+     */
     public function get_output() {
         return $this->output;
     }
 
-    public function get_player($id, $includedeleted = false) {
-        $player = $this->db->find_player_by_id($id, $this->seriesid, $includedeleted);
-        if (!$player) {
-            throw new not_found_exception('Unknown player.', $id);
-        }
-        return $player;
-    }
-
-    public function get_players($includedeleted = false, $currentuserid = null) {
+    public function get_players($includenotplaying = false, $currentuserid = null) {
         if (is_null($this->players)) {
-            $this->players = $this->db->load_players($this->seriesid, $includedeleted,
-                    $currentuserid);
+            $this->players = $this->db->load_players($this->seriesid,
+                    $includenotplaying, $currentuserid);
         }
         return $this->players;
     }
@@ -174,6 +169,10 @@ class orchestra_register {
             $subtotals[$row->part]->numplayers[$row->eventid] = $row->numplayers;
         }
         return $subtotals;
+    }
+
+    public function set_player_part($player, $newpart) {
+        $this->db->set_player_part($player->id, $this->seriesid, $newpart);
     }
 
     public function set_attendance($player, $event, $newattendance) {

@@ -95,7 +95,7 @@ if ($printview) {
 
 $title = '';
 if (count($series) > 1) {
-    $title = 'Rehearsals for ' . $series[$or->get_config()->defaultseriesid]->name;
+    $title = 'Rehearsals for ' . $series[$or->get_current_seriesid()]->name;
 }
 
 $output = $or->get_output();
