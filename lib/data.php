@@ -329,6 +329,18 @@ class database {
         return $config;
     }
 
+    public function copy_players_between_series($oldseriesid, $newseriesid) {
+        $sql = "INSERT INTO players (userid, seriesid, part)
+                SELECT oldplayers.userid, {$this->escape($newseriesid)}, oldplayers.part
+                FROM players oldplayers
+                WHERE
+                    oldplayers.seriesid = {$this->escape($oldseriesid)} AND
+                    NOT EXISTS (SELECT 1 FROM players newplayers
+                        WHERE newplayers.userid = oldplayers.userid AND
+                            newplayers.seriesid = {$this->escape($newseriesid)})";
+        $this->connection->update($sql);
+    }
+
     public function set_player_part($userid, $seriesid, $newpart) {
         $sql = "INSERT INTO players (userid, seriesid, part)
                 VALUES (" . $this->escape($userid) . ", " . $this->escape($seriesid) . ", " .

@@ -64,7 +64,7 @@ class orchestra_register {
         date_default_timezone_set($this->config->timezone);
 
         $this->seriesid = $this->request->get_param('s', request::TYPE_INT, null, false);
-        if (is_null($this->seriesid)) {
+        if (is_null($this->seriesid) || !$this->check_series_exists($this->seriesid)) {
             $this->seriesid = $this->config->defaultseriesid;
         }
     }
@@ -173,6 +173,10 @@ class orchestra_register {
 
     public function set_player_part($player, $newpart) {
         $this->db->set_player_part($player->id, $this->seriesid, $newpart);
+    }
+
+    public function copy_players_between_series($oldseriesid, $newseriesid) {
+        $this->db->copy_players_between_series($oldseriesid, $newseriesid);
     }
 
     public function set_attendance($player, $event, $newattendance) {
@@ -311,6 +315,10 @@ class orchestra_register {
         if ($this->config->changesesskeyonloginout) {
             $this->refresh_sesskey();
         }
+    }
+
+    public function check_series_exists($seriesid) {
+        return $this->db->find_series_by_id($seriesid);
     }
 
     public function get_current_seriesid() {

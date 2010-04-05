@@ -43,11 +43,17 @@ if ($seriesid) {
     $title = 'Add a rehearsal series';
     $submitlabel = 'Create rehearsal series';
     $url = $or->url('series.php', false, false);
+    $existingseries = $or->get_series_options();
+    $existingseries[0] = 'Do not copy';
+    $series->copyplayersfrom = 0;
 }
 
 $form = new form($url, $submitlabel);
 $form->add_field(new text_field('name', 'Event name', request::TYPE_RAW));
 $form->add_field(new text_field('description', 'Description', request::TYPE_RAW));
+if (!$seriesid) {
+    $form->add_field(new select_field('copyplayersfrom', 'Copy the list of players from', $existingseries));
+}
 $form->set_required_fields('name');
 
 $form->set_initial_data($series);
@@ -68,6 +74,10 @@ switch ($form->get_outcome()) {
         } else {
             $or->create_series($newseries);
             $or->log('add series ' . $newseries->id);
+
+            if (!$seriesid && $newseries->copyplayersfrom) {
+                $or->copy_players_between_series($newseries->copyplayersfrom, $newseries->id);
+            }
         }
 
         $or->redirect('serieslist.php');
