@@ -10,46 +10,59 @@
 <h1>An overview of how Orchestra register works</h1>
 
 <p>The basic idea is that you have some of players, and some events like
-rehearsals and a concert, and you want to know which players are planning to be
-at which events.</p>
+rehearsals leading up to a concert, and you want to know which players are
+planning to be at which events.</p>
 
 
-<h2>Players</h2>
+<h2>Event series</h2>
 
-<p>As far as this system in concerned, payers have an first name, last name,
-email address, and the part (instrument) they play. parts are further divided
-into sections like strings or woodwind. The list of available parts and sections,
-and the order in which they should be displayed, can be set when the system is
-installed.</p>
+<p>Since most orchestras give more than one concert, and the list of players
+playing in one concert may be different from those playing in another, the system
+can store multiple registers, one for each 'Event series'. An event series has
+a name and a description.</p>
 
-<p>The system also stores the information required to let players log in to the
+<p>An event series also has a list of players and a list of events, which define
+the rows and columns in the register.</p>
+
+ 
+<h2>Users</h2>
+
+<p>Users are people who have access to the system, regardless of which event series
+they are playing in. A user has a first name, last name, and email address. The
+system also stores the information required to let players log in to the
 system, and what level of access each player has.</p>
 
 <p>Although the system stores each players' email address and full name, this
 information is only visible to people with speciall access rights. In the
 publicly visible pages, it only shows a player's firstname and last initial, along
-with which part they play.</p>
+with which part they play in a particular rehearsal series.</p>
+
+
+<h2>Players</h2>
+
+<p>The list of players for a rehearsal series says, for each user who is playing
+in the series, which part they play.</p>
 
 
 <h2>Events</h2>
 
-<p>An event has a name, description, venue, start and end time (and date).</p>
+<p>Each event in a series has a name, description, venue, and start and end time (and date).</p>
 
-<p>The list of events can be mananged by users with an appropriate access level.
-There are facilities for exporting the list of events so they can be imported
+<p>There are facilities for exporting the list of events so they can be imported
 into diary software, and into a MediaWiki page.</p>
 
 
 <h2>The register</h2>
 
-<p>The register lists events across the top, and players down the side. In each
-cell of the register, it shows the players' attendance as one of:</p>
+<p>For a given event series, the register lists events across the top,
+and players down the side. In each cell of the register, it shows the players'
+attendance as one of:</p>
 <ul>
-<li><b>-</b>: no information has been input yet.</li>
+<li><b></b>: (that is, blank) no information has been input yet.</li>
 <li><b>No</b>: the player cannot attend</li>
-<li><b>Unsure</b>: the player is unsure whether they will be able to attend</li>
+<li><b>?</b>: the player is unsure whether they will be able to attend</li>
 <li><b>Yes</b>: the player intends to attend</li>
-<li><b>Not needed</b>: the player is not needed for this rehearsal</li>
+<li><b>-</b>: the player is not needed for this rehearsal</li>
 </ul>
 <p>The attendance information is shown nicely colour-coded.</p>
 
@@ -57,17 +70,17 @@ cell of the register, it shows the players' attendance as one of:</p>
 <h2>How users get access to the system</h2>
 
 <p>Anyone who know the right URL can go to the register and see the attendance
-information. This is a read-only view that should print nicely.</p>
+information. This is a read-only view.</p>
 
-<p>Players can get access to edit their own information using a special URL with
-a token on the end, like ...?t=VDcHOaWWq0XHUwXDD6wJZwzKTqbciiKwoFrToTZ8. Each
-player will have a different token, and if they bookmark that URL, then they
-can get access to edit their own attendance information.</p>
+<p>Each user has a special URL with
+a token on the end, like ...?t=VDcHOaWWq0XHUwXDD6wJZwzKTqbciiKwoFrToTZ8. This
+gives that user access to update their own attendance information.</p>
 
-<p>People with a higher level of access than that have to log in with an email
+<p>Users with a higher level of access than that have to log in with an email
 address and password. There are two classes of people with a higher level of
-access: Organisers can edit any player's attendance information, and edit the
-list of events and players. Adminsitrators can do anything in the system.</p>
+access, Organisers and Administrators. Adminsitrators can slightly more than
+Organisers, but the difference is small. These users can edit any player's
+attendance, and can edit the list of users, players, events and event series.</p>
 
 
 <h2>See also</h2>

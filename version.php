@@ -22,4 +22,4 @@
  */
 
 $version->id = 2010040303;
-$version->name = '2.0 dev';
+$version->name = '2.0 beta';
