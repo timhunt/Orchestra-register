@@ -222,6 +222,7 @@ class installer {
         }
 
         if ($fromversion < 2010040301) {
+
             // Create a new series table.
             $this->connection->execute_sql("
                 CREATE TABLE series (
@@ -271,9 +272,9 @@ class installer {
 
             // Populate the players table.
             $this->connection->update('
-                INSERT INTO players (userid, seriesid, part, deleted)
+                INSERT INTO players (userid, seriesid, part)
                 SELECT id, ' . $this->connection->escape($series->id) . ',
-                        CASE WHEN DELETED NULL ELSE part END
+                        CASE WHEN deleted <> 0 THEN NULL ELSE part END
                 FROM users');
 
             // Prepare to drop the user.deleted column.
