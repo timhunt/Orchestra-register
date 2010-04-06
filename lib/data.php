@@ -189,8 +189,8 @@ class database {
                     WHERE players.seriesid = {$this->escape($seriesid)}
                         AND players.userid = {$this->escape($currentuserid)}
                 ) THEN -1 ELSE partsort END,
-                lastname,
-                firstname";
+                firstname,
+                lastname";
         return $this->connection->get_records_sql($sql, 'player');
     }
 
@@ -289,8 +289,8 @@ class database {
                 CASE WHEN parts.section IS NULL THEN 1 ELSE 0 END,
                 sectionsort,
                 partsort,
-                lastname,
-                firstname";
+                firstname,
+                lastname";
         return $this->connection->get_records_sql($sql, 'player');
     }
 
