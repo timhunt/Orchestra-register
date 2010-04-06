@@ -291,7 +291,6 @@ class database {
                 partsort,
                 lastname,
                 firstname";
-                echo '<pre>'; var_dump($sql); echo '</pre>'; // DONOTCOMMIT
         return $this->connection->get_records_sql($sql, 'player');
     }
 
@@ -308,12 +307,12 @@ class database {
         if (!$includedisabled) {
             $disabledtest = " AND role <> '" . user::DISABLED . "'";
         }
-        return $this->connection->get_record_select('users', 
+        return $this->connection->get_record_select('users',
                 "id = $userid" . $disabledtest, 'user');
     }
 
     public function find_user_by_token($token) {
-        return $this->connection->get_record_select('users', 
+        return $this->connection->get_record_select('users',
                 "authkey = {$this->escape($token)} AND role <> '" . user::DISABLED . "'", 'user');
     }
 

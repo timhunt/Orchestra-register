@@ -129,7 +129,7 @@ class installer {
                         ON DELETE CASCADE ON UPDATE RESTRICT,
                 CONSTRAINT fk_attendances_userid_seriesid FOREIGN KEY (userid, seriesid)
                         REFERENCES players (userid, seriesid)
-                        ON DELETE RESTRICT ON UPDATE RESTRICT 
+                        ON DELETE RESTRICT ON UPDATE RESTRICT
             ) ENGINE = InnoDB
         ");
 
