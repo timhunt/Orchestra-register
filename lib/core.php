@@ -549,7 +549,7 @@ class user {
     public $authlevel = self::AUTH_NONE;
     public $sesskey;
     public function __construct() {
-        if (array_key_exists('sesskey', $_SESSION)) {
+        if (!empty($_SESSION) && array_key_exists('sesskey', $_SESSION)) {
             $this->sesskey = $_SESSION['sesskey'];
         } else {
             $this->refresh_sesskey();

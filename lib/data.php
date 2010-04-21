@@ -566,7 +566,7 @@ class database {
      * @param string $pwsalt
      * @return db_config the config, possibly updated.
      */
-    public function check_installed(db_config $config, $codeversion, $pwsalt) {
+    public function check_installed($config, $codeversion, $pwsalt) {
         $donesomething = false;
         if (is_null($config)) {
             $this->get_installer()->install($pwsalt);

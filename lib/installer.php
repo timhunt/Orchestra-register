@@ -138,7 +138,7 @@ class installer {
         $series->description = '';
         $this->db->insert_series($series);
 
-        $this->db->set_config('icalguid', self::random_string(40));
+        $this->db->set_config('icalguid', database::random_string(40));
         $this->db->set_config('title', 'Orchestra Register');
         $this->db->set_config('timezone', 'Europe/London');
         $this->db->set_config('defaultseriesid', $series->id);
@@ -156,6 +156,7 @@ class installer {
         $events = database::load_csv('data/events.txt');
         foreach ($events as $data) {
             $event = new event();
+            $event->seriesid = $series->id;
             $event->name = $data[0];
             $event->description = $data[1];
             $event->venue = $data[2];
@@ -167,7 +168,7 @@ class installer {
         $users = database::load_csv('data/users.txt');
         $firstuser = true;
         foreach ($users as $data) {
-            $user = new player();
+            $user = new user();
             $user->firstname = $data[0];
             $user->lastname = $data[1];
             $user->email = $data[2];
@@ -177,7 +178,7 @@ class installer {
             }
             $this->db->insert_user($user);
             if ($firstuser) {
-                $this->set_password($this->get_last_insert_id(), $pwsalt . 'mozart');
+                $this->db->set_password($user->id, $pwsalt . 'mozart');
                 $firstuser = false;
             }
         }
