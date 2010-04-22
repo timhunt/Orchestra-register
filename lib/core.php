@@ -588,8 +588,9 @@ class user {
     public function can_edit_motd() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
     }
-    public function can_set_passwords() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
+    public function can_edit_password($userid) {
+        return $this->authlevel >= self::AUTH_LOGIN && (
+                $this->is_admin() || $this->id == $userid);
     }
     public function can_edit_config() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();

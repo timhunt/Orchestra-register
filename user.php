@@ -55,7 +55,7 @@ if ($assignableroles) {
     $form->add_field(new select_field('role', 'Role', $assignableroles));
     $form->get_field('role')->set_note('Controls what this person is allowed to do');
 }
-if ($currentuser->can_set_passwords()) {
+if ($currentuser->can_edit_password($userid)) {
     $form->add_field(new password_field('changepw', 'New password', request::TYPE_RAW));
     $form->add_field(new password_field('confirmchangepw', 'Comfirm new password', request::TYPE_RAW));
     $form->get_field('changepw')->set_note('Leave blank for no change');
@@ -64,7 +64,7 @@ $form->set_required_fields('firstname', 'lastname', 'email');
 
 $form->set_initial_data($user);
 $form->parse_request($or);
-if ($currentuser->can_set_passwords() && $form->get_field_value('changepw') != $form->get_field_value('confirmchangepw')) {
+if ($currentuser->can_edit_password($userid) && $form->get_field_value('changepw') != $form->get_field_value('confirmchangepw')) {
     $form->set_field_error('changepw', '');
     $form->set_field_error('confirmchangepw', 'The two passwords did not match');
 }
@@ -89,7 +89,8 @@ switch ($form->get_outcome()) {
             $or->log('add user ' . $newuser->id);
         }
 
-        if ($currentuser->can_set_passwords() && ($newpassword = $form->get_field_value('changepw'))) {
+        if ($currentuser->can_edit_password($userid) &&
+                ($newpassword = $form->get_field_value('changepw'))) {
             $or->set_user_password($newuser->id, $newpassword);
             $or->log('change password ' . $newuser->id);
         }
