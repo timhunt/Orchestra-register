@@ -80,6 +80,13 @@ class orchestra_register {
         return $this->output;
     }
 
+    /**
+     * @return mail_helper
+     */
+    public function emails() {
+        return new mail_helper($this);
+    }
+
     public function get_players($includenotplaying = false, $currentuserid = null) {
         if (is_null($this->players)) {
             $this->players = $this->db->load_players($this->seriesid,
