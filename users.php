@@ -62,6 +62,7 @@ foreach ($users as $user) {
         $readonly = 'readonly="readonly"';
     }
     $actions[] = '<a href="' . $or->url('user.php?id=' . $user->id, false) . '">Edit</a>';
+    $actions[] = '<a href="' . $or->emails()->forgotten_url_mailto($user) . '">Recover URL email</a>';
     $role = '';
     if ($user->role != user::PLAYER) {
         $role = $roles[$user->role];
@@ -72,7 +73,7 @@ foreach ($users as $user) {
 <td><?php echo htmlspecialchars($user->email); ?></td>
 <td><?php echo htmlspecialchars($role); ?></td>
 <td><?php echo implode("\n", $actions); ?></td>
-<td><input type="text" size="60" <?php echo $readonly; ?> value="<?php echo $or->url(
+<td><input type="text" size="20" <?php echo $readonly; ?> value="<?php echo $or->url(
             '?t=' . $user->authkey, false, $or->get_config()->defaultseriesid); ?>" /></td>
 </tr>
 <?php
