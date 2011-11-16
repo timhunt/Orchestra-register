@@ -49,17 +49,27 @@ $subtotals = $or->load_subtotals();
 
 $totalplayers = array();
 $totalattending = array();
+$sectionplayers = array();
+$sectionattending = array();
 foreach ($events as $event) {
     $totalplayers[$event->id] = 0;
     $totalattending[$event->id] = 0;
+
     foreach ($subtotals as $part => $subtotal) {
         if ($subtotal->numplayers[$event->id]) {
             $totalplayers[$event->id] += $subtotal->numplayers[$event->id];
             $totalattending[$event->id] += $subtotal->attending[$event->id];
+
+            if (!isset($sectionplayers[$subtotal->section][$event->id])) {
+                $sectionplayers[$subtotal->section][$event->id] = 0;
+                $sectionattending[$subtotal->section][$event->id] = 0;
+            }
+
+            $sectionplayers[$subtotal->section][$event->id] += $subtotal->numplayers[$event->id];
+            $sectionattending[$subtotal->section][$event->id] += $subtotal->attending[$event->id];
         }
     }
 }
-
 
 if ($includepast) {
     $showhidepasturl = $or->url('');
@@ -247,6 +257,34 @@ foreach ($events as $event) {
 <td><span class="total"><?php echo $totalattending[$event->id];
         ?></span><span class="outof">/<?php echo $totalplayers[$event->id]; ?></span></td>
     <?php
+}
+?>
+</tr>
+<?php
+
+$rowparity = 1;
+foreach ($sectionplayers as $section => $eventtotals) {
+    ?>
+<tr class="sectiontotal r<?php echo $rowparity = 1 - $rowparity; ?>">
+<th colspan="3"><?php echo htmlspecialchars($section); ?> total</th>
+    <?php
+    foreach ($events as $event) {
+        ?>
+<td>
+        <?php
+        if (array_key_exists($event->id, $eventtotals) && $eventtotals[$event->id]) {
+            echo '<span class="total">', $sectionattending[$section][$event->id],
+                    '</span><span class="outof">/', $eventtotals[$event->id], '</span>';
+        } else {
+            echo '-';
+        }
+        ?>
+</td>
+        <?php
+    }
+    ?>
+</tr>
+<?php
 }
 ?>
 </tbody>
