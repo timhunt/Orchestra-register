@@ -266,18 +266,7 @@ if ($printview) {
     <?php
 
 } else {
-    if (count($series) > 1) {
-        $links = array();
-        foreach ($series as $s) {
-            if ($s->id == $or->get_current_seriesid()) {
-                $links[] = '<b>' . htmlspecialchars($s->name) . '</b>';
-            } else {
-                $links[] = '<a href="' . $or->url('', true, true, $s->id) . '">' .
-                        htmlspecialchars($s->name) . '</a>';
-            }
-        }
-        echo '<p>Other series of rehearsals: ' . implode(' - ', $links) . '</p>';
-    }
+    echo $output->links_to_other_series($series);
 
     echo '<h3>Options</h3>';
     echo $seriesactions->output($output);

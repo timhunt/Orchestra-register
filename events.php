@@ -50,10 +50,12 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
 
 }
 
+$series = $or->get_series_list();
 $events = $or->get_events(true, true);
 
 $output = $or->get_output();
-$output->header('Edit events');
+$output->header('Edit events for ' . $series[$or->get_current_seriesid()]->name);
+echo $output->links_to_other_series($series, 'events.php');
 
 ?>
 <p><a href="<?php echo $or->url('event.php'); ?>">Add another event</a></p>

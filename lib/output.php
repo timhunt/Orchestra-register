@@ -231,6 +231,24 @@ class html_output {
         return $output;
     }
 
+    public function links_to_other_series($series, $relativeurl = '', $withtoken = true) {
+        if (count($series) <= 1) {
+            return '';
+        }
+
+        $links = array();
+        foreach ($series as $s) {
+            if ($s->id == $this->or->get_current_seriesid()) {
+                $links[] = '<b>' . htmlspecialchars($s->name) . '</b>';
+            } else {
+                $links[] = '<a href="' . $this->or->url($relativeurl, $withtoken, true, $s->id) . '">' .
+                htmlspecialchars($s->name) . '</a>';
+            }
+        }
+
+        return '<p>Other series of rehearsals: ' . implode(' - ', $links) . '</p>';
+    }
+
     public function call_to_js($function, $arguments = array()) {
         $quotedargs = array();
         foreach ($arguments as $arg) {

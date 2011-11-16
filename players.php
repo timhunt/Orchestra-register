@@ -62,9 +62,9 @@ if ($or->get_param('save', request::TYPE_BOOL, false)) {
     $or->redirect('players.php');
 }
 
-
 $output = $or->get_output();
 $output->header('Edit players for ' . $series[$or->get_current_seriesid()]->name);
+echo $output->links_to_other_series($series, 'players.php');
 
 ?>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
