@@ -302,6 +302,14 @@ class database {
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
+    public function load_player_parts($userid) {
+        return $this->connection->get_records_sql("
+            SELECT seriesid AS id, seriesid, part
+            FROM players
+            where userid = $userid
+            ORDER BY seriesid", 'stdClass');
+    }
+
     public function find_user_by_id($userid, $includedisabled = false) {
         $disabledtest = '';
         if (!$includedisabled) {

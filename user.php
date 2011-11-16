@@ -24,6 +24,8 @@
 require_once(dirname(__FILE__) . '/setup.php');
 require_once(dirname(__FILE__) . '/lib/form.php');
 $or = new orchestra_register();
+$series = $or->get_series_list();
+$parts = $or->get_parts(true);
 
 $currentuser = $or->get_current_user();
 if (!$currentuser->can_edit_users()) {
@@ -38,11 +40,20 @@ if ($userid) {
     $submitlabel = 'Save changes';
     $url = $or->url('user.php?id=' . $userid, false, false);
 
+    $userparts = $or->get_player_parts($user);
+    foreach ($series as $s) {
+        if (array_key_exists($s->id, $userparts)) {
+            $field = 'part' . $s->id;
+            $user->$field = $userparts[$s->id]->part;
+        }
+    }
+
 } else {
     $user = new user();
     $title = 'Add a user';
     $submitlabel = 'Create user';
     $url = $or->url('user.php', false, false);
+    $userparts = array();
 }
 
 $assignableroles = $currentuser->assignable_roles($userid);
@@ -51,17 +62,23 @@ $form = new form($url, $submitlabel);
 $form->add_field(new text_field('firstname', 'First name', request::TYPE_RAW));
 $form->add_field(new text_field('lastname', 'Last name', request::TYPE_RAW));
 $form->add_field(new text_field('email', 'Email', request::TYPE_EMAIL));
+
 if ($assignableroles) {
     $form->add_field(new select_field('role', 'Role', $assignableroles));
     $form->get_field('role')->set_note('Controls what this person is allowed to do');
 }
+
 if ($currentuser->can_edit_password($userid)) {
     $form->add_field(new password_field('changepw', 'New password', request::TYPE_RAW));
     $form->add_field(new password_field('confirmchangepw', 'Comfirm new password', request::TYPE_RAW));
     $form->get_field('changepw')->set_note('Leave blank for no change');
 }
-$form->set_required_fields('firstname', 'lastname', 'email');
 
+foreach ($series as $s) {
+    $form->add_field(new group_select_field('part' . $s->id, $s->name, $parts, 0));
+}
+
+$form->set_required_fields('firstname', 'lastname', 'email');
 $form->set_initial_data($user);
 $form->parse_request($or);
 if ($currentuser->can_edit_password($userid) && $form->get_field_value('changepw') != $form->get_field_value('confirmchangepw')) {
@@ -94,6 +111,25 @@ switch ($form->get_outcome()) {
             $or->set_user_password($newuser->id, $newpassword);
             $or->log('change password ' . $newuser->id);
         }
+
+        foreach ($series as $s) {
+            $field = 'part' . $s->id;
+            $newpart = $newuser->$field;
+
+            if (!$or->is_valid_part($newpart)) {
+                continue;
+            }
+
+            if ($newpart === '0') {
+                $newpart = null;
+            }
+            if (array_key_exists($s->id, $userparts) && $newpart == $userparts[$s->id]->part) {
+                continue;
+            }
+
+            $or->set_player_part($newuser, $newpart, $s->id);
+        }
+
         $or->redirect('users.php');
 }
 

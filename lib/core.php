@@ -132,6 +132,15 @@ class orchestra_register {
         return $this->parts;
     }
 
+    function is_valid_part($newpart) {
+        foreach ($this->get_parts(true) as $sectionparts) {
+            if (isset($sectionparts[$newpart])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public function get_series($id, $includedeleted = false) {
         $series = $this->db->find_series_by_id($id, $includedeleted);
         if (!$series) {
@@ -185,8 +194,15 @@ class orchestra_register {
         return $this->db->load_selected_players($this->seriesid, $parts, $eventid, $statuses);
     }
 
-    public function set_player_part($player, $newpart) {
-        $this->db->set_player_part($player->id, $this->seriesid, $newpart);
+    public function set_player_part($player, $newpart, $seriesid = null) {
+        if (is_null($seriesid)) {
+            $seriesid = $this->seriesid;
+        }
+        $this->db->set_player_part($player->id, $seriesid, $newpart);
+    }
+
+    public function get_player_parts($user) {
+        return $this->db->load_player_parts($user->id);
     }
 
     public function copy_players_between_series($oldseriesid, $newseriesid) {

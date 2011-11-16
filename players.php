@@ -40,7 +40,7 @@ if ($or->get_param('save', request::TYPE_BOOL, false)) {
     foreach ($players as $player) {
         $newpart = $or->get_param('player' . $player->id, request::TYPE_RAW);
 
-        if (!is_valid_part($newpart, $parts)) {
+        if (!$or->is_valid_part($newpart)) {
             continue;
         }
 
@@ -116,12 +116,3 @@ foreach ($players as $player) {
 $output->call_to_js('init_edit_players_page', array(array_keys($players)));
 
 $output->footer();
-
-function is_valid_part($newpart, $parts) {
-    foreach ($parts as $sectionparts) {
-        if (isset($sectionparts[$newpart])) {
-            return true;
-        }
-    }
-    return false;
-}
