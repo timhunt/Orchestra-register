@@ -31,6 +31,10 @@ th {
 .headingrow {
     background: #ddd;
 }
+.sectiontotal th {
+    font-size: 0.8em;
+    font-weight: normal;
+}
 .eventname,
 .eventdesc,
 .eventvenue,
