@@ -67,6 +67,8 @@ $output->header('Edit players for ' . $series[$or->get_current_seriesid()]->name
 echo $output->links_to_other_series($series, 'players.php');
 
 ?>
+<p><a href="<?php echo $or->url('users.php'); ?>">Edit the list of users</a></p>
+
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 
 <form action="<?php echo $or->url('players.php'); ?>" method="post">
@@ -112,6 +114,8 @@ foreach ($players as $player) {
 
 </div>
 </form>
+
+<p><a href="<?php echo $or->url('users.php'); ?>">Edit the list of users</a></p>
 
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 

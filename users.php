@@ -31,6 +31,7 @@ if (!$currentuser->can_edit_users()) {
 }
 
 $users = $or->get_users(true);
+$series = $or->get_series_list();
 $roles = user::get_all_roles();
 
 $output = $or->get_output();
@@ -38,6 +39,9 @@ $output->header('Edit users');
 
 ?>
 <p><a href="<?php echo $or->url('edituser.php'); ?>">Add another user</a></p>
+<?php
+echo $output->links_to_other_series($series, 'players.php', false, true, 'Edit the players for');
+?>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <table>
 <thead>
@@ -82,6 +86,9 @@ foreach ($users as $user) {
 </tbody>
 </table>
 <p><a href="<?php echo $or->url('edituser.php'); ?>">Add another user</a></p>
+<?php
+echo $output->links_to_other_series($series, 'players.php', false, true, 'Edit the players for');
+?>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
 $output->call_to_js('init_edit_users_page');
