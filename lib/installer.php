@@ -35,19 +35,22 @@ class installer {
         $this->connection = $connection;
     }
 
-    public function install($pwsalt) {
+    public function install() {
+
         $this->connection->execute_sql("
             CREATE TABLE config (
                 name VARCHAR(32) NOT NULL PRIMARY KEY,
                 value TEXT NOT NULL
             ) ENGINE = InnoDB
         ");
+
         $this->connection->execute_sql("
             CREATE TABLE sections (
                 section VARCHAR(100) NOT NULL PRIMARY KEY,
                 sectionsort INT(10) NOT NULL UNIQUE
             ) ENGINE = InnoDB
         ");
+
         $this->connection->execute_sql("
             CREATE TABLE parts (
                 part VARCHAR(100) NOT NULL PRIMARY KEY,
@@ -58,6 +61,7 @@ class installer {
                         ON DELETE RESTRICT ON UPDATE RESTRICT
             ) ENGINE = InnoDB
         ");
+
         $this->connection->execute_sql("
             CREATE TABLE series (
                 id INT(10) AUTO_INCREMENT PRIMARY KEY,
@@ -66,6 +70,7 @@ class installer {
                 deleted INT(1) NOT NULL DEFAULT 0
             ) ENGINE = InnoDB
         ");
+
         $this->connection->execute_sql("
             CREATE TABLE events (
                 id INT(10) AUTO_INCREMENT PRIMARY KEY,
@@ -81,6 +86,7 @@ class installer {
                         ON DELETE RESTRICT ON UPDATE RESTRICT
             ) ENGINE = InnoDB
         ");
+
         $this->connection->execute_sql("
             CREATE TABLE users (
                 id INT(10) AUTO_INCREMENT PRIMARY KEY,
@@ -93,6 +99,7 @@ class installer {
                 role VARCHAR(40) NOT NULL
             ) ENGINE = InnoDB
         ");
+
         $this->connection->execute_sql("
             CREATE TABLE logs (
                 id INT(10) AUTO_INCREMENT PRIMARY KEY,
@@ -105,6 +112,7 @@ class installer {
                         ON DELETE RESTRICT ON UPDATE RESTRICT
             ) ENGINE = InnoDB
         ");
+
         $this->connection->execute_sql('
             CREATE TABLE players (
                 userid INT(10) NOT NULL,
@@ -118,6 +126,7 @@ class installer {
                 CONSTRAINT fk_players_part FOREIGN KEY (part) REFERENCES parts (part)
                         ON DELETE RESTRICT ON UPDATE RESTRICT
             ) ENGINE = InnoDB');
+
         $this->connection->execute_sql("
             CREATE TABLE attendances (
                 userid INT(10) NOT NULL,
@@ -152,36 +161,6 @@ class installer {
                 $sections[$section] = $section;
             }
             $this->db->insert_part($section, $part);
-        }
-
-        $events = database::load_csv('data/events.txt');
-        foreach ($events as $data) {
-            $event = new event();
-            $event->seriesid = $series->id;
-            $event->name = $data[0];
-            $event->description = $data[1];
-            $event->venue = $data[2];
-            $event->timestart = strtotime($data[3] . ' ' . $data[4]);
-            $event->timeend = strtotime($data[3] . ' ' . $data[5]);
-            $this->db->insert_event($event);
-        }
-
-        $users = database::load_csv('data/users.txt');
-        $firstuser = true;
-        foreach ($users as $data) {
-            $user = new user();
-            $user->firstname = $data[0];
-            $user->lastname = $data[1];
-            $user->email = $data[2];
-            $user->role = 'player';
-            if ($firstuser) {
-                $user->role = 'admin';
-            }
-            $this->db->insert_user($user);
-            if ($firstuser) {
-                $this->db->set_password($user->id, $pwsalt . 'mozart');
-                $firstuser = false;
-            }
         }
     }
 

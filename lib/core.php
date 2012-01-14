@@ -38,7 +38,12 @@ class orchestra_register {
     private $attendanceloaded = false;
     private $seriesid;
 
-    public function __construct() {
+    public function __construct($requireinstalled = true) {
+
+        if ($requireinstalled && !is_readable(dirname(__FILE__) . '/../config.php')) {
+            $this->redirect('install.php', false, 'none');
+        }
+
         $config = new sys_config();
         include(dirname(__FILE__) . '/../config.php');
         $config->check();
@@ -48,19 +53,25 @@ class orchestra_register {
         include(dirname(__FILE__) . '/../version.php');
         $this->version = $version;
 
+        $this->request = new request();
+        $this->output = new html_output($this);
+        session_start();
+
         $this->db = new database($this->sysconfig->dbhost, $this->sysconfig->dbuser,
                 $this->sysconfig->dbpass, $this->sysconfig->dbname);
 
         $this->config = $this->db->load_config();
+        if (!$this->config) {
+            if ($requireinstalled) {
+                $this->redirect('install.php', false, 'none');
+            } else {
+                return;
+            }
+        }
         $this->config = $this->db->check_installed($this->config,
                 $this->version->id, $this->sysconfig->pwsalt);
 
-        $this->output = new html_output($this);
         set_exception_handler(array($this->output, 'exception'));
-
-        $this->request = new request();
-
-        session_start();
 
         date_default_timezone_set($this->config->timezone);
 
@@ -68,6 +79,10 @@ class orchestra_register {
         if (is_null($this->seriesid) || !$this->check_series_exists($this->seriesid)) {
             $this->seriesid = $this->config->defaultseriesid;
         }
+    }
+
+    public function install() {
+        $this->db->install($this->version->id);
     }
 
     public function get_request() {
@@ -473,9 +488,9 @@ class orchestra_register {
         return $this->user;
     }
 
-    public function redirect($relativeurl, $withtoken = true) {
+    public function redirect($relativeurl, $withtoken = true, $seriesid = null) {
         header('HTTP/1.1 303 See Other');
-        header('Location: ' . $this->url($relativeurl, $withtoken, false));
+        header('Location: ' . $this->url($relativeurl, $withtoken, false, $seriesid));
         exit(0);
     }
 
@@ -492,6 +507,14 @@ class orchestra_register {
                     'Name: ' . $name . ', Value: ' . $value);
         }
         $this->db->set_config($name, $value, $this->config);
+    }
+
+    /**
+     * For use by install.php only.
+     */
+    public function set_default_config() {
+        $this->config = new db_config();
+        $this->user = new user();
     }
 
     public function version_string() {
@@ -752,7 +775,7 @@ class sys_config {
         if (empty($this->wwwroot)) {
             throw new configuration_exception('Web site location ($config->wwwroot) not set in config.php.');
         }
-        if (empty($this->pwsalt) || $this->pwsalt == '0123456789012345678901234567890123456789') {
+        if (empty($this->pwsalt) || $this->pwsalt === '0123456789012345678901234567890123456789') {
             throw new configuration_exception('Password salt ($config->pwsalt) not set in config.php.');
         }
         if (strlen($this->pwsalt) < 40) {

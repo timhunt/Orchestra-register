@@ -708,24 +708,19 @@ class database {
      * @return db_config the config, possibly updated.
      */
     public function check_installed($config, $codeversion, $pwsalt) {
-        $donesomething = false;
-        if (is_null($config)) {
-            $this->get_installer()->install($pwsalt);
-            $this->insert_log(null, user::AUTH_NONE, 'install version ' . $codeversion);
-            $donesomething = true;
-
-        } else if ($config->version < $codeversion) {
+        if ($config->version < $codeversion) {
             $this->get_installer()->upgrade($config->version);
             $this->insert_log(null, user::AUTH_NONE, 'upgrade to version ' . $codeversion);
-            $donesomething = true;
-        }
-
-        if ($donesomething) {
             $this->set_config('version', $codeversion);
             $config = $this->load_config();
         }
 
         return $config;
+    }
+
+    public function install($codeversion) {
+        $this->get_installer()->install();
+        $this->set_config('version', $codeversion);
     }
 }
 
