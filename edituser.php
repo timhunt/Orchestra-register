@@ -38,7 +38,7 @@ if ($userid) {
     $user = $or->get_user($userid, true);
     $title = 'Edit a user';
     $submitlabel = 'Save changes';
-    $url = $or->url('user.php?id=' . $userid, false, false);
+    $url = $or->url('edituser.php?id=' . $userid, false, false);
 
     $userparts = $or->get_player_parts($user);
     foreach ($series as $s) {
@@ -52,7 +52,7 @@ if ($userid) {
     $user = new user();
     $title = 'Add a user';
     $submitlabel = 'Create user';
-    $url = $or->url('user.php', false, false);
+    $url = $or->url('edituser.php', false, false);
     $userparts = array();
 }
 

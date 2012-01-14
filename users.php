@@ -37,7 +37,7 @@ $output = $or->get_output();
 $output->header('Edit users');
 
 ?>
-<p><a href="<?php echo $or->url('user.php'); ?>">Add another user</a></p>
+<p><a href="<?php echo $or->url('edituser.php'); ?>">Add another user</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <table>
 <thead>
@@ -61,7 +61,7 @@ foreach ($users as $user) {
         $extrarowclass = '';
         $readonly = 'readonly="readonly"';
     }
-    $actions[] = '<a href="' . $or->url('user.php?id=' . $user->id, false) . '">Edit</a>';
+    $actions[] = '<a href="' . $or->url('edituser.php?id=' . $user->id, false) . '">Edit</a>';
     $actions[] = '<a href="' . $or->emails()->forgotten_url_mailto($user) . '">Recover URL email</a>';
     $role = '';
     if ($user->role != user::PLAYER) {
@@ -81,7 +81,7 @@ foreach ($users as $user) {
 ?>
 </tbody>
 </table>
-<p><a href="<?php echo $or->url('user.php'); ?>">Add another user</a></p>
+<p><a href="<?php echo $or->url('edituser.php'); ?>">Add another user</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
 $output->call_to_js('init_edit_users_page');

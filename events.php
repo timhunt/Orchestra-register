@@ -58,7 +58,7 @@ $output->header('Edit events for ' . $series[$or->get_current_seriesid()]->name)
 echo $output->links_to_other_series($series, 'events.php');
 
 ?>
-<p><a href="<?php echo $or->url('event.php'); ?>">Add another event</a></p>
+<p><a href="<?php echo $or->url('editevent.php'); ?>">Add another event</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <table>
 <thead>
@@ -83,7 +83,7 @@ foreach ($events as $event) {
         $extrarowclass = ' deleted';
 
     } else {
-        $actions[] = '<a href="' . $or->url('event.php?id=' . $event->id, false) . '">Edit</a>';
+        $actions[] = '<a href="' . $or->url('editevent.php?id=' . $event->id, false) . '">Edit</a>';
         $actions[] = $output->action_button($or->url('events.php', false),
                 array('delete' => $event->id), 'Delete');
         $extrarowclass = '';
@@ -103,7 +103,7 @@ foreach ($events as $event) {
 ?>
 </tbody>
 </table>
-<p><a href="<?php echo $or->url('event.php'); ?>">Add another event</a></p>
+<p><a href="<?php echo $or->url('editevent.php'); ?>">Add another event</a></p>
 <p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
 $output->call_to_js('init_edit_events_page');

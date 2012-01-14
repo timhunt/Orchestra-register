@@ -606,7 +606,7 @@ class database {
         $this->insert_part($oldpart->section, $newname);
 
         $sql = "UPDATE players SET part = " . $this->escape($newname) . "
-                WHERE part = " . $this->escape($newname);
+                WHERE part = " . $this->escape($oldname);
         $this->connection->update($sql);
 
         $this->delete_part($oldname);

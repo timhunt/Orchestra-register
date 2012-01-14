@@ -90,7 +90,7 @@ $seriesactions->add($or->url('extractemails.php'), 'Get a list of email addresse
 
 $systemactions = new actions();
 $systemactions->add($or->url('users.php'), 'Edit the list of users', $user->can_edit_users());
-$systemactions->add($or->url('serieslist.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
+$systemactions->add($or->url('series.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
 $systemactions->add($or->url('parts.php'), 'Edit the available sections and parts', $user->can_edit_parts());
 $systemactions->add($or->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
 $systemactions->add($or->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());

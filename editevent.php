@@ -36,7 +36,7 @@ if ($eventid) {
     $event = $or->get_event($eventid);
     $title = 'Edit an event';
     $submitlabel = 'Save changes';
-    $url = $or->url('event.php?id=' . $eventid, false, false);
+    $url = $or->url('editevent.php?id=' . $eventid, false, false);
 
 } else {
     $event = new event();
@@ -44,7 +44,7 @@ if ($eventid) {
     $event->timeend = strtotime('next Friday 13:45');
     $title = 'Add an event';
     $submitlabel = 'Create event';
-    $url = $or->url('event.php', false, false);
+    $url = $or->url('editevent.php', false, false);
 }
 
 $event->date = strftime('%d %B %Y', $event->timestart);
