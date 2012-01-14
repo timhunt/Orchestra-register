@@ -26,6 +26,7 @@ class orchestra_register {
     private $players = null;
     private $events = null;
     private $parts = null;
+    private $sections = null;
     private $request;
     private $output = null;
     /** @var sys_config */
@@ -132,13 +133,97 @@ class orchestra_register {
         return $this->parts;
     }
 
-    function is_valid_part($newpart) {
+    /**
+     * @return array nested structure represending all the secions and parts.
+     */
+    public function get_sections_and_parts() {
+        if (is_null($this->sections)) {
+            $partsdata = $this->db->load_sections_and_parts();
+            $this->sections = array();
+            $currentsection = null;
+            foreach ($partsdata as $part) {
+                if ($part->section != $currentsection) {
+                    $currentsection = $part->section;
+                    $this->sections[$currentsection]->section = $part->section;
+                    $this->sections[$currentsection]->sectionsort = $part->sectionsort;
+                    $this->sections[$currentsection]->parts = array();
+                }
+                if (!is_null($part->part)) {
+                    $this->sections[$currentsection]->parts[$part->part]->part = $part->part;
+                    $this->sections[$currentsection]->parts[$part->part]->section = $currentsection;
+                    $this->sections[$currentsection]->parts[$part->part]->partsort = $part->partsort;
+                    $this->sections[$currentsection]->parts[$part->part]->inuse = $part->inuse;
+                }
+            }
+        }
+        return $this->sections;
+    }
+
+    public function get_part_data($part) {
+        foreach ($this->get_sections_and_parts() as $sectiondata) {
+            if (array_key_exists($part, $sectiondata->parts)) {
+                return $sectiondata->parts[$part];
+            }
+        }
+        return null;
+    }
+
+    function is_valid_part($part) {
         foreach ($this->get_parts(true) as $sectionparts) {
-            if (isset($sectionparts[$newpart])) {
+            if (isset($sectionparts[$part])) {
                 return true;
             }
         }
         return false;
+    }
+
+    function get_section($part) {
+        foreach ($this->get_parts(true) as $section => $sectionparts) {
+            if (isset($sectionparts[$part])) {
+                return $section;
+            }
+        }
+        throw new coding_error('Unknown part.');
+    }
+
+    function is_valid_section($section) {
+        return array_key_exists($section, $this->get_sections_and_parts());
+    }
+
+    public function create_part($section, $part) {
+        $this->db->insert_part($section, $part);
+    }
+
+    public function create_section($section) {
+        $this->db->insert_section($section);
+    }
+
+    public function rename_part($oldname, $newname) {
+        $this->db->rename_part($oldname, $newname);
+    }
+
+    public function rename_section($oldname, $newname) {
+        $this->db->rename_section($oldname, $newname);
+    }
+
+    public function delete_part($part) {
+        $this->db->delete_part($part);
+    }
+
+    public function delete_section($section) {
+        $this->db->delete_section($section);
+    }
+
+    public function swap_section_order($section1, $section2) {
+        $sections = $this->get_sections_and_parts();
+        $this->db->swap_section_order($section1, $sections[$section1]->sectionsort,
+                $section2, $sections[$section2]->sectionsort);
+    }
+
+    public function swap_part_order($part1, $part2) {
+        $sections = $this->get_sections_and_parts();
+        $this->db->swap_part_order($part1, $this->get_part_data($part1)->partsort,
+                $part2, $this->get_part_data($part2)->partsort);
     }
 
     public function get_series($id, $includedeleted = false) {
@@ -462,6 +547,7 @@ class request {
     const TYPE_RAW = 666;
     const TYPE_AUTHTOKEN = '/[a-zA-Z0-9]{40}/';
     const TYPE_TIME = '/\d\d?:\d\d?(?::\d\d?)?/';
+    const TYPE_ALNUMSPACE = '/^[a-zA-Z0-9 ]*$/';
     public static $typenames = array(
         self::TYPE_INT => 'integer',
         self::TYPE_ATTENDANCE => 'attendance status',
@@ -471,6 +557,7 @@ class request {
         self::TYPE_RAW => 'anything',
         self::TYPE_AUTHTOKEN => 'authentication token',
         self::TYPE_TIME => 'time',
+        self::TYPE_ALNUMSPACE => 'string of letters, numbers and spaces only',
     );
 
     public function get_param($name, $type, $default = null, $postonly = true) {
@@ -614,6 +701,9 @@ class user {
     public function can_edit_password($userid) {
         return $this->authlevel >= self::AUTH_LOGIN && (
                 $this->is_admin() || $this->id == $userid);
+    }
+    public function can_edit_parts() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
     }
     public function can_edit_config() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();

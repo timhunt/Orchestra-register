@@ -1,5 +1,0 @@
-Sort order,Section
-1,Strings
-2,Woodwind
-3,Brass
-4,Percussion

@@ -14,7 +14,7 @@
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A page to edit or show a user.
+ * A page to edit or create a user.
  *
  * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk

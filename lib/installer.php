@@ -143,14 +143,15 @@ class installer {
         $this->db->set_config('timezone', 'Europe/London');
         $this->db->set_config('defaultseriesid', $series->id);
 
-        $sections = database::load_csv('data/sections.txt');
-        foreach ($sections as $section) {
-            $this->db->insert_section($section[1], $section[0]);
-        }
-
         $parts = database::load_csv('data/parts.txt');
-        foreach ($parts as $part) {
-            $this->db->insert_part($part[2], $part[0], $part[1]);
+        $sections = array();
+        foreach ($parts as $partdata) {
+            list($section, $part) = $partdata;
+            if (!array_key_exists($section, $sections)) {
+                $this->db->insert_section($section);
+                $sections[$section] = $section;
+            }
+            $this->db->insert_part($section, $part);
         }
 
         $events = database::load_csv('data/events.txt');

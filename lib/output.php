@@ -113,9 +113,11 @@ class html_output {
     <?php
     }
 
-    public function action_button($url, $params, $label) {
-        $output = '<form action="' . $url . '" method="post"><div>';
-        $output .= $this->sesskey_input();
+    public function action_button($url, $params, $label, $method = 'post') {
+        $output = '<form action="' . $url . '" method="' . $method . '"><div>';
+        if ($method == 'post') {
+            $output .= $this->sesskey_input();
+        }
         foreach ($params as $name => $value) {
             $output .= '<input type="hidden" name="' . $name . '" value="' . $value . '" />';
         }

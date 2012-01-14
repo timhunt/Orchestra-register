@@ -1,17 +1,17 @@
-Section,Sort order within section,Part
-Strings,1,Violin I
-Strings,2,Violin II
-Strings,3,Viola
-Strings,4,Cello
-Strings,5,Bass
-Woodwind,1,Flute
-Woodwind,2,Oboe
-Woodwind,3,Clarinet
-Woodwind,4,Bassoon
-Brass,1,Horn
-Brass,2,Trumpet
-Brass,3,Trombone
-Brass,4,Tuba
-Percussion,1,Timpani
-Percussion,2,Percussion
-Percussion,3,Harp
+Section,Part
+Strings,Violin I
+Strings,Violin II
+Strings,Viola
+Strings,Cello
+Strings,Bass
+Woodwind,Flute
+Woodwind,Oboe
+Woodwind,Clarinet
+Woodwind,Bassoon
+Brass,Horn
+Brass,Trumpet
+Brass,Trombone
+Brass,Tuba
+Percussion,Timpani
+Percussion,Percussion
+Percussion,Harp

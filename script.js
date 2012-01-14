@@ -43,6 +43,15 @@ function init_edit_series_page() {
     document.getElementById('name').focus();
 }
 
+function init_edit_parts_page() {
+}
+
+function init_edit_section_page() {
+}
+
+function init_edit_part_page() {
+}
+
 function init_editmotd_page() {
     document.getElementById('motd').focus();
 }

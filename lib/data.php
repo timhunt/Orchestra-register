@@ -27,6 +27,9 @@
 class database_connection {
     private $conn;
 
+    private $transactions = array();
+    private $isrolledback = false;
+
     public function __construct($dbhost, $dbuser, $dbpass, $dbname) {
         $this->conn = mysql_connect($dbhost, $dbuser, $dbpass);
         if (!$this->conn) {
@@ -66,6 +69,11 @@ class database_connection {
 
     public function update($sql) {
         $this->execute_sql($sql);
+    }
+
+    public function set_field($table, $column, $newvalue, $where) {
+        $this->update("UPDATE $table SET $column = " . $this->escape($newvalue) .
+                "WHERE $where");
     }
 
     public function table_exists($name) {
@@ -126,6 +134,54 @@ class database_connection {
             throw new database_exception('Failed to count data in the databse.', 'Table ' . $table);
         }
         return $record->count;
+    }
+
+    public function begin_transaction() {
+        if (empty($this->transactions)) {
+            $this->execute_sql('BEGIN');
+        }
+        $transaction = new transaction($this);
+        $this->transactions[] = $transaction;
+        return $transaction; 
+    }
+
+    protected function verify_right_transaction($transaction) {
+        $nexttrans = array_pop($this->transactions);
+        if ($nexttrans !== $transaction) {
+            throw new coding_error('Transactions incorrectly nested.');
+        }
+        $transaction->dispose();
+    }
+
+    public function commit_transaction($transaction) {
+        if ($this->isrolledback) {
+            $this->rollback_transaction($transaction);
+        }
+
+        $this->verify_right_transaction($transaction);
+
+        if (empty($this->transactions)) {
+            $this->execute_sql('COMMIT');
+        }
+    }
+
+    public function rollback_transaction($transaction) {
+        $this->verify_right_transaction($transaction);
+
+        if (empty($this->transactions)) {
+            $this->execute_sql('ROLLBACK');
+            $this->isrolledback = false;
+        } else {
+            $this->isrolledback = true;
+        }
+    }
+
+    public function __destruct() {
+        if ($this->transactions) {
+            $this->execute_sql('ROLLBACK');
+            $this->transactions = array();
+            $this->isrolledback = false;
+        }
     }
 }
 
@@ -300,6 +356,17 @@ class database {
             FROM parts
             JOIN sections ON parts.section = sections.section
             ORDER BY sectionsort, partsort", 'stdClass');
+    }
+
+    public function load_sections_and_parts() {
+        return $this->connection->get_records_sql("
+                SELECT sections.section, sections.sectionsort, parts.part, parts.partsort,
+                    CASE WHEN EXISTS (SELECT 1 FROM players WHERE players.part = parts.part)
+                    THEN 1
+                    ELSE 0 END AS inuse
+                FROM sections
+                LEFT JOIN parts ON parts.section = sections.section
+                ORDER BY sectionsort, partsort", 'stdClass');
     }
 
     public function load_player_parts($userid) {
@@ -488,17 +555,83 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function insert_section($section, $sort) {
+    public function insert_section($section) {
         $sql = "INSERT INTO sections (section, sectionsort)
-                VALUES (" . $this->escape($section) . ", " . $this->escape($sort) . ")";
+                VALUES (" . $this->escape($section) . ",
+                    COALESCE(1 + (SELECT MAX(sectionsort) FROM
+                            (SELECT sectionsort FROM sections) mysqlworkaround)
+                    , 1))";
         $this->connection->update($sql);
     }
 
-    public function insert_part($part, $section, $sort) {
+    public function insert_part($section, $part) {
         $sql = "INSERT INTO parts (part, section, partsort)
-                VALUES (" . $this->escape($part) . ", " . $this->escape($section) . ", " .
-                $this->escape($sort) . ")";
+                VALUES (" . $this->escape($part) . ", " . $this->escape($section) . ",
+                    COALESCE(1 + (SELECT MAX(partsort) FROM
+                            (SELECT partsort FROM parts WHERE section = " . $this->escape($section) . "
+                    ) mysqlworkaround), 1))";
         $this->connection->update($sql);
+    }
+
+    public function delete_section($section) {
+        $sql = "DELETE FROM sections WHERE section = " . $this->escape($section);
+        $this->connection->update($sql);
+    }
+
+    public function delete_part($part) {
+        $sql = "DELETE FROM parts WHERE part = " . $this->escape($part);
+        $this->connection->update($sql);
+    }
+
+    public function rename_section($oldname, $newname) {
+        $transaction = $this->connection->begin_transaction();
+        $oldsection = $this->connection->get_record_select('sections', 'section = ' .
+                $this->escape($oldname), 'stdClass');
+        $this->insert_section($newname);
+
+        $sql = "UPDATE parts SET section = " . $this->escape($newname) . "
+                WHERE section = " . $this->escape($oldname);
+        $this->connection->update($sql);
+
+        $this->delete_section($oldname);
+        $this->connection->set_field('sections', 'sectionsort', $oldsection->partsort,
+                'section = ' . $this->escape($newname));
+        $transaction->commit();
+    }
+
+    public function rename_part($oldname, $newname) {
+        $transaction = $this->connection->begin_transaction();
+        $oldpart = $this->connection->get_record_select('parts', 'part = ' .
+                $this->escape($oldname), 'stdClass');
+        $this->insert_part($oldpart->section, $newname);
+
+        $sql = "UPDATE players SET part = " . $this->escape($newname) . "
+                WHERE part = " . $this->escape($newname);
+        $this->connection->update($sql);
+
+        $this->delete_part($oldname);
+        $this->connection->set_field('parts', 'partsort', $oldpart->partsort,
+                'part = ' . $this->escape($newname));
+        $transaction->commit();
+    }
+
+    public function swap_section_order($section1, $order1, $section2, $order2) {
+        $transaction = $this->connection->begin_transaction();
+        $this->connection->set_field('sections', 'sectionsort', 0,
+                'section = ' . $this->escape($section1));
+        $this->connection->set_field('sections', 'sectionsort', $order1,
+                'section = ' . $this->escape($section2));
+        $this->connection->set_field('sections', 'sectionsort', $order2,
+                'section = ' . $this->escape($section1));
+        $transaction->commit();
+    }
+
+    public function swap_part_order($part1, $order1, $part2, $order2) {
+        $transaction = $this->connection->begin_transaction();
+        $this->connection->set_field('parts', 'partsort', 0, 'part = ' . $this->escape($part1));
+        $this->connection->set_field('parts', 'partsort', $order1, 'part = ' . $this->escape($part2));
+        $this->connection->set_field('parts', 'partsort', $order2, 'part = ' . $this->escape($part1));
+        $transaction->commit();
     }
 
     public function insert_log($userid, $authlevel, $action) {
@@ -593,5 +726,38 @@ class database {
         }
 
         return $config;
+    }
+}
+
+/**
+ * Transaction class.
+ */
+class transaction {
+    private $connection;
+
+    public function __construct($connection) {
+        $this->connection = $connection;
+    }
+
+    protected function is_disposed() {
+        return empty($this->connection);
+    }
+
+    public function dispose() {
+        return $this->connection = null;
+    }
+
+    public function commit() {
+        if ($this->is_disposed()) {
+            throw new coding_error('Transactions already disposed');
+        }
+        $this->connection->commit_transaction($this);
+    }
+
+    public function rollback() {
+        if ($this->is_disposed()) {
+            throw new coding_error('Transactions already disposed');
+        }
+        $this->connection->rollback_transaction($this);
     }
 }
