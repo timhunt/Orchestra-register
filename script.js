@@ -30,6 +30,9 @@ function init_edit_events_page() {
 }
 
 function init_edit_players_page() {
+    YUI().use('event', function(Y) {
+        Y.on('click', onclick_select, 'input');
+    });
 }
 
 function init_edit_event_page() {
@@ -47,9 +50,11 @@ function init_edit_parts_page() {
 }
 
 function init_edit_section_page() {
+    document.getElementById('sectionname').focus();
 }
 
 function init_edit_part_page() {
+    document.getElementById('partname').focus();
 }
 
 function init_editmotd_page() {

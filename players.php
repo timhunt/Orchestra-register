@@ -83,6 +83,7 @@ echo $output->sesskey_input($or);
 <tr class="headingrow">
 <th>Name</th>
 <th>Part</th>
+<th>URL</th>
 </tr>
 </thead>
 <tbody>
@@ -99,6 +100,8 @@ foreach ($players as $player) {
     echo $output->group_select('player' . $player->id, $parts, $player->part);
     ?>
 </td>
+<td><input type="text" size="40" readonly="readonly" value="<?php echo $or->url(
+            '?t=' . $user->authkey, false, $or->get_config()->defaultseriesid); ?>" /></td>
 </tr>
     <?php
 }
