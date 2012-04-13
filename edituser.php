@@ -22,7 +22,7 @@
  */
 
 require_once(dirname(__FILE__) . '/setup.php');
-require_once(dirname(__FILE__) . '/lib/form.php');
+require_once(dirname(__FILE__) . '/lib/forms.php');
 $or = new orchestra_register();
 $series = $or->get_series_list();
 $parts = $or->get_parts(true);

@@ -22,7 +22,7 @@
  */
 
 require_once(dirname(__FILE__) . '/setup.php');
-require_once(dirname(__FILE__) . '/lib/form.php');
+require_once(dirname(__FILE__) . '/lib/forms.php');
 $or = new orchestra_register();
 
 $currentuser = $or->get_current_user();

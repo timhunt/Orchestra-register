@@ -22,7 +22,7 @@
  */
 
 require_once(dirname(__FILE__) . '/setup.php');
-require_once(dirname(__FILE__) . '/lib/form.php');
+require_once(dirname(__FILE__) . '/lib/forms.php');
 
 if (!is_readable(dirname(__FILE__) . '/config.php')) {
     throw new register_exception('In order to install Orchestra register, ' .

@@ -15,10 +15,7 @@
 
 
 /**
- * Low-level database functions.
- *
- * This class should only be used by the other classes in this file, it should
- * not be used more widely.
+ * Code for installing/upgrading the system.
  *
  * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk
