@@ -13,8 +13,13 @@ h2 {
 }
 h3 {
     font-weight: bold;
-    font-size: 100%;
+    font-size: 110%;
     margin: 1em 0 0.5em;
+}
+h4 {
+    font-weight: bold;
+    font-size: 100%;
+    margin: 0.5em 0 0.2em;
 }
 p, ul, ol {
     margin: 0.5em 0;
@@ -40,6 +45,12 @@ th {
 .eventvenue,
 .eventdatetime {
     font-size: 0.8em;
+}
+p.eventname,
+p.eventdesc,
+p.eventvenue,
+p.eventdatetime {
+    font-size: 1em;
 }
 .sectcol,
 .partcol {
@@ -119,6 +130,33 @@ pre {
 }
 .r1 .unsure {
     background: #f4f4b0;
+}
+ul.attendancelist {
+    display: block;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+ul.attendancelist li {
+    display: inline;
+    margin: 0 2px 0 0;
+    padding: 1px 2px;
+    white-space: nowrap;
+}
+ul.attendancelist li.unknown {
+    border: 1px solid #666;
+}
+ul.attendancelist li.yes {
+    border: 1px solid #080;
+}
+ul.attendancelist li.no {
+    border: 1px solid #a00;
+}
+ul.attendancelist li.unsure {
+    border: 1px solid #ffc;
+}
+ul.attendancelist li.notrequired {
+    border: 1px solid #888;
 }
 ul.sections form,
 ul.sections form div {

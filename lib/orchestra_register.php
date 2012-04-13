@@ -81,6 +81,18 @@ class orchestra_register {
         }
     }
 
+    public function set_series_id($seriesid) {
+        if (!$this->check_series_exists($seriesid)) {
+            throw new not_found_exception('Unknown series.', $seriesid);
+        }
+        if ($this->seriesid != $seriesid) {
+            $this->seriesid = $seriesid;
+            $this->players = null;
+            $this->events = null;
+            $this->attendanceloaded = false;
+        }
+    }
+
     public function install() {
         $this->db->install($this->version->id);
     }
@@ -119,6 +131,12 @@ class orchestra_register {
         return $this->db->load_users($includedisabled);
     }
 
+    /**
+     * Get the data about an event.
+     * @param int $id
+     * @param bool $includedeleted
+     * @return event
+     */
     public function get_event($id, $includedeleted = false) {
         $event = $this->db->find_event_by_id($id, $includedeleted);
         if (!$event) {
@@ -132,6 +150,30 @@ class orchestra_register {
             $this->events = $this->db->load_events($this->seriesid, $includepast, $includedeleted);
         }
         return $this->events;
+    }
+
+    public function get_previous_event($eventid) {
+        $previousevent = null;
+        foreach ($this->get_events(true) as $event) {
+            if ($event->id == $eventid) {
+                return $previousevent;
+            }
+            $previousevent = $event;
+        }
+        return null;
+    }
+
+    public function get_next_event($eventid) {
+        $found = false;
+        foreach ($this->get_events(true) as $event) {
+            if ($found) {
+                return $event;
+            }
+            if ($event->id == $eventid) {
+                $found = true;
+            }
+        }
+        return null;
     }
 
     public function get_parts($includenotplaying = false) {
@@ -299,6 +341,10 @@ class orchestra_register {
         foreach ($events as $event) {
             $totalplayers[$event->id] = 0;
             $totalattending[$event->id] = 0;
+            foreach ($this->get_sections_and_parts() as $section => $notused) {
+                $sectionplayers[$section][$event->id] = 0;
+                $sectionattending[$section][$event->id] = 0;
+            }
 
             foreach ($subtotals as $part => $subtotal) {
                 if ($subtotal->numplayers[$event->id]) {
@@ -561,7 +607,7 @@ class orchestra_register {
         return $this->config->motd;
     }
 
-    public function get_actions_menus($user, $includepast) {
+    public function get_actions_menus($user, $includepast, $withprint = true, $withshowhide = true) {
         if ($includepast) {
             $showhidepasturl = $this->url('');
             $showhidepastlabel = 'Hide events in the past';
@@ -573,8 +619,12 @@ class orchestra_register {
         }
 
         $seriesactions = new actions();
-        $seriesactions->add($showhidepasturl, $showhidepastlabel);
-        $seriesactions->add($printurl, 'Printable view');
+        if ($withprint) {
+            $seriesactions->add($showhidepasturl, $showhidepastlabel);
+        }
+        if ($withshowhide) {
+            $seriesactions->add($printurl, 'Printable view');
+        }
         $seriesactions->add($this->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
         $seriesactions->add($this->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
         $seriesactions->add($this->url('players.php'), 'Edit the list of players', $user->can_edit_players());

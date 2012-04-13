@@ -39,6 +39,9 @@ class event {
     }
 
     public function get_nice_datetime($dateformat = self::DATE_FORMAT, $html = true) {
+        if (strftime('%Y', $this->timestart) != strftime('%Y', time())) {
+            $dateformat .= ' %Y';
+        }
         $startdate = strftime($dateformat, $this->timestart);
         $enddate = strftime($dateformat, $this->timeend);
         $starttime = strftime(self::TIME_FORMAT, $this->timestart);

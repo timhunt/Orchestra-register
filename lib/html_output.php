@@ -252,6 +252,33 @@ class html_output {
         return '<p>' . $intro . ': ' . implode(' - ', $links) . '</p>';
     }
 
+    public function subtotal($attending, $outof) {
+        if ($outof) {
+            return '<span class="total">' . $attending . '</span><span class="outof">/' . $outof . '</span>';
+        } else {
+            return '-';
+        }
+    }
+
+    /**
+     * Output the links to the previous or next events, if any.
+     * @param event $previousevent
+     * @param event $nextevent
+     */
+    public function previous_next_links($previousevent, $nextevent) {
+        $output = '';
+        if ($previousevent) {
+            $output .= '<p><a href="' . $this->or->url('event.php?id=' . $previousevent->id) .
+                    '">Previous: ' . htmlspecialchars($previousevent->name) .
+                    ' (' . $previousevent->get_nice_datetime() . ')</a></p>';
+        }
+        if ($nextevent) {
+            $output .= '<p><a href="' . $this->or->url('event.php?id=' . $nextevent->id) . '">Next: ' . htmlspecialchars($nextevent->name) .
+                    ' (' . $nextevent->get_nice_datetime() . ')</a></p>';
+        }
+        return $output;
+    }
+
     public function call_to_js($function, $arguments = array()) {
         $quotedargs = array();
         foreach ($arguments as $arg) {

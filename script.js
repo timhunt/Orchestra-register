@@ -12,6 +12,9 @@ function init_index_page(eventids, playerids) {
     });
 }
 
+function init_event_page() {
+}
+
 function init_login_page() {
     document.getElementById('email').focus();
 }

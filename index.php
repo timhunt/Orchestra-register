@@ -32,7 +32,7 @@ $events = $or->get_events($includepast);
 $user = $or->get_current_user();
 $series = $or->get_series_list();
 
-if ($printview || empty($user->id)) {
+if ($printview) {
     $players = $or->get_players(false);
 } else {
     $players = $or->get_players(false, $user->id);
@@ -102,7 +102,8 @@ if (!$printview && $user->is_authenticated()) {
 <?php
 foreach ($events as $event) {
     ?>
-<th class="eventname"><?php echo htmlspecialchars($event->name); ?></th>
+<th class="eventname"><a href="<?php echo $or->url('event.php?id=' . $event->id);
+        ?>"><?php echo htmlspecialchars($event->name); ?></a></th>
     <?php
 }
 ?>
@@ -186,16 +187,7 @@ foreach ($subtotals as $part => $subtotal) {
     <?php
     foreach ($events as $event) {
         ?>
-<td>
-        <?php
-        if ($subtotal->numplayers[$event->id]) {
-            echo '<span class="total">', $subtotal->attending[$event->id], '</span><span class="outof">/',
-                    $subtotal->numplayers[$event->id], '</span>';
-        } else {
-            echo '-';
-        }
-        ?>
-</td>
+<td><?php echo $output->subtotal($subtotal->attending[$event->id], $subtotal->numplayers[$event->id]); ?></td>
         <?php
     }
     ?>
@@ -208,8 +200,7 @@ foreach ($subtotals as $part => $subtotal) {
 <?php
 foreach ($events as $event) {
     ?>
-<td><span class="total"><?php echo $totalattending[$event->id];
-        ?></span><span class="outof">/<?php echo $totalplayers[$event->id]; ?></span></td>
+<td><?php echo $output->subtotal($totalattending[$event->id], $totalplayers[$event->id]); ?></td>
     <?php
 }
 ?>
@@ -224,16 +215,7 @@ foreach ($sectionplayers as $section => $eventtotals) {
     <?php
     foreach ($events as $event) {
         ?>
-<td>
-        <?php
-        if (array_key_exists($event->id, $eventtotals) && $eventtotals[$event->id]) {
-            echo '<span class="total">', $sectionattending[$section][$event->id],
-                    '</span><span class="outof">/', $eventtotals[$event->id], '</span>';
-        } else {
-            echo '-';
-        }
-        ?>
-</td>
+<td><?php echo $output->subtotal($sectionattending[$section][$event->id], $eventtotals[$event->id]); ?></td>
         <?php
     }
     ?>
