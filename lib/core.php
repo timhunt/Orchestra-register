@@ -290,6 +290,34 @@ class orchestra_register {
         return $subtotals;
     }
 
+    public function get_subtotals($events) {
+        $subtotals = $this->load_subtotals();
+        $totalplayers = array();
+        $totalattending = array();
+        $sectionplayers = array();
+        $sectionattending = array();
+        foreach ($events as $event) {
+            $totalplayers[$event->id] = 0;
+            $totalattending[$event->id] = 0;
+
+            foreach ($subtotals as $part => $subtotal) {
+                if ($subtotal->numplayers[$event->id]) {
+                    $totalplayers[$event->id] += $subtotal->numplayers[$event->id];
+                    $totalattending[$event->id] += $subtotal->attending[$event->id];
+
+                    if (!isset($sectionplayers[$subtotal->section][$event->id])) {
+                        $sectionplayers[$subtotal->section][$event->id] = 0;
+                        $sectionattending[$subtotal->section][$event->id] = 0;
+                    }
+
+                    $sectionplayers[$subtotal->section][$event->id] += $subtotal->numplayers[$event->id];
+                    $sectionattending[$subtotal->section][$event->id] += $subtotal->attending[$event->id];
+                }
+            }
+        }
+        return array($subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending);
+    }
+
     public function load_selected_players($parts, $eventid, $statuses) {
         return $this->db->load_selected_players($this->seriesid, $parts, $eventid, $statuses);
     }
@@ -531,6 +559,37 @@ class orchestra_register {
 
     public function get_motd() {
         return $this->config->motd;
+    }
+
+    public function get_actions_menus($user, $includepast) {
+        if ($includepast) {
+            $showhidepasturl = $this->url('');
+            $showhidepastlabel = 'Hide events in the past';
+            $printurl = $this->url('?print=1&past=1');
+        } else {
+            $showhidepasturl = $this->url('?past=1');
+            $showhidepastlabel = 'Show events in the past';
+            $printurl = $this->url('?print=1');
+        }
+
+        $seriesactions = new actions();
+        $seriesactions->add($showhidepasturl, $showhidepastlabel);
+        $seriesactions->add($printurl, 'Printable view');
+        $seriesactions->add($this->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
+        $seriesactions->add($this->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
+        $seriesactions->add($this->url('players.php'), 'Edit the list of players', $user->can_edit_players());
+        $seriesactions->add($this->url('events.php'), 'Edit the list of events', $user->can_edit_events());
+        $seriesactions->add($this->url('extractemails.php'), 'Get a list of email addresses', $user->can_edit_users());
+
+        $systemactions = new actions();
+        $systemactions->add($this->url('users.php'), 'Edit the list of users', $user->can_edit_users());
+        $systemactions->add($this->url('series.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
+        $systemactions->add($this->url('parts.php'), 'Edit the available sections and parts', $user->can_edit_parts());
+        $systemactions->add($this->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
+        $systemactions->add($this->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());
+        $systemactions->add($this->url('logs.php'), 'View the system logs', $user->can_view_logs());
+
+        return array($seriesactions, $systemactions);
     }
 
     public function get_help_url() {

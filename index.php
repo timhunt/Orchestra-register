@@ -32,12 +32,6 @@ $events = $or->get_events($includepast);
 $user = $or->get_current_user();
 $series = $or->get_series_list();
 
-if ($user->is_authenticated()) {
-    $savechangesbutton = '<p><input type="submit" name="save" value="Save changes" /></p>';
-} else {
-    $savechangesbutton = '';
-}
-
 if ($printview || empty($user->id)) {
     $players = $or->get_players(false);
 } else {
@@ -45,60 +39,19 @@ if ($printview || empty($user->id)) {
 }
 
 $or->load_attendance();
-$subtotals = $or->load_subtotals();
+list($subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending) =
+        $or->get_subtotals($events);
 
-$totalplayers = array();
-$totalattending = array();
-$sectionplayers = array();
-$sectionattending = array();
-foreach ($events as $event) {
-    $totalplayers[$event->id] = 0;
-    $totalattending[$event->id] = 0;
+list($seriesactions, $systemactions) = $or->get_actions_menus($user, $includepast);
 
-    foreach ($subtotals as $part => $subtotal) {
-        if ($subtotal->numplayers[$event->id]) {
-            $totalplayers[$event->id] += $subtotal->numplayers[$event->id];
-            $totalattending[$event->id] += $subtotal->attending[$event->id];
-
-            if (!isset($sectionplayers[$subtotal->section][$event->id])) {
-                $sectionplayers[$subtotal->section][$event->id] = 0;
-                $sectionattending[$subtotal->section][$event->id] = 0;
-            }
-
-            $sectionplayers[$subtotal->section][$event->id] += $subtotal->numplayers[$event->id];
-            $sectionattending[$subtotal->section][$event->id] += $subtotal->attending[$event->id];
-        }
-    }
-}
-
-if ($includepast) {
-    $showhidepasturl = $or->url('');
-    $showhidepastlabel = 'Hide events in the past';
+if ($user->is_authenticated()) {
+    $savechangesbutton = '<p><input type="submit" name="save" value="Save changes" /></p>';
 } else {
-    $showhidepasturl = $or->url('?past=1');
-    $showhidepastlabel = 'Show events in the past';
+    $savechangesbutton = '';
 }
-
-$seriesactions = new actions();
-$seriesactions->add($showhidepasturl, $showhidepastlabel);
-$seriesactions->add($or->url('?print=1'), 'Printable view');
-$seriesactions->add($or->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
-$seriesactions->add($or->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());
-$seriesactions->add($or->url('players.php'), 'Edit the list of players', $user->can_edit_players());
-$seriesactions->add($or->url('events.php'), 'Edit the list of events', $user->can_edit_events());
-$seriesactions->add($or->url('extractemails.php'), 'Get a list of email addresses', $user->can_edit_users());
-
-$systemactions = new actions();
-$systemactions->add($or->url('users.php'), 'Edit the list of users', $user->can_edit_users());
-$systemactions->add($or->url('series.php'), 'Edit the list of rehearsal series', $user->can_edit_series());
-$systemactions->add($or->url('parts.php'), 'Edit the available sections and parts', $user->can_edit_parts());
-$systemactions->add($or->url('editmotd.php'), 'Edit introductory message', $user->can_edit_motd());
-$systemactions->add($or->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());
-$systemactions->add($or->url('logs.php'), 'View the system logs', $user->can_view_logs());
 
 $motdheading = $or->get_motd_heading();
 $motd = $or->get_motd();
-
 
 $bodyclass = '';
 if ($printview) {
