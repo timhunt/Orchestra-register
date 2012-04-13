@@ -279,6 +279,10 @@ class html_output {
         return $output;
     }
 
+    public function make_id($string) {
+        return trim(preg_replace('~[^a-z0-9]+~', '-', strtolower($string)), '-');
+    }
+
     public function call_to_js($function, $arguments = array()) {
         $quotedargs = array();
         foreach ($arguments as $arg) {

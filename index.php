@@ -14,7 +14,7 @@
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Main script. Show the register,
+ * Main script. Show the register.
  *
  * @package orchestraregister
  * @copyright 2009 onwards Tim Hunt. T.J.Hunt@open.ac.uk

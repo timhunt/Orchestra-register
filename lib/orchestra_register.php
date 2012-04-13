@@ -607,23 +607,36 @@ class orchestra_register {
         return $this->config->motd;
     }
 
-    public function get_actions_menus($user, $includepast, $withprint = true, $withshowhide = true) {
+    /**
+     * Get the lists of actions that appear under the register.
+     * @param user $user
+     * @param bool $includepast whether past events are currently included.
+     * @param string|bool $printurl whether to include a print view link. String script name to include. false to exclude.
+     * @param string|bool $showhideurl whether to include the show/hide events in the past URL.
+     * @return array with two elements, both actions objects.
+     */
+    public function get_actions_menus($user, $includepast, $printurl = '', $showhideurl = '') {
         if ($includepast) {
-            $showhidepasturl = $this->url('');
+            $showhidepasturl = $this->url($showhideurl);
             $showhidepastlabel = 'Hide events in the past';
-            $printurl = $this->url('?print=1&past=1');
+            $fullprinturl = $this->url('?print=1&past=1');
         } else {
-            $showhidepasturl = $this->url('?past=1');
+            if (strpos($showhideurl, '?') !== false) {
+                $join = '&';
+            } else {
+                $join = '?';
+            }
+            $showhidepasturl = $this->url($showhideurl . $join . 'past=1');
             $showhidepastlabel = 'Show events in the past';
-            $printurl = $this->url('?print=1');
+            $fullprinturl = $this->url($printurl . '?print=1');
         }
 
         $seriesactions = new actions();
-        if ($withprint) {
+        if (is_string($showhideurl)) {
             $seriesactions->add($showhidepasturl, $showhidepastlabel);
         }
-        if ($withshowhide) {
-            $seriesactions->add($printurl, 'Printable view');
+        if (is_string($printurl)) {
+            $seriesactions->add($fullprinturl, 'Printable view');
         }
         $seriesactions->add($this->url('ical.php', false), 'Download iCal file (to add the rehearsals into Outlook, etc.)');
         $seriesactions->add($this->url('wikiformat.php'), 'List of events to copy-and-paste into the wiki', $user->can_edit_events());

@@ -143,24 +143,34 @@ ul.attendancelist li {
     padding: 1px 2px;
     white-space: nowrap;
 }
+label.unknown,
 ul.attendancelist li.unknown {
-    border: 1px solid #666;
+  border: 1px solid #666;
 }
+label.yes,
 ul.attendancelist li.yes {
-    border: 1px solid #080;
+  border: 1px solid #080;
 }
+label.no,
 ul.attendancelist li.no {
-    border: 1px solid #a00;
+  border: 1px solid #a00;
 }
+label.unsure,
 ul.attendancelist li.unsure {
-    border: 1px solid #ffc;
+  border: 1px solid #aa3;
 }
+label.notrequired,
 ul.attendancelist li.notrequired {
-    border: 1px solid #888;
+  border: 1px solid #888;
 }
 ul.sections form,
 ul.sections form div {
   display: inline;
+}
+label.status {
+    display: inline-block;
+    padding: 1px 2px;
+    width: 3em;
 }
 .logs td {
     font-size: 0.8em;

@@ -100,7 +100,7 @@ if (!$players) {
             }
             $currentsection = $player->section
             ?>
-<h3><?php echo htmlspecialchars($currentsection); ?> <?php echo $output->subtotal(
+<h3 id="section-<?php echo $output->make_id($currentsection); ?>"><?php echo htmlspecialchars($currentsection); ?> <?php echo $output->subtotal(
                 $sectionattending[$currentsection][$event->id],
                 $sectionplayers[$currentsection][$event->id]); ?></h3>
             <?php
@@ -113,7 +113,7 @@ if (!$players) {
             }
             $currentpart = $player->part
             ?>
-<h4><?php echo htmlspecialchars($currentpart); ?> <?php echo $output->subtotal(
+<h4 id="part-<?php echo $output->make_id($currentpart); ?>"><?php echo htmlspecialchars($currentpart); ?> <?php echo $output->subtotal(
                 $subtotals[$currentpart]->attending[$event->id],
                 $subtotals[$currentpart]->numplayers[$event->id]); ?></h4>
             <?php

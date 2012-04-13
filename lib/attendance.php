@@ -44,27 +44,66 @@ class attendance {
     public function get_field_name() {
         return 'att_' . $this->userid . '_' . $this->eventid;
     }
+
+    protected function get_choices($includenoneeded) {
+        $choices = array();
+
+        foreach (self::$symbols as $value => $symbol) {
+            if (!$includenoneeded && $value == self::NOTREQUIRED) {
+                continue;
+            }
+            $choices[$value] = $symbol;
+        }
+
+        return $choices;
+    }
+
     public function get_select($includenoneeded) {
         if (!$includenoneeded && $this->status == attendance::NOTREQUIRED) {
             return $this->get_symbol();
         }
         $output = '<select name="' . $this->get_field_name() . '" class="statusselect" id="' .
                 $this->get_field_name() . '">';
-        foreach (self::$symbols as $value => $symbol) {
-            if (!$includenoneeded && $value == self::NOTREQUIRED) {
-                continue;
-            }
-            if ($this->status == $value) {
-                $selected = ' selected="selected"';
+        foreach ($this->get_choices($includenoneeded) as $value => $symbol) {
+            if ($value == $this->status) {
                 $actualvalue = 'nochange';
+                $selected = ' selected="selected"';
             } else {
-                $selected = '';
                 $actualvalue = $value;
+                $selected = '';
             }
             $output .= '<option class="' . $value . '" value="' . $actualvalue . '"' .
                     $selected . '>' . $symbol . '</option>';
         }
         $output .= '</select>';
+        return $output;
+    }
+
+    public function get_radio($editable, $includenoneeded) {
+        if (!$includenoneeded && $this->status == attendance::NOTREQUIRED) {
+            return $this->get_symbol();
+        }
+
+        $output = '';
+        foreach ($this->get_choices($includenoneeded) as $value => $symbol) {
+            if ($value == $this->status) {
+                $actualvalue = 'nochange';
+                $checked = ' checked="checked"';
+            } else {
+                $actualvalue = $value;
+                $checked = '';
+            }
+            $disabled = '';
+            if (!$editable) {
+                $disabled = ' disabled="disabled"';
+            }
+            $output .= '<label for="' . $this->get_field_name() . '-' . $value .
+                    '" class="status ' . $value . '"><input type="radio" name="' .
+                    $this->get_field_name() . '" value="' . $actualvalue . '"' .
+                    $checked . $disabled . ' id="' . $this->get_field_name() . '-' . $value .
+                    '" />' . $symbol . '</label>';
+        }
+
         return $output;
     }
 }
