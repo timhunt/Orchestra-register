@@ -90,7 +90,7 @@ foreach ($events as $event) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
-<th><?php echo htmlspecialchars($event->name); ?></th>
+<th><?php echo $output->event_link($event); ?></th>
 <td><?php echo htmlspecialchars($event->venue); ?></td>
 <td><?php echo strftime(event::DATE_FORMAT, $event->timestart); ?></td>
 <td><?php echo strftime(event::TIME_FORMAT, $event->timestart); ?></td>

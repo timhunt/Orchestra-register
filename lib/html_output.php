@@ -252,6 +252,14 @@ class html_output {
         return '<p>' . $intro . ': ' . implode(' - ', $links) . '</p>';
     }
 
+    public function event_link($event, $fragment = '') {
+        if ($fragment) {
+            $fragment = '#' . $fragment;
+        }
+        return '<a class="eventlink" href="' . $this->or->url('event.php?id=' . $event->id) . $fragment . '">' .
+                htmlspecialchars($event->name) . '</a>';
+    }
+
     public function subtotal($attending, $outof) {
         if ($outof) {
             return '<span class="total">' . $attending . '</span><span class="outof">/' . $outof . '</span>';

@@ -130,8 +130,8 @@ if (!$player) {
         $info[] = $event->get_nice_datetime();
         ?>
 <div class="event r<?php echo $rowparity = 1 - $rowparity; ?>">
-<h3 id="event-<?php echo $event->id; ?>"><a href="<?php echo $or->url('event.php?id=' . $event->id);
-        ?>#part-<?php echo $output->make_id($player->part); ?>"><?php echo htmlspecialchars($event->name); ?></a> (<?php echo implode('; ', $info); ?>)</h3>
+<h3 id="event-<?php echo $event->id; ?>"><?php echo $output->event_link($event, 'part-' . $output->make_id($player->part)); ?>
+        (<?php echo implode('; ', $info); ?>)</h3>
         <?php
 
         $attendance = $player->get_attendance($event);

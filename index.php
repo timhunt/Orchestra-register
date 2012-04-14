@@ -102,8 +102,7 @@ if (!$printview && $user->is_authenticated()) {
 <?php
 foreach ($events as $event) {
     ?>
-<th class="eventname"><a href="<?php echo $or->url('event.php?id=' . $event->id);
-        ?>"><?php echo htmlspecialchars($event->name); ?></a></th>
+<th class="eventname"><?php echo $output->event_link($event); ?></th>
     <?php
 }
 ?>

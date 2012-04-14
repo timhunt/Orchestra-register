@@ -78,6 +78,23 @@ pre {
     padding: 0.5em 1em;
     background: #ddd;
 }
+a:link,
+a:visited {
+    text-decoration: underline;
+    color: #008;
+}
+a.eventlink:link,
+a.eventlink:visited {
+    text-decoration: none;
+    color: #000;
+}
+a:link:hover,
+a:visited:hover,
+a:link:active,
+a:visited:active {
+    text-decoration: underline;
+    color: #00f;
+}
 .deleted {
     color: #aaa;
 }
