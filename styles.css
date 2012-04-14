@@ -159,7 +159,6 @@ ul.attendancelist {
 }
 ul.attendancelist li {
     display: inline;
-    margin: 0 0.1em 0 0;
     padding: 0.1em 0.2em;
     border-radius: 0.25em;
     white-space: nowrap;

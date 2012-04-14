@@ -288,6 +288,17 @@ class html_output {
                 htmlspecialchars($name) . '</a>';
     }
 
+    public function player_attendance($player, $event) {
+        $attendance = $player->get_attendance($event);
+
+        $content = $this->player_link($player, $event);
+        if (trim($attendance->get_symbol())) {
+            $content .= ': ' . htmlspecialchars($attendance->get_symbol());
+        }
+
+        return '<li class="' . $attendance->status . '">' . $content . '</li> ';
+    }
+
     public function subtotal($attending, $outof) {
         if ($outof) {
             return '<span class="total">' . $attending . '</span><span class="outof">/' . $outof . '</span>';

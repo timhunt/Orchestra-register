@@ -154,11 +154,7 @@ if (!$player) {
                     $listopen = true;
                 }
 
-                $attendance = $otherplayer->get_attendance($event);
-                ?>
-<li class="<?php echo $attendance->status; ?>"><?php echo trim(htmlspecialchars($otherplayer->get_public_name()) .
-        ' ' . $attendance->get_symbol()); ?></li>
-                <?php
+                echo $output->player_attendance($otherplayer, $event);
             }
         }
 

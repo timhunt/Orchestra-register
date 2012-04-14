@@ -132,11 +132,7 @@ if (!$players) {
             $listopen = true;
         }
 
-        $attendance = $player->get_attendance($event);
-        ?>
-<li class="<?php echo $attendance->status; ?>"><?php echo trim(htmlspecialchars($player->get_public_name()) .
-            ' ' . $attendance->get_symbol()); ?></li>
-        <?php
+        echo $output->player_attendance($player, $event);
     }
     if ($listopen) {
         ?>
