@@ -41,8 +41,9 @@ $output->header('Edit users');
 <p><a href="<?php echo $or->url('edituser.php'); ?>">Add another user</a></p>
 <?php
 echo $output->links_to_other_series($series, 'players.php', false, true, 'Edit the players for');
+echo $output->back_link();
+
 ?>
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <table>
 <thead>
 <tr class="headingrow">
@@ -88,8 +89,6 @@ foreach ($users as $user) {
 <p><a href="<?php echo $or->url('edituser.php'); ?>">Add another user</a></p>
 <?php
 echo $output->links_to_other_series($series, 'players.php', false, true, 'Edit the players for');
-?>
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
-<?php
+echo $output->back_link();
 $output->call_to_js('init_edit_users_page');
 $output->footer();

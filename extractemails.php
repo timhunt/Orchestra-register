@@ -76,7 +76,7 @@ switch ($form->get_outcome()) {
 
 $output = $or->get_output();
 $output->header('Get a list of email addresses');
-echo '<p><a href="' . $or->url('') . '">Back to the register</a></p>';
+echo $output->back_link();
 echo $form->output($output);
 $output->call_to_js('init_extract_emails_page');
 

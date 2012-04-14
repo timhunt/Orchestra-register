@@ -45,7 +45,7 @@ class html_output {
         echo '<h2>' . $summary . '</h2>';
         echo '<p>' . $e->getMessage() . '</p>';
         echo '</div>';
-        echo '<p><a href="' . $this->or->url('') . '">Continue</a></p>';
+        echo $this->back_link('Continue');
 
         $this->footer();
         die;
@@ -250,6 +250,15 @@ class html_output {
         }
 
         return '<p>' . $intro . ': ' . implode(' - ', $links) . '</p>';
+    }
+
+    public function back_link($text = 'Back to the register', $event = null) {
+        if (($event && $event->timestart < time()) || $this->or->get_param('past', request::TYPE_BOOL, false, false)) {
+            $url = '?past=1';
+        } else {
+            $url = '';
+        }
+        return '<p><a href="' . $this->or->url($url) . '">' . $text . '</a></p>';
     }
 
     public function event_link($event, $fragment = '') {

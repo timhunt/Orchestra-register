@@ -165,9 +165,8 @@ if ($part = $or->get_param('partdelete', request::TYPE_RAW, false)) {
 $output = $or->get_output();
 $output->header('Edit sections and parts');
 
+echo $output->back_link();
 ?>
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
-
 <ul class="sections">
 <?php
 $rowparity = 1;
@@ -218,9 +217,8 @@ echo '<li>', $output->action_button($or->url('editsection.php', false), array(),
 ?>
 </ul>
 
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
-
 <?php
+echo $output->back_link();
 $output->call_to_js('init_edit_parts_page', array($sections));
 
 $output->footer();

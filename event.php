@@ -144,9 +144,7 @@ if (!$players) {
 }
 
 echo $output->previous_next_links($previousevent, $nextevent);
-?>
-<p><a href="<?php echo $or->url(''); ?>">Show the full register</a></p>
-<?php
+echo $output->back_link('Show the full register', $event);
 echo $output->links_to_other_series($series, 'event.php');
 
 echo '<h3>Options</h3>';

@@ -57,7 +57,7 @@ $output->header('Edit rehearsal series');
 
 ?>
 <p><a href="<?php echo $or->url('editseries.php'); ?>">Add another rehearsal series</a></p>
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
+<?php echo $output->back_link(); ?>
 <table>
 <thead>
 <tr class="headingrow">
@@ -98,7 +98,7 @@ foreach ($serieslist as $series) {
 </tbody>
 </table>
 <p><a href="<?php echo $or->url('editseries.php'); ?>">Add another rehearsal series</a></p>
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
+echo $output->back_link();
 $output->call_to_js('init_edit_series_list_page');
 $output->footer();

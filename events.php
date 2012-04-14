@@ -59,7 +59,7 @@ echo $output->links_to_other_series($series, 'events.php');
 
 ?>
 <p><a href="<?php echo $or->url('editevent.php'); ?>">Add another event</a></p>
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
+<?php echo $output->back_link(); ?>
 <table>
 <thead>
 <tr class="headingrow">
@@ -104,7 +104,7 @@ foreach ($events as $event) {
 </tbody>
 </table>
 <p><a href="<?php echo $or->url('editevent.php'); ?>">Add another event</a></p>
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
 <?php
+echo $output->back_link();
 $output->call_to_js('init_edit_events_page');
 $output->footer();

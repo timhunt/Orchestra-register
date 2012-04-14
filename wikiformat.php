@@ -46,6 +46,6 @@ if ($wikiediturl) {
 }
 echo '<textarea id="wikimarkup" readonly="readonly" cols="80" rows="25">' .
         $content . '</textarea>';
-echo '<p><a href="' . $or->url('') . '">Back to the register</a></p>';
+echo $output->back_link();
 $output->call_to_js('init_wiki_format_page');
 $output->footer();

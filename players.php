@@ -68,8 +68,7 @@ echo $output->links_to_other_series($series, 'players.php');
 
 ?>
 <p><a href="<?php echo $or->url('users.php'); ?>">Edit the list of users</a></p>
-
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
+<?php echo $output->back_link(); ?>
 
 <form action="<?php echo $or->url('players.php'); ?>" method="post">
 <div>
@@ -116,10 +115,7 @@ foreach ($players as $player) {
 </form>
 
 <p><a href="<?php echo $or->url('users.php'); ?>">Edit the list of users</a></p>
-
-<p><a href="<?php echo $or->url(''); ?>">Back to the register</a></p>
-
 <?php
+echo $output->back_link();
 $output->call_to_js('init_edit_players_page', array(array_keys($players)));
-
 $output->footer();

@@ -191,6 +191,7 @@ if ($editable) {
 }
 
 echo $output->links_to_other_series($series, $showhideurl);
+echo $output->back_link('Show the full register');
 
 echo '<h3>Options</h3>';
 echo $seriesactions->output($output);
