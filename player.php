@@ -120,6 +120,7 @@ if (!$player) {
     <?php
 
 } else {
+    $rowparity = 1;
     foreach ($events as $event) {
         $info = array();
         if ($event->description) {
@@ -128,6 +129,7 @@ if (!$player) {
         $info[] = htmlspecialchars($event->venue);
         $info[] = $event->get_nice_datetime();
         ?>
+<div class="event r<?php echo $rowparity = 1 - $rowparity; ?>">
 <h3 id="event-<?php echo $event->id; ?>"><a href="<?php echo $or->url('event.php?id=' . $event->id);
         ?>#part-<?php echo $output->make_id($player->part); ?>"><?php echo htmlspecialchars($event->name); ?></a> (<?php echo implode('; ', $info); ?>)</h3>
         <?php
@@ -173,11 +175,14 @@ if (!$player) {
                         $subtotals[$part->part]->attending[$event->id], $subtotals[$part->part]->numplayers[$event->id]);
             }
             ?>
-<p><b><?php echo htmlspecialchars($section); ?></b> <?php echo $output->subtotal(
+<p><span class="section"><?php echo htmlspecialchars($section); ?></span> <?php echo $output->subtotal(
                 $attending[$event->id], $sectionplayers[$section][$event->id]); ?>
-                (<?php echo implode('; ', $parttotals); ?>)</p>
+                <span class="sectiontotal">(<?php echo implode('; ', $parttotals); ?>)</span></p>
             <?php
         }
+        ?>
+</div>
+        <?php
     }
 }
 

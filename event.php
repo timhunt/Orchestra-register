@@ -91,11 +91,15 @@ if (!$players) {
 } else {
     $currentsection = null;
     $currentpart = null;
+    $rowparity = 1;
     $listopen = false;
     foreach ($players as $player) {
         if ($currentsection != $player->section) {
             if ($listopen) {
-                echo "</ul>\n";
+                ?>
+</ul>
+</div>
+                <?php
                 $listopen = false;
             }
             $currentsection = $player->section
@@ -108,11 +112,15 @@ if (!$players) {
 
         if ($currentpart != $player->part) {
             if ($listopen) {
-                echo "</ul>\n";
+                ?>
+</ul>
+</div>
+                <?php
                 $listopen = false;
             }
             $currentpart = $player->part
             ?>
+<div class="part r<?php echo $rowparity = 1 - $rowparity; ?>">
 <h4 id="part-<?php echo $output->make_id($currentpart); ?>"><?php echo htmlspecialchars($currentpart); ?> <?php echo $output->subtotal(
                 $subtotals[$currentpart]->attending[$event->id],
                 $subtotals[$currentpart]->numplayers[$event->id]); ?></h4>
@@ -131,7 +139,10 @@ if (!$players) {
         <?php
     }
     if ($listopen) {
-        echo "</ul>\n";
+        ?>
+</ul>
+</div>
+        <?php
         $listopen = false;
     }
 }
