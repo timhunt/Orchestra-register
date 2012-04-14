@@ -78,7 +78,14 @@ if ($motdheading || $motd) {
 }
 
 if (!$printview && $user->is_authenticated()) {
+    if ($includepast) {
+        $url = 'player.php?past=1';
+    } else {
+        $url = 'player.php';
+    }
 ?>
+<p><a href="<?php echo $or->url($url); ?>">Go to your personal page (better for mobile phones)</a></p>
+
 <form action="<?php echo $or->url('savechoices.php'); ?>" method="post">
 <div>
 

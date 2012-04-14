@@ -98,6 +98,7 @@ if ($editable) {
 ?>
 <form action="<?php echo $or->url('savechoices.php'); ?>" method="post">
 <div>
+<input type="hidden" name="back" value="<?php echo $playerid; ?>" />
 
 <?php
     echo $output->sesskey_input($or);

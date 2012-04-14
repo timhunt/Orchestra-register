@@ -23,7 +23,10 @@
 
 require_once(dirname(__FILE__) . '/setup.php');
 $or = new orchestra_register();
+
 $includepast = $or->get_param('past', request::TYPE_BOOL, false, false);
+$backto = $or->get_param('back', request::TYPE_INT, 0, false);
+
 $events = $or->get_events($includepast);
 $players = $or->get_players();
 $user = $or->get_current_user();
@@ -49,11 +52,22 @@ foreach ($players as $player) {
     }
 }
 
-if ($includepast) {
-    $or->redirect('?past=1');
-} else {
-    $or->redirect('');
+$url = '';
+$params = array();
+if ($backto) {
+    $url = 'player.php';
+    if ($backto != $user->id) {
+        $params[] = 'id=' . $backto;
+    }
 }
+if ($includepast) {
+    $params[] = 'past=1';
+}
+if ($params) {
+    $url .= '?' . implode('&', $params);
+}
+$or->redirect($url);
+
 
 function has_really_changed($newattendance, $oldattendance, $canchangenotrequired) {
     if ($newattendance == 'nochange' || $newattendance == $oldattendance) {
