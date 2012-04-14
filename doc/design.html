@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>System design - Docs - Orchestra Register</title>
+<link rel="stylesheet" type="text/css" href="../styles.css" />
+</head>
+<body>
+
+<h1>Orchestra register system design</h1>
+
+
+<h2>Overall architecture</h2>
+
+<p>There is a three-layer architecture.</p>
+
+<p>The database layer is in the files <tt>lib/database.php</tt>,
+<tt>lib/database_connection.php</tt>, <tt>lib/transaction.php</tt> and
+<tt>lib/installer.php</tt>.</p>
+
+<p>The domain layer made up of all the other classes in the lib folder, that are
+not otherwise mentioned here. That contains the system class
+<tt>orchestra_register</tt>, which acts as a facade to the rest of the domain classes.
+Then there is a class for each significant database table (<tt>series</tt>,
+<tt>event</tt>, <tt>player</tt>, <tt>user</tt>, <tt>attendance</tt>).
+Then there are some classes that hold the configuration (<tt>version</tt>,
+<tt>sys_config</tt> and <tt>db_config</tt>).</p>
+
+<p>The user interface layer adopts a transaction script architecture, with the
+scripts living in the top-level folder. To avoid duplicated code, there are
+helper classes <tt>html_output</tt> in <tt>lib/html_output.php</tt>, and a set
+of classes for representing forms in <tt>lib/forms.php</tt>.</p>
+
+<p>If you like to think of web applications according to the Model-View-Controller
+paradigm, note that there is a point in each transaction script where all the
+code before that point can be viewed as controller code, and all the code after
+that point can be viewed as view code. The domain layer provides the model.</p>
+
+
+<h2>Database structure</h2>
+
+<p><img src="database.png" alt="Database structure diagram" width="800" /></p>
+
+
+<h2>Class diagram</h2>
+
+<p><img src="classes.png" alt="Class diagram" width="800" /></p>
+
+
+<h2>More on the UI scripts</h2>
+
+<p>The UI scripts can be roughly split into several categories:</p>
+
+<p>Scripts that are basically just a view. For example, <tt>index.php</tt>,
+<tt>event.php</tt>, <tt>player.php</tt>, <tt>logs.php</tt>,
+<tt>wikiformat.php</tt> and <tt>ical.php</tt>.</p>
+
+<p>Scripts that display a list of things, with some facilities for editing them.
+For example <tt>events.php</tt>, <tt>series.php</tt>, <tt>users.php</tt>.</p>
+
+<p>Scripts that use a form to edit something. For example <tt>editevent.php</tt>,
+<tt>editpart.php</tt>, <tt>editsection.php</tt>, <tt>editseries.php</tt>,
+<tt>edituser.php</tt>, <tt>editmotd.php</tt> and <tt>admin.php</tt>,
+although the last two are slightly different.</p>
+
+<p>The scripts <tt>login.php</tt> and <tt>logout.php</tt> handle authenticating users.</p>
+
+<p>The remaining others: <tt>savechoices.php</tt> which process the Save changes
+submission from <tt>index.php</tt>; <tt>players.php</tt> for editing the list
+of players for a rehearsal series; <tt>extractemails.php</tt> for getting a list
+of email addresses based on the register data; and <tt>install.php</tt> deals
+with installing the software initially.</p>
+
+<p>Note that the files <tt>config.php</tt> and <tt>version.php</tt> (and
+<tt>config-example.php</tt>) in the top-level folder are configuration files.
+<tt>script.js</tt> and <tt>styles.css</tt> (and <tt>styles-extra.css</tt>, if
+you use it) are part of the UI, and used on every page. <tt>setup.php</tt> is
+the file that all the scripts need to include to get access to the standard
+libraries.</p>
+
+
+<h2>See also</h2>
+
+<ul>
+<li><a href=".">Other documentation</a></li>
+</ul>
+
+</body>
+</html>
