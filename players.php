@@ -97,7 +97,7 @@ foreach ($players as $player) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
-<th><label for="player<?php echo $player->id ?>"/><?php echo htmlspecialchars($player->get_name()); ?></label></th>
+<th><label for="player<?php echo $player->id ?>"><?php echo $output->player_link($player, null, true); ?></label></th>
 <td><?php
     echo $output->group_select('player' . $player->id, $parts, $player->part);
     ?>

@@ -83,6 +83,8 @@ a:visited {
     text-decoration: underline;
     color: #008;
 }
+a.playerlink:link,
+a.playerlink:visited,
 a.eventlink:link,
 a.eventlink:visited {
     text-decoration: none;

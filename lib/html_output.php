@@ -260,6 +260,34 @@ class html_output {
                 htmlspecialchars($event->name) . '</a>';
     }
 
+    public function player_link($player, $event = null, $fullname = false) {
+        $params = array();
+        if ($player->id != $this->or->get_current_user()->id) {
+            $params[] = 'id=' . $player->id;
+        }
+        if (($event && $event->timestart < time()) || $this->or->get_param('past', request::TYPE_BOOL, false, false)) {
+            $params[] = 'past=1';
+        }
+        if ($params) {
+            $params = '?' . implode('&', $params);
+        } else {
+            $params = '';
+        }
+
+        $fragment = '';
+        if ($event) {
+            $fragment = '#event-' . $event->id;
+        }
+
+        if ($fullname) {
+            $name = $player->get_public_name();
+        } else {
+            $name = $player->get_name();
+        }
+        return '<a class="playerlink" href="' . $this->or->url('player.php' . $params) . $fragment . '">' .
+                htmlspecialchars($name) . '</a>';
+    }
+
     public function subtotal($attending, $outof) {
         if ($outof) {
             return '<span class="total">' . $attending . '</span><span class="outof">/' . $outof . '</span>';

@@ -144,7 +144,7 @@ foreach ($players as $player) {
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
 <td class="sectcol"><?php echo htmlspecialchars($player->section); ?></td>
 <td class="partcol"><?php echo htmlspecialchars($player->part); ?></td>
-<th><?php echo htmlspecialchars($player->get_public_name()); ?></th>
+<th><?php echo $output->player_link($player); ?></th>
     <?php
     foreach ($events as $event) {
         $attendance = $player->get_attendance($event);
