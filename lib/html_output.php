@@ -289,9 +289,9 @@ class html_output {
         }
 
         if ($fullname) {
-            $name = $player->get_public_name();
-        } else {
             $name = $player->get_name();
+        } else {
+            $name = $player->get_public_name();
         }
         return '<a class="playerlink" href="' . $this->or->url('player.php' . $params) . $fragment . '">' .
                 htmlspecialchars($name) . '</a>';
