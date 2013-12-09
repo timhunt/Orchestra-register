@@ -168,6 +168,9 @@ if (!$player) {
         foreach ($sectionattending as $section => $attending) {
             $parttotals = array();
             foreach ($sections[$section]->parts as $part) {
+                if (!array_key_exists($part->part, $subtotals)) {
+                    continue;
+                }
                 $parttotals[] = htmlspecialchars($part->part) . ' ' . $output->subtotal(
                         $subtotals[$part->part]->attending[$event->id], $subtotals[$part->part]->numplayers[$event->id]);
             }

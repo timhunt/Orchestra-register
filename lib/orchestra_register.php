@@ -201,11 +201,13 @@ class orchestra_register {
             foreach ($partsdata as $part) {
                 if ($part->section != $currentsection) {
                     $currentsection = $part->section;
+                    $this->sections[$currentsection] = new stdClass();
                     $this->sections[$currentsection]->section = $part->section;
                     $this->sections[$currentsection]->sectionsort = $part->sectionsort;
                     $this->sections[$currentsection]->parts = array();
                 }
                 if (!is_null($part->part)) {
+                    $this->sections[$currentsection]->parts[$part->part] = new stdClass();
                     $this->sections[$currentsection]->parts[$part->part]->part = $part->part;
                     $this->sections[$currentsection]->parts[$part->part]->section = $currentsection;
                     $this->sections[$currentsection]->parts[$part->part]->partsort = $part->partsort;
