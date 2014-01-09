@@ -30,11 +30,16 @@ if (!$user->can_edit_config()) {
     throw new permission_exception('You don\'t have permission to edit the system configuration.');
 }
 
+$maintenanceoptions = array(
+    0 => 'Off',
+    1 => 'Enabled, no changes can be made until maintenance mode is disabled',
+);
 $currentconfig = $or->get_config();
 
-$fields = array('title', 'defaultseriesid', 'timezone', 'helpurl', 'wikiediturl', 'icaleventnameprefix');
+$fields = array('maintenancemode', 'title', 'defaultseriesid', 'timezone', 'helpurl', 'wikiediturl', 'icaleventnameprefix');
 
 $form = new form($or->url('admin.php'));
+$form->add_field(new select_field('maintenancemode', 'Maintenance mode', $maintenanceoptions, 0));
 $form->add_field(new text_field('title', 'Register title', request::TYPE_RAW));
 $form->add_field(new select_field('defaultseriesid', 'Current rehearsal series', $or->get_series_options()));
 $form->add_field(new timezone_field('timezone', 'Time zone'));
@@ -63,7 +68,7 @@ switch ($form->parse_request($or)) {
 }
 
 $output = $or->get_output();
-$output->header('Edit system configuration');
+$output->header('Edit system configuration', '', true, true);
 echo $form->output($output);
 $output->call_to_js('init_admin_page');
 echo '<p>This is ' . $or->version_string() . '</p>';

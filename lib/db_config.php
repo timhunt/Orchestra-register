@@ -40,6 +40,9 @@ class db_config {
 
     public $defaultseriesid;
 
+    /** @var bool whether the system is in maitenance mode. */
+    public $maintenancemode = false;
+
     protected $propertynames = null;
 
     /**

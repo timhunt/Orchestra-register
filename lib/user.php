@@ -47,6 +47,7 @@ class user {
     public $role = user::PLAYER;
     public $authlevel = self::AUTH_NONE;
     public $sesskey;
+    public $maintenancemode = false;
     public function __construct() {
         if (!empty($_SESSION) && array_key_exists('sesskey', $_SESSION)) {
             $this->sesskey = $_SESSION['sesskey'];
@@ -68,53 +69,70 @@ class user {
         $this->sesskey = database::random_string(40);
         $_SESSION['sesskey'] = $this->sesskey;
     }
+
     public function can_edit_attendance($player) {
-        return ($this->authlevel >= self::AUTH_TOKEN && $this->id == $player->id) ||
-                $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+        return ($this->authlevel >= self::AUTH_TOKEN &&
+                        $this->id == $player->id && !$this->maintenancemode) ||
+                $this->is_organiser_level_access();
     }
     public function can_edit_users() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+        return $this->is_organiser_level_access();
     }
     public function can_edit_players() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+        return $this->is_organiser_level_access();
     }
     public function can_edit_series() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+        return $this->is_organiser_level_access();
     }
     public function can_edit_events() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+        return $this->is_organiser_level_access();
     }
     public function can_edit_motd() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser();
+        return $this->is_organiser_level_access();
     }
     public function can_edit_password($userid) {
-        return $this->authlevel >= self::AUTH_LOGIN && (
-                $this->is_admin() || $this->id == $userid);
+        return ($this->authlevel >= self::AUTH_LOGIN &&
+                        $this->id == $userid && !$this->maintenancemode) ||
+                $this->is_admin_level_access();
     }
     public function can_edit_parts() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
+        return $this->is_admin_level_access();
     }
     public function can_edit_config() {
-        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
+        return $this->is_admin_level_access_allow_in_maintenance_mode();
     }
     public function can_view_logs() {
+        return $this->is_admin_level_access_allow_in_maintenance_mode();
+    }
+
+    protected function is_admin_level_access_allow_in_maintenance_mode() {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
     }
+    protected function is_admin_level_access() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin() && !$this->maintenancemode;
+    }
+    protected function is_organiser_level_access() {
+        return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser() && !$this->maintenancemode;
+    }
+
     public function is_logged_in() {
         return $this->authlevel >= self::AUTH_LOGIN;
     }
     public function is_authenticated() {
         return $this->authlevel >= self::AUTH_TOKEN;
     }
+
     protected function is_organiser() {
         return in_array($this->role, array(self::ORGANISER, self::ADMIN));
     }
     protected function is_admin() {
         return $this->role == self::ADMIN;
     }
+
     public function get_name() {
         return $this->firstname . ' ' . $this->lastname;
     }
+
     public function assignable_roles($userid) {
         if ($this->authlevel < self::AUTH_LOGIN || !$this->is_admin() ||
                 $this->id == $userid) {

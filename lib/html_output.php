@@ -51,7 +51,7 @@ class html_output {
         die;
     }
 
-    public function header($subhead = '', $bodyclass = '', $showlogin = true) {
+    public function header($subhead = '', $bodyclass = '', $showlogin = true, $hidemaintenance = false) {
         $title = $this->or->get_title();
         if ($subhead) {
             $title = $subhead . ' - ' . $title;
@@ -87,6 +87,11 @@ class html_output {
 <div class="logininfo"><?php echo $logininfo; ?></div>
 <h1><?php echo $this->or->get_title(); ?></h1>
     <?php
+        if (!$hidemaintenance && $this->or->is_in_maintenance_mode()) {
+            echo '<div class="errorbox">';
+            echo '<p>The system is in maintenance mode. No changes can be made at the moment. If you need to update anything, please try again later.</p>';
+            echo '</div>';
+        }
         if ($subhead) {
             echo '<h2>' . $subhead . '</h2>';
         }

@@ -537,16 +537,23 @@ class orchestra_register {
 
     /** @return user */
     public function get_current_user() {
-        if ($this->user) {
-            return $this->user;
+        if (!$this->user) {
+            $this->user = $this->find_current_user();
+            $this->user->maintenancemode = $this->is_in_maintenance_mode();
         }
+        return $this->user;
+    }
 
+    /**
+     * Helper used by {@link get_current_user()}.
+     * @return user
+     */
+    protected function find_current_user() {
         if (!empty($_SESSION['userid'])) {
             $user = $this->db->find_user_by_id($_SESSION['userid']);
             if ($user) {
-                $this->user = $user;
-                $this->user->authlevel = user::AUTH_LOGIN;
-                return $this->user;
+                $user->authlevel = user::AUTH_LOGIN;
+                return $user;
             }
         }
 
@@ -554,14 +561,12 @@ class orchestra_register {
         if ($token) {
             $user = $this->db->find_user_by_token($token);
             if ($user) {
-                $this->user = $user;
-                $this->user->authlevel = user::AUTH_TOKEN;
-                return $this->user;
+                $user->authlevel = user::AUTH_TOKEN;
+                return $user;
             }
         }
 
-        $this->user = new user();
-        return $this->user;
+        return new user();
     }
 
     public function redirect($relativeurl, $withtoken = true, $seriesid = null) {
@@ -663,6 +668,10 @@ class orchestra_register {
 
     public function get_wiki_edit_url() {
         return $this->config->wikiediturl;
+    }
+
+    public function is_in_maintenance_mode() {
+        return $this->get_config()->maintenancemode;
     }
 
     public function log($action) {
