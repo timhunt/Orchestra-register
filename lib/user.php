@@ -63,6 +63,8 @@ class user {
                 return 'Token';
             case self::AUTH_LOGIN:
                 return 'Logged in';
+            default:
+                throw new coding_error('Unexpected auth level ' . $level);
         }
     }
     public function refresh_sesskey() {

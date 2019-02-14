@@ -21,10 +21,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
-require_once(dirname(__FILE__) . '/lib/forms.php');
+require_once(__DIR__ . '/setup.php');
+require_once(__DIR__ . '/lib/forms.php');
 
-if (!is_readable(dirname(__FILE__) . '/config.php')) {
+if (!is_readable(__DIR__ . '/config.php')) {
     throw new register_exception('In order to install Orchestra register, ' .
             'you must create the file config.php, based on the model provided by config-example.php.');
 }

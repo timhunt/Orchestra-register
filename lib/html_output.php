@@ -33,7 +33,7 @@ class html_output {
         $this->or = $or;
     }
 
-    public function exception($e) {
+    public function exception(Throwable $e) {
         $summary = prepare_exception($e);
 
         $this->javascriptcode = array();
@@ -60,7 +60,7 @@ class html_output {
             $bodyclass = ' class="' . $bodyclass . '"';
         }
         $stylesheets = array($this->or->url('styles.css', false, true, 'none'));
-        if (is_readable(dirname(__FILE__) . '/../' . self::EXTRA_STYLES)) {
+        if (is_readable(__DIR__ . '/../' . self::EXTRA_STYLES)) {
             $stylesheets[] = $this->or->url(self::EXTRA_STYLES, false, true, 'none');
         }
         if ($showlogin) {
@@ -72,7 +72,7 @@ class html_output {
     ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html lang="en">
 <head>
 <title><?php echo $title; ?></title>
     <?php
@@ -159,7 +159,7 @@ class html_output {
 
     public function text_field($label, $name, $default, $postfix = '') {
         return $this->form_field($label, '<input type="text" name="' . $name .
-                '" value="' . htmlspecialchars($default) . '" />');
+                '" value="' . htmlspecialchars($default) . '" />', $postfix);
     }
 
     public function password_field($label, $name, $default, $postfix = '') {
@@ -257,7 +257,7 @@ class html_output {
         return '<p>' . $intro . ': ' . implode(' - ', $links) . '</p>';
     }
 
-    public function back_link($text = 'Back to the register', $event = null) {
+    public function back_link($text = 'Back to the register', event $event = null) {
         if (($event && $event->timestart < time()) || $this->or->get_param('past', request::TYPE_BOOL, false, false)) {
             $url = '?past=1';
         } else {
@@ -274,7 +274,7 @@ class html_output {
                 htmlspecialchars($event->name) . '</a>';
     }
 
-    public function player_link($player, $event = null, $fullname = false) {
+    public function player_link(player $player, event $event = null, $fullname = false) {
         $params = array();
         if ($player->id != $this->or->get_current_user()->id) {
             $params[] = 'id=' . $player->id;
@@ -302,7 +302,7 @@ class html_output {
                 htmlspecialchars($name) . '</a>';
     }
 
-    public function player_attendance($player, $event) {
+    public function player_attendance(player $player, event $event) {
         $attendance = $player->get_attendance($event);
 
         $content = $this->player_link($player, $event);
@@ -354,7 +354,7 @@ class html_output {
 
     public function markdown($content) {
         if (is_null($this->markdownparser)) {
-            require_once(dirname(__FILE__) . '/../thirdparty/markdown/markdown.php');
+            require_once(__DIR__ . '/../thirdparty/markdown/markdown.php');
             $this->markdownparser = new Markdown_Parser();
             $this->markdownparser->no_markup = true;
             $this->markdownparser->no_entities = true;

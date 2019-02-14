@@ -21,8 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
-require_once(dirname(__FILE__) . '/lib/forms.php');
+require_once(__DIR__ . '/setup.php');
+require_once(__DIR__ . '/lib/forms.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
@@ -45,6 +45,7 @@ $form->set_initial_data($current);
 switch ($form->parse_request($or)) {
     case form::CANCELLED:
         $or->redirect('');
+        break;
 
     case form::SUBMITTED:
         foreach (array('motdheading', 'motd') as $field) {

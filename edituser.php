@@ -21,8 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
-require_once(dirname(__FILE__) . '/lib/forms.php');
+require_once(__DIR__ . '/setup.php');
+require_once(__DIR__ . '/lib/forms.php');
 $or = new orchestra_register();
 $series = $or->get_series_list();
 $parts = $or->get_parts(true);
@@ -89,6 +89,7 @@ if ($currentuser->can_edit_password($userid) && $form->get_field_value('changepw
 switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('users.php');
+        break;
 
     case form::SUBMITTED:
         $newuser = $form->get_submitted_data('user');
@@ -131,6 +132,7 @@ switch ($form->get_outcome()) {
         }
 
         $or->redirect('users.php');
+        break;
 }
 
 $output = $or->get_output();

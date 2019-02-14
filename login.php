@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
+require_once(__DIR__ . '/setup.php');
 
 $or = new orchestra_register();
 
@@ -56,9 +56,9 @@ if ($ok === false) {
 ?>
 <form action="<?php echo $or->url('login.php'); ?>" method="post">
 <div>
-<?php echo $output->sesskey_input($or); ?>
-<p>Email: <input type="text" size="50" name="email" id="email" value="<?php echo htmlspecialchars($or->get_param('email', '//')); ?>" /></p>
-<p>Password: <input type="password" size="50" name="password" /></p>
+<?php echo $output->sesskey_input(); ?>
+<p><label for="email">Email</label>: <input type="text" size="50" name="email" id="email" value="<?php echo htmlspecialchars($or->get_param('email', '//')); ?>" /></p>
+<p><label for="password">Password</label>: <input type="password" size="50" name="password" id="password" /></p>
 
 <p><input type="submit" value="Log in" /> <input type="submit" name="cancel" value="Cancel" /></p>
 

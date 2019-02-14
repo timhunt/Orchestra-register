@@ -25,18 +25,20 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class database_connection {
+    /** @var mysqli */
     private $conn;
 
+    /** @var transaction[] stack of currently active transactions. */
     private $transactions = array();
     private $isrolledback = false;
 
     public function __construct($dbhost, $dbuser, $dbpass, $dbname) {
-        $this->conn = mysql_connect($dbhost, $dbuser, $dbpass);
+        $this->conn = new mysqli($dbhost, $dbuser, $dbpass);
         if (!$this->conn) {
             throw new database_connect_exception($this->get_last_error());
         }
-        if (!mysql_select_db($dbname)) {
-            throw new database_connect_exception('Could not select the database ' . $dbname, $this->get_last_error());
+        if (!$this->conn->select_db($dbname)) {
+            throw new database_connect_exception($this->get_last_error());
         }
     }
 
@@ -47,20 +49,20 @@ class database_connection {
         if ($maxlength) {
             $value = substr($value, 0, $maxlength - 1);
         }
-        return "'" . mysql_real_escape_string($value, $this->conn) . "'";
+        return "'" . $this->conn->real_escape_string($value) . "'";
     }
 
     public function get_last_insert_id() {
-        return mysql_insert_id($this->conn);
+        return $this->conn->insert_id;
     }
 
     public function get_last_error() {
-        return mysql_error($this->conn);
+        return $this->conn->error;
     }
 
     public function execute_sql($sql) {
-        $result = mysql_query($sql, $this->conn);
-        if (!$result) {
+        $result = $this->conn->query($sql);
+        if ($result === false) {
             throw new database_exception('Failed to load or save data from the databse.',
                     $this->get_last_error() . '. SQL: ' . $sql);
         }
@@ -77,9 +79,9 @@ class database_connection {
     }
 
     public function table_exists($name) {
-        $result = $this->execute_sql("SHOW TABLES LIKE 'config'");
-        $exists = mysql_num_rows($result);
-        mysql_free_result($result);
+        $result = $this->execute_sql("SHOW TABLES LIKE {$this->escape($name)}");
+        $exists = $result->num_rows;
+        $result->close();
         return $exists;
     }
 
@@ -87,13 +89,19 @@ class database_connection {
         return $this->get_record_sql("SELECT * FROM $table WHERE $where", $class);
     }
 
+    /**
+     * @param $sql
+     * @param $class
+     * @return mixed
+     * @throws database_exception
+     */
     public function get_record_sql($sql, $class) {
         $object = null;
         $result = $this->execute_sql($sql);
-        if (mysql_num_rows($result) == 1) {
-            $object = mysql_fetch_object($result, $class);
+        if ($result->num_rows == 1) {
+            $object = $result->fetch_object($class);
         }
-        mysql_free_result($result);
+        $result->close();
         return $object;
     }
 
@@ -117,14 +125,14 @@ class database_connection {
     public function get_records_sql($sql, $class) {
         $result = $this->execute_sql($sql);
         $objects = array();
-        while ($object = mysql_fetch_object($result, $class)) {
+        while ($object = $result->fetch_object($class)) {
             if (!empty($object->id)) {
                 $objects[$object->id] = $object;
             } else {
                 $objects[] = $object;
             }
         }
-        mysql_free_result($result);
+        $result->close();
         return $objects;
     }
 
@@ -142,10 +150,10 @@ class database_connection {
         }
         $transaction = new transaction($this);
         $this->transactions[] = $transaction;
-        return $transaction; 
+        return $transaction;
     }
 
-    protected function verify_right_transaction($transaction) {
+    protected function verify_right_transaction(transaction $transaction) {
         $nexttrans = array_pop($this->transactions);
         if ($nexttrans !== $transaction) {
             throw new coding_error('Transactions incorrectly nested.');
@@ -153,7 +161,7 @@ class database_connection {
         $transaction->dispose();
     }
 
-    public function commit_transaction($transaction) {
+    public function commit_transaction(transaction $transaction) {
         if ($this->isrolledback) {
             $this->rollback_transaction($transaction);
         }
@@ -165,7 +173,7 @@ class database_connection {
         }
     }
 
-    public function rollback_transaction($transaction) {
+    public function rollback_transaction(transaction $transaction) {
         $this->verify_right_transaction($transaction);
 
         if (empty($this->transactions)) {

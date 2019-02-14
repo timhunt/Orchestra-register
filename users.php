@@ -22,7 +22,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
+require_once(__DIR__ . '/setup.php');
 $or = new orchestra_register();
 
 $currentuser = $or->get_current_user();
@@ -79,7 +79,8 @@ foreach ($users as $user) {
 <td><?php echo htmlspecialchars($role); ?></td>
 <td><?php echo implode("\n", $actions); ?></td>
 <td><input type="text" size="20" <?php echo $readonly; ?> value="<?php echo $or->url(
-            '?t=' . $user->authkey, false, $or->get_config()->defaultseriesid); ?>" /></td>
+            '?t=' . $user->authkey, false, $or->get_config()->defaultseriesid); ?>" aria-label="Edit URL for <?php
+            echo htmlspecialchars($user->get_name()); ?>"/></td>
 </tr>
 <?php
 }

@@ -38,7 +38,7 @@ class register_exception extends Exception {
 
 class configuration_exception extends register_exception {
     protected $debuginfo;
-    public function __construct($message, $debuginfo = null, $code = 500) {
+    public function __construct($message, $debuginfo = null) {
         parent::__construct($message, $debuginfo, 500);
     }
     public function get_summary() {
@@ -96,7 +96,7 @@ class coding_error extends register_exception {
     }
 }
 
-function prepare_exception($e) {
+function prepare_exception(Throwable $e) {
     $code = $e->getCode();
     if ($code < 400) {
         $code = 500;
@@ -105,13 +105,15 @@ function prepare_exception($e) {
 
     if ($e instanceof register_exception) {
         $summary = $e->get_summary();
+        $debuginfo = $e->get_debug_info();
     } else {
         $summary = 'An error occurred';
+        $debuginfo = '';
     }
 
     $log = "Exception caught: " . $summary . ", " . $e->getMessage() . ", ";
-    if ($e->get_debug_info()) {
-        $log .= $e->get_debug_info() . ", ";
+    if ($debuginfo) {
+        $log .= $debuginfo . ", ";
     }
     error_log($log . $e->getTraceAsString(), E_USER_ERROR);
 
@@ -119,12 +121,12 @@ function prepare_exception($e) {
 }
 
 
-function early_exception_handler($e) {
+function early_exception_handler(Exception $e) {
     $summary = prepare_exception($e);
     ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html lang = "en">
 <head>
 <title>Error - Orchestra register</title>
 <style type="text/css">

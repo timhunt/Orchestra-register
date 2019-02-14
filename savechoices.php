@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
+require_once(__DIR__ . '/setup.php');
 $or = new orchestra_register();
 
 $includepast = $or->get_param('past', request::TYPE_BOOL, false, false);

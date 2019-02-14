@@ -21,8 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
-require_once(dirname(__FILE__) . '/lib/forms.php');
+require_once(__DIR__ . '/setup.php');
+require_once(__DIR__ . '/lib/forms.php');
 $or = new orchestra_register();
 
 $user = $or->get_current_user();
@@ -63,6 +63,7 @@ if ($newsection != $section && $or->is_valid_section($newsection)) {
 switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('parts.php');
+        break;
 
     case form::SUBMITTED:
         $data = $form->get_submitted_data('stdClass');
@@ -80,6 +81,7 @@ switch ($form->get_outcome()) {
         }
 
         $or->redirect('parts.php');
+        break;
 }
 
 $output = $or->get_output();

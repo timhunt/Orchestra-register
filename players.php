@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/setup.php');
+require_once(__DIR__ . '/setup.php');
 
 $or = new orchestra_register();
 
@@ -74,7 +74,7 @@ echo $output->links_to_other_series($series, 'players.php');
 <div>
 
 <?php
-echo $output->sesskey_input($or);
+echo $output->sesskey_input();
 ?>
 
 <p><input type="submit" name="save" value="Save changes" /></p>

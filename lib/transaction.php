@@ -22,9 +22,10 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class transaction {
+    /** @var database_connection */
     private $connection;
 
-    public function __construct($connection) {
+    public function __construct(database_connection $connection) {
         $this->connection = $connection;
     }
 

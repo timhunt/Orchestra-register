@@ -220,6 +220,11 @@ class database {
                 "authkey = {$this->escape($token)} AND role <> '" . user::DISABLED . "'", 'user');
     }
 
+    /**
+     * @param $eventid
+     * @param bool $includedeleted
+     * @return event
+     */
     public function find_event_by_id($eventid, $includedeleted = false) {
         $conditions = array('id' => $eventid);
         if (!$includedeleted) {
@@ -266,10 +271,10 @@ class database {
         }
         $result = $this->connection->execute_sql('SELECT * FROM config');
         $config = new db_config();
-        while ($row = mysql_fetch_object($result)) {
+        while ($row = $result->fetch_object()) {
             $config->{$row->name} = $row->value;
         }
-        mysql_free_result($result);
+        $result->close();
         return $config;
     }
 
@@ -509,7 +514,7 @@ class database {
     }
 
     public static function load_csv($filename, $skipheader = true) {
-        $handle = fopen(dirname(__FILE__) . '/../' . $filename, 'r');
+        $handle = fopen(__DIR__ . '/../' . $filename, 'r');
         if (!$handle) {
             return array();
         }
@@ -525,7 +530,7 @@ class database {
     }
 
     protected function get_installer() {
-        require_once(dirname(__FILE__) . '/installer.php');
+        require_once(__DIR__ . '/installer.php');
         return new installer($this, $this->connection);
     }
 
@@ -533,10 +538,9 @@ class database {
      * Check that the database is installed, and up-to-date. If not, rectify that.
      * @param db_config $config
      * @param string $codeversion
-     * @param string $pwsalt
      * @return db_config the config, possibly updated.
      */
-    public function check_installed($config, $codeversion, $pwsalt) {
+    public function check_installed($config, $codeversion) {
         if ($config->version < $codeversion) {
             $this->get_installer()->upgrade($config->version);
             $this->insert_log(null, user::AUTH_NONE, 'upgrade to version ' . $codeversion);

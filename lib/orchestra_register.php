@@ -22,6 +22,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class orchestra_register {
+    /** @var user */
     private $user;
     private $players = null;
     private $events = null;
@@ -40,17 +41,17 @@ class orchestra_register {
 
     public function __construct($requireinstalled = true) {
 
-        if ($requireinstalled && !is_readable(dirname(__FILE__) . '/../config.php')) {
+        if ($requireinstalled && !is_readable(__DIR__ . '/../config.php')) {
             $this->redirect('install.php', false, 'none');
         }
 
         $config = new sys_config();
-        include(dirname(__FILE__) . '/../config.php');
+        include(__DIR__ . '/../config.php');
         $config->check();
         $this->sysconfig = $config;
 
         $version = new version();
-        include(dirname(__FILE__) . '/../version.php');
+        include(__DIR__ . '/../version.php');
         $this->version = $version;
 
         $this->request = new request();
@@ -68,8 +69,7 @@ class orchestra_register {
                 return;
             }
         }
-        $this->config = $this->db->check_installed($this->config,
-                $this->version->id, $this->sysconfig->pwsalt);
+        $this->config = $this->db->check_installed($this->config, $this->version->id);
 
         set_exception_handler(array($this->output, 'exception'));
 
@@ -115,6 +115,11 @@ class orchestra_register {
         return new mail_helper($this);
     }
 
+    /**
+     * @param bool $includenotplaying
+     * @param null $currentuserid
+     * @return player[]
+     */
     public function get_players($includenotplaying = false, $currentuserid = null) {
         if (is_null($this->players)) {
             $this->players = $this->db->load_players($this->seriesid,
@@ -123,10 +128,19 @@ class orchestra_register {
         return $this->players;
     }
 
+    /**
+     * @param int $userid
+     * @param bool $includedisabled
+     * @return player
+     */
     public function get_user($userid, $includedisabled = false) {
         return $this->db->find_user_by_id($userid, $includedisabled);
     }
 
+    /**
+     * @param bool $includedisabled
+     * @return player[]
+     */
     public function get_users($includedisabled = false) {
         return $this->db->load_users($includedisabled);
     }
@@ -145,6 +159,12 @@ class orchestra_register {
         return $event;
     }
 
+    /**
+     * Get the data about an event.
+     * @param bool $includepast
+     * @param bool $includedeleted
+     * @return event[]
+     */
     public function get_events($includepast = false, $includedeleted = false) {
         if (is_null($this->events)) {
             $this->events = $this->db->load_events($this->seriesid, $includepast, $includedeleted);
@@ -191,7 +211,7 @@ class orchestra_register {
     }
 
     /**
-     * @return array nested structure represending all the secions and parts.
+     * @return array nested structure representing all the sections and parts.
      */
     public function get_sections_and_parts() {
         if (is_null($this->sections)) {
@@ -218,6 +238,10 @@ class orchestra_register {
         return $this->sections;
     }
 
+    /**
+     * @param $part
+     * @return null|stdClass
+     */
     public function get_part_data($part) {
         foreach ($this->get_sections_and_parts() as $sectiondata) {
             if (array_key_exists($part, $sectiondata->parts)) {
@@ -279,8 +303,7 @@ class orchestra_register {
                 $section2, $sections[$section2]->sectionsort);
     }
 
-    public function swap_part_order($part1, $part2) {
-        $sections = $this->get_sections_and_parts();
+    public function swap_part_order(string $part1, string $part2) {
         $this->db->swap_part_order($part1, $this->get_part_data($part1)->partsort,
                 $part2, $this->get_part_data($part2)->partsort);
     }
@@ -620,7 +643,7 @@ class orchestra_register {
      * @param bool $includepast whether past events are currently included.
      * @param string|bool $printurl whether to include a print view link. String script name to include. false to exclude.
      * @param string|bool $showhideurl whether to include the show/hide events in the past URL.
-     * @return array with two elements, both actions objects.
+     * @return actions[] with two elements, both actions objects.
      */
     public function get_actions_menus($user, $includepast, $printurl = '', $showhideurl = '') {
         if ($includepast) {
