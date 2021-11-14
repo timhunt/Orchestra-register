@@ -354,11 +354,10 @@ class html_output {
 
     public function markdown($content) {
         if (is_null($this->markdownparser)) {
-            require_once(__DIR__ . '/../thirdparty/markdown/markdown.php');
-            $this->markdownparser = new Markdown_Parser();
-            $this->markdownparser->no_markup = true;
-            $this->markdownparser->no_entities = true;
+            require_once(__DIR__ . '/../thirdparty/parsedown/Parsedown.php');
+            $this->markdownparser = new Parsedown();
+            $this->markdownparser->setSafeMode(true);
         }
-        return $this->markdownparser->transform($content);
+        return $this->markdownparser->text($content);
     }
 }
