@@ -335,7 +335,9 @@ class orchestra_register {
         }
         $attendances = $this->db->load_attendances($this->seriesid);
         foreach ($attendances as $a) {
-            $this->players[$a->userid]->attendance[$a->eventid] = $a;
+            if (isset($this->players[$a->userid])) {
+                $this->players[$a->userid]->attendance[$a->eventid] = $a;
+            }
         }
         $this->attendanceloaded = true;
     }
