@@ -121,7 +121,7 @@ function prepare_exception(Throwable $e) {
 }
 
 
-function early_exception_handler(Exception $e) {
+function early_exception_handler(Throwable $e) {
     $summary = prepare_exception($e);
     ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
