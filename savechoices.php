@@ -53,7 +53,7 @@ foreach ($players as $player) {
 }
 
 $url = '';
-$params = array();
+$params = [];
 if ($backto) {
     $url = 'player.php';
     if ($backto != $user->id) {

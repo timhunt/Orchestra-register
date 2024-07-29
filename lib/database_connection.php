@@ -124,7 +124,7 @@ class database_connection {
 
     public function get_records_sql(string $sql, string $class): array {
         $result = $this->execute_sql($sql);
-        $objects = array();
+        $objects = [];
         while ($object = $result->fetch_object($class)) {
             if (!empty($object->id)) {
                 $objects[$object->id] = $object;
@@ -187,7 +187,7 @@ class database_connection {
     public function __destruct() {
         if ($this->transactions) {
             $this->execute_sql('ROLLBACK');
-            $this->transactions = array();
+            $this->transactions = [];
             $this->isrolledback = false;
         }
     }

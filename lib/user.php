@@ -124,7 +124,7 @@ class user {
     }
 
     protected function is_organiser(): bool {
-        return in_array($this->role, array(self::ORGANISER, self::ADMIN));
+        return in_array($this->role, [self::ORGANISER, self::ADMIN]);
     }
     protected function is_admin(): bool {
         return $this->role == self::ADMIN;
@@ -137,7 +137,7 @@ class user {
     public function assignable_roles(int $userid): array {
         if ($this->authlevel < self::AUTH_LOGIN || !$this->is_admin() ||
                 $this->id == $userid) {
-            return array();
+            return [];
         }
         return self::$roles;
     }

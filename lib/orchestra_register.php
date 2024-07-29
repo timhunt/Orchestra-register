@@ -71,7 +71,7 @@ class orchestra_register {
         }
         $this->config = $this->db->check_installed($this->config, $this->version->id);
 
-        set_exception_handler(array($this->output, 'exception'));
+        set_exception_handler([$this->output, 'exception']);
 
         date_default_timezone_set($this->config->timezone);
 
@@ -199,7 +199,7 @@ class orchestra_register {
     public function get_parts(bool $includenotplaying = false): array {
         if (is_null($this->parts)) {
             $partsdata = $this->db->load_parts();
-            $this->parts = array();
+            $this->parts = [];
             foreach ($partsdata as $part) {
                 $this->parts[$part->section][$part->part] = $part->part;
             }
@@ -322,7 +322,7 @@ class orchestra_register {
 
     public function get_series_options(): array {
         $series = $this->db->load_series();
-        $options = array();
+        $options = [];
         foreach ($series as $s) {
             $options[$s->id] = $s->name;
         }
@@ -344,7 +344,7 @@ class orchestra_register {
 
     public function load_subtotals(): array {
         $data = $this->db->load_subtotals($this->seriesid);
-        $subtotals = array();
+        $subtotals = [];
         foreach ($data as $row) {
             if (!array_key_exists($row->part, $subtotals)) {
                 $subtotal = new stdClass;
@@ -473,7 +473,7 @@ class orchestra_register {
     }
 
     public function url(string $relativeurl, bool $withtoken = true, bool $xmlescape = true, ?int $seriesid = null): string {
-        $extra = array();
+        $extra = [];
 
         if (is_null($seriesid)) {
             $seriesid = $this->seriesid;
@@ -678,7 +678,7 @@ class orchestra_register {
         $systemactions->add($this->url('admin.php'), 'Edit the system configuration', $user->can_edit_config());
         $systemactions->add($this->url('logs.php'), 'View the system logs', $user->can_view_logs());
 
-        return array($seriesactions, $systemactions);
+        return [$seriesactions, $systemactions];
     }
 
     public function get_help_url(): string {

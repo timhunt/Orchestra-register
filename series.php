@@ -70,17 +70,17 @@ $output->header('Edit rehearsal series');
 <?php
 $rowparity = 1;
 foreach ($serieslist as $series) {
-    $actions = array();
+    $actions = [];
     if ($series->deleted) {
         $actions[] = $output->action_button($or->url('series.php', false),
-                array('undelete' => $series->id), 'Restore');
+                ['undelete' => $series->id], 'Restore');
         $extrarowclass = ' deleted';
 
     } else {
         $actions[] = '<a href="' . $or->url('editseries.php?id=' . $series->id, false) . '">Edit</a>';
         if ($series->id != $or->get_config()->defaultseriesid) {
             $actions[] = $output->action_button($or->url('series.php', false),
-                    array('delete' => $series->id), 'Archive');
+                    ['delete' => $series->id], 'Archive');
         } else {
             $actions[] = '<div class="defaultmarker">Current default</div>';
         }

@@ -31,13 +31,13 @@ if (!$currentuser->can_edit_users()) {
 }
 
 $parts = $or->get_parts(true);
-$allparts = array();
+$allparts = [];
 foreach ($parts as $sectionparts) {
     $allparts += $sectionparts;
 }
 
 $events = $or->get_events(true);
-$eventoptions = array(0 => 'Do not restrict');
+$eventoptions = [0 => 'Do not restrict'];
 foreach ($events as $event) {
     $eventoptions[$event->id] = $event->name . ' ' . $event->get_nice_datetime(event::DATE_FORMAT, false);
 }
@@ -64,10 +64,10 @@ switch ($form->get_outcome()) {
         $players = $or->load_selected_players($settings->part, $settings->event, $settings->attendance);
 
         if (empty($players)) {
-            $emails = array('-none-');
+            $emails = ['-none-'];
 
         } else {
-            $emails = array();
+            $emails = [];
             foreach ($players as $player) {
                 $emails[] = $player->email;
             }

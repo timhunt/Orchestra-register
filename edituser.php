@@ -53,7 +53,7 @@ if ($userid) {
     $title = 'Add a user';
     $submitlabel = 'Create user';
     $url = $or->url('edituser.php', false, false);
-    $userparts = array();
+    $userparts = [];
 }
 
 $assignableroles = $currentuser->assignable_roles($userid);

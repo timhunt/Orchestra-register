@@ -117,5 +117,5 @@ foreach ($players as $player) {
 <p><a href="<?php echo $or->url('users.php'); ?>">Edit the list of users</a></p>
 <?php
 echo $output->back_link();
-$output->call_to_js('init_edit_players_page', array(array_keys($players)));
+$output->call_to_js('init_edit_players_page', [array_keys($players)]);
 $output->footer();

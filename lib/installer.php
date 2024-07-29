@@ -150,9 +150,9 @@ class installer {
         $this->db->set_config('defaultseriesid', $series->id);
 
         $parts = database::load_csv('data/parts.txt');
-        $sections = array();
+        $sections = [];
         foreach ($parts as $partdata) {
-            list($section, $part) = $partdata;
+            [$section, $part] = $partdata;
             if (!array_key_exists($section, $sections)) {
                 $this->db->insert_section($section);
                 $sections[$section] = $section;

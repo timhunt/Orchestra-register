@@ -176,17 +176,17 @@ $isfirstsection = true;
 foreach ($sections as $section => $sectiondata) {
     echo '<li>', $section;
     if (!$isfirstsection) {
-        echo $output->action_button($or->url('parts.php', false), array('sectionup' => $section), '↑');
+        echo $output->action_button($or->url('parts.php', false), ['sectionup' => $section], '↑');
     } else {
         $isfirstsection = false;
     }
     if ($section != $lastsection) {
-        echo $output->action_button($or->url('parts.php', false), array('sectiondown' => $section), '↓');
+        echo $output->action_button($or->url('parts.php', false), ['sectiondown' => $section], '↓');
     }
-    echo $output->action_button($or->url('editsection.php', false), array('section' => $section), 'Rename', 'get');
+    echo $output->action_button($or->url('editsection.php', false), ['section' => $section], 'Rename', 'get');
     if (empty($sectiondata->parts)) {
         if (count($sections) > 1) {
-            echo $output->action_button($or->url('parts.php', false), array('sectiondelete' => $section), 'Delete');
+            echo $output->action_button($or->url('parts.php', false), ['sectiondelete' => $section], 'Delete');
         }
     } else {
         echo '<ul class="parts">';
@@ -196,29 +196,29 @@ foreach ($sections as $section => $sectiondata) {
         foreach ($sectiondata->parts as $part => $partdata) {
             echo '<li>', $part;
             if (!$isfirstpart) {
-                echo $output->action_button($or->url('parts.php', false), array('partup' => $part), '↑');
+                echo $output->action_button($or->url('parts.php', false), ['partup' => $part], '↑');
             } else {
                 $isfirstpart = false;
             }
             if ($part != $lastpart) {
-                echo $output->action_button($or->url('parts.php', false), array('partdown' => $part), '↓');
+                echo $output->action_button($or->url('parts.php', false), ['partdown' => $part], '↓');
             }
-            echo $output->action_button($or->url('editpart.php', false), array('part' => $part), 'Rename', 'get');
+            echo $output->action_button($or->url('editpart.php', false), ['part' => $part], 'Rename', 'get');
             if (!$partdata->inuse) {
-                echo $output->action_button($or->url('parts.php', false), array('partdelete' => $part), 'Delete');
+                echo $output->action_button($or->url('parts.php', false), ['partdelete' => $part], 'Delete');
             }
         }
-        echo '<li>', $output->action_button($or->url('editpart.php', false), array('section' => $section), 'Add a part', 'get'), '</li>';
+        echo '<li>', $output->action_button($or->url('editpart.php', false), ['section' => $section], 'Add a part', 'get'), '</li>';
         echo '</ul>';
     }
     echo '</li>';
 }
-echo '<li>', $output->action_button($or->url('editsection.php', false), array(), 'Add a section', 'get'), '</li>';
+echo '<li>', $output->action_button($or->url('editsection.php', false), [], 'Add a section', 'get'), '</li>';
 ?>
 </ul>
 
 <?php
 echo $output->back_link();
-$output->call_to_js('init_edit_parts_page', array($sections));
+$output->call_to_js('init_edit_parts_page', [$sections]);
 
 $output->footer();

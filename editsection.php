@@ -52,7 +52,7 @@ $form = new form($url, $submitlabel);
 $form->add_field(new text_field('sectionname', 'New section name', request::TYPE_ALNUMSPACE));
 $form->set_required_fields('sectionname');
 
-$form->set_initial_data(array('sectionname' => $section));
+$form->set_initial_data(['sectionname' => $section]);
 $form->parse_request($or);
 
 $newsection = $form->get_field_value('sectionname');

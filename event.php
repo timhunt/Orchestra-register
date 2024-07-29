@@ -52,7 +52,7 @@ if ($event) {
             $or->get_subtotals([$event]);
 }
 
-list($seriesactions, $systemactions) = $or->get_actions_menus($user, false);
+[$seriesactions, $systemactions] = $or->get_actions_menus($user, false);
 
 if ($event) {
     $previousevent = $or->get_previous_event($event->id);

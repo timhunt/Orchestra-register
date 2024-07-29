@@ -51,7 +51,7 @@ class db_config {
      * @return boolean
      */
     public function is_settable_property(string $name): bool {
-        if (in_array($name, array('icalguid', 'version'))) {
+        if (in_array($name, ['icalguid', 'version'])) {
             return false;
         }
 

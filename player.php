@@ -52,7 +52,7 @@ if (array_key_exists($playerid, $players)) {
 }
 
 $or->load_attendance();
-list($subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending) =
+[$subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending] =
         $or->get_subtotals($events);
 
 if ($playerid == $user->id) {
@@ -123,7 +123,7 @@ if (!$player) {
 } else {
     $rowparity = 1;
     foreach ($events as $event) {
-        $info = array();
+        $info = [];
         if ($event->description) {
             $info[] = htmlspecialchars($event->description);
         }
@@ -166,7 +166,7 @@ if (!$player) {
         }
 
         foreach ($sectionattending as $section => $attending) {
-            $parttotals = array();
+            $parttotals = [];
             foreach ($sections[$section]->parts as $part) {
                 if (!array_key_exists($part->part, $subtotals)) {
                     continue;
@@ -205,6 +205,6 @@ if (!$systemactions->is_empty()) {
     echo $systemactions->output($output);
 }
 
-$output->call_to_js('init_player_page', array(array_keys($events), array_keys($players)));
+$output->call_to_js('init_player_page', [array_keys($events), array_keys($players)]);
 
 $output->footer();

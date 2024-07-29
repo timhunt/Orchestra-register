@@ -36,7 +36,7 @@ class player {
     public $pwsalt;
     public $role = user::PLAYER;
 
-    public $attendance = array(); // $eventid => attendance.
+    public $attendance = []; // $eventid => attendance.
 
     public function get_attendance(event $event): attendance {
         if (!array_key_exists($event->id, $this->attendance)) {

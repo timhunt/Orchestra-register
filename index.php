@@ -39,10 +39,10 @@ if ($printview) {
 }
 
 $or->load_attendance();
-list($subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending) =
+[$subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending] =
         $or->get_subtotals($events);
 
-list($seriesactions, $systemactions) = $or->get_actions_menus($user, $includepast);
+[$seriesactions, $systemactions] = $or->get_actions_menus($user, $includepast);
 
 if ($user->is_authenticated()) {
     $savechangesbutton = '<p><input type="submit" name="save" value="Save changes" /></p>';
@@ -256,7 +256,7 @@ if ($printview) {
         echo $systemactions->output($output);
     }
 
-    $output->call_to_js('init_index_page', array(array_keys($events), array_keys($players)));
+    $output->call_to_js('init_index_page', [array_keys($events), array_keys($players)]);
 }
 
 $output->footer();

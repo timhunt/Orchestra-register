@@ -143,7 +143,7 @@ abstract class form_field {
     protected string $error = '';
     protected ?string $default = null;
     protected ?string $initial = null;
-    protected ?string $submitted = null;
+    protected ?array $submitted = null;
     protected ?string $raw = null;
     protected bool $isrequired = false;
 
@@ -287,7 +287,7 @@ class date_field extends text_field {
         parent::__construct($name, $label, request::TYPE_DATE, $default);
     }
     public function output(html_output $output): string {
-        $output->call_to_js('init_date_hint', array($this->name));
+        $output->call_to_js('init_date_hint', [$this->name]);
         return parent::output($output);
     }
 }
@@ -372,7 +372,7 @@ class multi_select_field extends form_field {
     }
 
     public function parse_request(orchestra_register $or): bool {
-        $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, array());
+        $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, []);
 
         foreach ($this->submitted as $index => $value) {
             if (!array_key_exists($value, $this->choices)) {
@@ -401,7 +401,7 @@ class group_multi_select_field extends form_field {
     }
 
     public function parse_request(orchestra_register $or): bool {
-        $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, array());
+        $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, []);
 
         foreach ($this->submitted as $index => $value) {
             $ok = false;

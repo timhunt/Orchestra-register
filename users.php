@@ -58,7 +58,7 @@ echo $output->back_link();
 <?php
 $rowparity = 1;
 foreach ($users as $user) {
-    $actions = array();
+    $actions = [];
     if ($user->role == user::DISABLED) {
         $extrarowclass = ' deleted';
         $readonly = 'disabled="disabled"';

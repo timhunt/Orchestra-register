@@ -30,13 +30,13 @@ if (!$user->can_edit_config()) {
     throw new permission_exception('You don\'t have permission to edit the system configuration.');
 }
 
-$maintenanceoptions = array(
+$maintenanceoptions = [
     0 => 'Off',
     1 => 'Enabled, no changes can be made until maintenance mode is disabled',
-);
+];
 $currentconfig = $or->get_config();
 
-$fields = array('maintenancemode', 'title', 'defaultseriesid', 'timezone', 'helpurl', 'wikiediturl', 'icaleventnameprefix');
+$fields = ['maintenancemode', 'title', 'defaultseriesid', 'timezone', 'helpurl', 'wikiediturl', 'icaleventnameprefix'];
 
 $form = new form($or->url('admin.php'));
 $form->add_field(new select_field('maintenancemode', 'Maintenance mode', $maintenanceoptions, 0));

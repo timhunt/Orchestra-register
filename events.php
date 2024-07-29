@@ -76,16 +76,16 @@ echo $output->links_to_other_series($series, 'events.php');
 <?php
 $rowparity = 1;
 foreach ($events as $event) {
-    $actions = array();
+    $actions = [];
     if ($event->deleted) {
         $actions[] = $output->action_button($or->url('events.php', false),
-                array('undelete' => $event->id), 'Un-delete');
+                ['undelete' => $event->id], 'Un-delete');
         $extrarowclass = ' deleted';
 
     } else {
         $actions[] = '<a href="' . $or->url('editevent.php?id=' . $event->id, false) . '">Edit</a>';
         $actions[] = $output->action_button($or->url('events.php', false),
-                array('delete' => $event->id), 'Delete');
+                ['delete' => $event->id], 'Delete');
         $extrarowclass = '';
     }
     ?>

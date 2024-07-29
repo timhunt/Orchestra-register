@@ -35,10 +35,10 @@ $form->add_field(new text_field('motdheading', 'Heading', request::TYPE_RAW));
 $form->add_field(new textarea_field('motd', 'Message', request::TYPE_RAW, 10, 50));
 $form->get_field('motd')->set_note('Uses <a href="https://daringfireball.net/projects/markdown/syntax">MarkDown</a> formatting.');
 
-$current = array(
+$current = [
     'motdheading' => $or->get_motd_heading(),
     'motd' => $or->get_motd(),
-);
+];
 
 $form->set_initial_data($current);
 
@@ -47,7 +47,7 @@ switch ($form->parse_request($or)) {
         $or->redirect('');
 
     case form::SUBMITTED:
-        foreach (array('motdheading', 'motd') as $field) {
+        foreach (['motdheading', 'motd'] as $field) {
             $newvalue = $form->get_field_value($field);
             if ($newvalue != $current[$field]) {
                 $or->set_config($field, $newvalue);

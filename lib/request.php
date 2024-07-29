@@ -76,7 +76,7 @@ class request {
         if (!is_array($raw)) {
             return $default;
         }
-        $clean = array();
+        $clean = [];
         foreach ($raw as $key => $value) {
             if ($type == self::TYPE_BOOL) {
                 $clean[$key] = $this->bool_value($value);

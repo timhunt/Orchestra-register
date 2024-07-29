@@ -80,7 +80,7 @@ class database {
     }
 
     public function load_series(bool $includedeleted = false): array {
-        $conditions = array();
+        $conditions = [];
         if (!$includedeleted) {
             $conditions['deleted'] = 0;
         }
@@ -89,7 +89,7 @@ class database {
     }
 
     public function load_events(int $seriesid, bool $includepast = false, bool $includedeleted = false): array {
-        $conditions = array('seriesid = ' . $this->escape($seriesid));
+        $conditions = ['seriesid = ' . $this->escape($seriesid)];
         if (!$includedeleted) {
             $conditions[] = 'deleted = 0';
         }
@@ -128,11 +128,11 @@ class database {
     }
 
     public function load_selected_players(int $seriesid, array $parts, int $eventid, array $statuses): array {
-        $tests = array("users.role <> '" . user::DISABLED . "'");
+        $tests = ["users.role <> '" . user::DISABLED . "'"];
 
         $extrajoin = '';
-        $conditions = array();
-        $partlist = array();
+        $conditions = [];
+        $partlist = [];
         foreach ($parts AS $part) {
             if (empty($part)) {
                 $conditions[] = 'players.part IS NULL';
@@ -148,7 +148,7 @@ class database {
         if ($eventid) {
             $extrajoin = "LEFT JOIN attendances ON attendances.seriesid = {$this->escape($seriesid)} AND
                     attendances.eventid = {$this->escape($eventid)} AND attendances.userid = players.userid";
-            $statuslist = array();
+            $statuslist = [];
             $extra = '';
             foreach ($statuses AS $status) {
                 $statuslist[] = $this->escape($status);
@@ -338,7 +338,7 @@ class database {
                 lastname = " . $this->escape($user->lastname) . ",
                 email = " . $this->escape($user->email) . ",
                 role = " . $this->escape($user->role) . "
-                WHERE " . $this->where_clause(array('id' => $user->id));
+                WHERE " . $this->where_clause(['id' => $user->id]);
         $this->connection->update($sql);
     }
 
@@ -369,7 +369,7 @@ class database {
                 name = " . $this->escape($series->name) . ",
                 description = " . $this->escape($series->description) . ",
                 deleted = " . $this->escape($series->deleted) . "
-                WHERE " . $this->where_clause(array('id' => $series->id));
+                WHERE " . $this->where_clause(['id' => $series->id]);
         $this->connection->update($sql);
     }
 
@@ -385,7 +385,7 @@ class database {
                 timestart = " . $this->escape($event->timestart) . ",
                 timeend = " . $this->escape($event->timeend) . ",
                 timemodified = " . $this->escape(time()) . "
-                WHERE " . $this->where_clause(array('id' => $event->id));
+                WHERE " . $this->where_clause(['id' => $event->id]);
         $this->connection->update($sql);
     }
 
@@ -502,7 +502,7 @@ class database {
     }
 
     protected function where_clause(array $tests): string {
-        $clauses = array();
+        $clauses = [];
         foreach ($tests as $field => $value) {
             $clauses[] = $field . " = " . $this->escape($value);
         }
@@ -516,12 +516,12 @@ class database {
     public static function load_csv(string $filename, bool $skipheader = true): array {
         $handle = fopen(__DIR__ . '/../' . $filename, 'r');
         if (!$handle) {
-            return array();
+            return [];
         }
         if ($skipheader) {
             fgets($handle);
         }
-        $data = array();
+        $data = [];
         while (($row = fgetcsv($handle)) !== false) {
             $data[] = $row;
         }

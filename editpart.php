@@ -57,7 +57,7 @@ $form = new form($url, $submitlabel);
 $form->add_field(new text_field('partname', 'New part name', request::TYPE_ALNUMSPACE));
 $form->set_required_fields('partname');
 
-$form->set_initial_data(array('partname' => $part));
+$form->set_initial_data(['partname' => $part]);
 $form->parse_request($or);
 
 $newpart = $form->get_field_value('partname');

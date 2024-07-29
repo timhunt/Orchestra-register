@@ -36,7 +36,7 @@ class html_output {
     #[NoReturn] public function exception(Throwable $e): void {
         $summary = prepare_exception($e);
 
-        $this->javascriptcode = array();
+        $this->javascriptcode = [];
         if (!$this->headeroutput) {
             $this->header('', '', false);
         }
@@ -60,7 +60,7 @@ class html_output {
         if ($bodyclass) {
             $bodyclass = ' class="' . $bodyclass . '"';
         }
-        $stylesheets = array($this->or->url('styles.css', false, true, 'none'));
+        $stylesheets = [$this->or->url('styles.css', false, true, 'none')];
         if (is_readable(__DIR__ . '/../' . self::EXTRA_STYLES)) {
             $stylesheets[] = $this->or->url(self::EXTRA_STYLES, false, true, 'none');
         }
@@ -244,7 +244,7 @@ class html_output {
             return '';
         }
 
-        $links = array();
+        $links = [];
         foreach ($series as $s) {
             if (!$linkall && $s->id == $this->or->get_current_seriesid()) {
                 $links[] = '<b>' . htmlspecialchars($s->name) . '</b>';
@@ -275,7 +275,7 @@ class html_output {
     }
 
     public function player_link(player $player, event $event = null, $fullname = false): string {
-        $params = array();
+        $params = [];
         if ($player->id != $this->or->get_current_user()->id) {
             $params[] = 'id=' . $player->id;
         }
@@ -347,7 +347,7 @@ class html_output {
     }
 
     public function call_to_js(string $function, array $arguments = []): void {
-        $quotedargs = array();
+        $quotedargs = [];
         foreach ($arguments as $arg) {
             $quotedargs[] = json_encode($arg);
         }
