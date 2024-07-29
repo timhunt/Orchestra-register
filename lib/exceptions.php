@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
-
+use JetBrains\PhpStorm\NoReturn;
 
 /**
  * Our exception classes and some catching code.
@@ -23,75 +23,75 @@
  */
 
 class register_exception extends Exception {
-    protected $debuginfo;
-    public function __construct($message, $debuginfo = null, $code = 500) {
+    protected ?string $debuginfo;
+    public function __construct(string $message, ?string $debuginfo = null, int $code = 500) {
         parent::__construct($message, $code);
         $this->debuginfo = $debuginfo;
     }
-    public function get_summary() {
+    public function get_summary(): string {
         return 'An error occurred';
     }
-    public function get_debug_info() {
+    public function get_debug_info(): ?string {
         return $this->debuginfo;
     }
 }
 
 class configuration_exception extends register_exception {
-    protected $debuginfo;
-    public function __construct($message, $debuginfo = null) {
-        parent::__construct($message, $debuginfo, 500);
+    protected ?string $debuginfo;
+    public function __construct(string $message, ?string $debuginfo = null) {
+        parent::__construct($message, $debuginfo);
     }
-    public function get_summary() {
+    public function get_summary(): string {
         return 'Configuration problem';
     }
 }
 
 class forbidden_operation_exception extends register_exception {
-    public function __construct($message, $debuginfo = null) {
+    public function __construct(string $message, ?string $debuginfo = null) {
         parent::__construct($message, $debuginfo, 403);
     }
-    public function get_summary() {
+    public function get_summary(): string {
         return 'Request forbidden';
     }
 }
 
 class permission_exception extends forbidden_operation_exception {
-    public function get_summary() {
+    public function get_summary(): string {
         return 'Permission denied';
     }
 }
 
 class not_found_exception extends register_exception {
-    public function __construct($message, $debuginfo = null) {
+    public function __construct(string $message, ?string $debuginfo = null) {
         parent::__construct($message, $debuginfo, 404);
     }
-    public function get_summary() {
+    public function get_summary(): string {
         return 'Not found';
     }
 }
 
 class database_connect_exception extends register_exception {
-    public function __construct($debuginfo = null) {
+    public function __construct(?string $debuginfo = null) {
         parent::__construct('The database may be overloaded or otherwise not running properly. ' .
                 'The site administrator should also check that the database details ' .
-                'have been correctly specified in config.php.', $debuginfo, 500);
+                'have been correctly specified in config.php.', $debuginfo);
     }
-    public function get_summary() {
+    public function get_summary(): string {
         return 'Error connecting to the database';
     }
 }
 
 class database_exception extends register_exception {
-    public function get_summary() {
+    public function get_summary(): string {
         return 'Database error';
     }
 }
 
 class coding_error extends register_exception {
-    public function __construct($message, $debuginfo = null, $code = 500) {
+    public function __construct(string $message, ?string $debuginfo = null, $code = 500) {
         parent::__construct($message . ' Please report this bug to the developers.', $debuginfo, $code);
     }
-    public function get_summary() {
+    public function get_summary(): string {
         return 'A bug was detected';
     }
 }
@@ -101,7 +101,7 @@ function prepare_exception(Throwable $e) {
     if ($code < 400) {
         $code = 500;
     }
-    header('x', true, $code);
+    http_response_code($code);
 
     if ($e instanceof register_exception) {
         $summary = $e->get_summary();
@@ -121,7 +121,7 @@ function prepare_exception(Throwable $e) {
 }
 
 
-function early_exception_handler(Throwable $e) {
+#[NoReturn] function early_exception_handler(Throwable $e): void {
     $summary = prepare_exception($e);
     ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"

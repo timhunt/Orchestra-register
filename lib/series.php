@@ -22,8 +22,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class series {
-    public $id;
-    public $name;
-    public $description;
-    public $deleted = 0;
+    public int $id;
+    public string $name;
+    public string $description;
+    public bool $deleted = false;
 }

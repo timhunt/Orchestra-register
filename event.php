@@ -48,11 +48,11 @@ $players = $or->get_players(false, $user->id);
 
 $or->load_attendance();
 if ($event) {
-    list($subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending) =
-            $or->get_subtotals(array($event));
+    [$subtotals, $totalplayers, $totalattending, $sectionplayers, $sectionattending] =
+            $or->get_subtotals([$event]);
 }
 
-list($seriesactions, $systemactions) = $or->get_actions_menus($user, false, false, false);
+list($seriesactions, $systemactions) = $or->get_actions_menus($user, false);
 
 if ($event) {
     $previousevent = $or->get_previous_event($event->id);
@@ -62,7 +62,7 @@ if ($event) {
     $previousevent = null;
     $nextevent = null;
     $title = 'No events!';
-    $players = array();
+    $players = [];
 }
 
 $output = $or->get_output();

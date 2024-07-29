@@ -29,25 +29,24 @@ class user {
     const PLAYER = 'player';
     const ORGANISER = 'organiser';
     const ADMIN = 'admin';
-    protected static $roles = array(
+    protected static array $roles = [
         self::DISABLED => 'Disabled',
         self::PLAYER => 'Ordinary player',
         self::ORGANISER => 'Committee member',
         self::ADMIN => 'Administrator',
-    );
-    /** @var player */
-    public $id;
-    public $firstname;
-    public $lastname;
-    public $email;
-    public $authkey;
-    public $username;
-    public $pwhash;
-    public $pwsalt;
-    public $role = user::PLAYER;
-    public $authlevel = self::AUTH_NONE;
-    public $sesskey;
-    public $maintenancemode = false;
+    ];
+    public int $id;
+    public string $firstname;
+    public string $lastname;
+    public string $email;
+    public string $authkey;
+    public string $username;
+    public string $pwhash;
+    public string $pwsalt;
+    public string $role = user::PLAYER;
+    public int $authlevel = self::AUTH_NONE;
+    public mixed $sesskey;
+    public bool $maintenancemode = false;
     public function __construct() {
         if (!empty($_SESSION) && array_key_exists('sesskey', $_SESSION)) {
             $this->sesskey = $_SESSION['sesskey'];
@@ -55,7 +54,7 @@ class user {
             $this->refresh_sesskey();
         }
     }
-    public static function auth_name($level) {
+    public static function auth_name(int $level): string {
         switch ($level) {
             case self::AUTH_NONE:
                 return 'None';
@@ -67,82 +66,83 @@ class user {
                 throw new coding_error('Unexpected auth level ' . $level);
         }
     }
-    public function refresh_sesskey() {
+    public function refresh_sesskey(): void {
         $this->sesskey = database::random_string(40);
         $_SESSION['sesskey'] = $this->sesskey;
     }
 
-    public function can_edit_attendance($player) {
+    public function can_edit_attendance(player $player): bool {
         return ($this->authlevel >= self::AUTH_TOKEN &&
                         $this->id == $player->id && !$this->maintenancemode) ||
                 $this->is_organiser_level_access();
     }
-    public function can_edit_users() {
+    public function can_edit_users(): bool {
         return $this->is_organiser_level_access();
     }
-    public function can_edit_players() {
+    public function can_edit_players(): bool {
         return $this->is_organiser_level_access();
     }
-    public function can_edit_series() {
+    public function can_edit_series(): bool {
         return $this->is_organiser_level_access();
     }
-    public function can_edit_events() {
+    public function can_edit_events(): bool {
         return $this->is_organiser_level_access();
     }
-    public function can_edit_motd() {
+    public function can_edit_motd(): bool {
         return $this->is_organiser_level_access();
     }
-    public function can_edit_password($userid) {
+    public function can_edit_password(int $userid): bool {
         return ($this->authlevel >= self::AUTH_LOGIN &&
                         $this->id == $userid && !$this->maintenancemode) ||
                 $this->is_admin_level_access();
     }
-    public function can_edit_parts() {
+    public function can_edit_parts(): bool {
         return $this->is_admin_level_access();
     }
-    public function can_edit_config() {
+    public function can_edit_config(): bool {
         return $this->is_admin_level_access_allow_in_maintenance_mode();
     }
-    public function can_view_logs() {
+    public function can_view_logs(): bool {
         return $this->is_admin_level_access_allow_in_maintenance_mode();
     }
 
-    protected function is_admin_level_access_allow_in_maintenance_mode() {
+    protected function is_admin_level_access_allow_in_maintenance_mode(): bool {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin();
     }
-    protected function is_admin_level_access() {
+    protected function is_admin_level_access(): bool {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_admin() && !$this->maintenancemode;
     }
-    protected function is_organiser_level_access() {
+    protected function is_organiser_level_access(): bool {
         return $this->authlevel >= self::AUTH_LOGIN && $this->is_organiser() && !$this->maintenancemode;
     }
 
-    public function is_logged_in() {
+    public function is_logged_in(): bool {
         return $this->authlevel >= self::AUTH_LOGIN;
     }
-    public function is_authenticated() {
+    public function is_authenticated(): bool {
         return $this->authlevel >= self::AUTH_TOKEN;
     }
 
-    protected function is_organiser() {
+    protected function is_organiser(): bool {
         return in_array($this->role, array(self::ORGANISER, self::ADMIN));
     }
-    protected function is_admin() {
+    protected function is_admin(): bool {
         return $this->role == self::ADMIN;
     }
 
-    public function get_name() {
+    public function get_name(): string {
         return $this->firstname . ' ' . $this->lastname;
     }
 
-    public function assignable_roles($userid) {
+    public function assignable_roles(int $userid): array {
         if ($this->authlevel < self::AUTH_LOGIN || !$this->is_admin() ||
                 $this->id == $userid) {
             return array();
         }
         return self::$roles;
     }
-    public static function get_all_roles() {
+
+    public static function get_all_roles(): array {
         return self::$roles;
     }
 }

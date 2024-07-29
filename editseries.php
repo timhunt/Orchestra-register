@@ -62,7 +62,6 @@ $form->parse_request($or);
 switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('series.php');
-        break;
 
     case form::SUBMITTED:
         $newseries = $form->get_submitted_data('series');
@@ -82,7 +81,6 @@ switch ($form->get_outcome()) {
         }
 
         $or->redirect('series.php');
-        break;
 }
 
 $output = $or->get_output();

@@ -22,6 +22,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class version {
-    public $id;
-    public $name;
+    public int $id;
+    public string $name;
 }

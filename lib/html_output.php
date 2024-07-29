@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Orchestra Register. If not, see <http://www.gnu.org/licenses/>.
-
+use JetBrains\PhpStorm\NoReturn;
 
 /**
  * Output helper functions.
@@ -24,16 +24,16 @@
 
 class html_output {
     const EXTRA_STYLES = 'styles-extra.css';
-    protected $or;
-    protected $javascriptcode = array();
-    protected $headeroutput = false;
-    protected $markdownparser = null;
+    protected orchestra_register $or;
+    protected array $javascriptcode = [];
+    protected bool $headeroutput = false;
+    protected ?Parsedown $markdownparser = null;
 
     public function __construct(orchestra_register $or) {
         $this->or = $or;
     }
 
-    public function exception(Throwable $e) {
+    #[NoReturn] public function exception(Throwable $e): void {
         $summary = prepare_exception($e);
 
         $this->javascriptcode = array();
@@ -51,7 +51,8 @@ class html_output {
         die;
     }
 
-    public function header($subhead = '', $bodyclass = '', $showlogin = true, $hidemaintenance = false) {
+    public function header(string $subhead = '', string $bodyclass = '',
+            bool $showlogin = true, bool $hidemaintenance = false): void {
         $title = $this->or->get_title();
         if ($subhead) {
             $title = $subhead . ' - ' . $title;
@@ -97,7 +98,7 @@ class html_output {
         }
     }
 
-    public function footer() {
+    public function footer(): void {
         if ($helpurl = $this->or->get_help_url()) {
             $helplink = ' <a href="' . $helpurl . '">Get help</a> -';
         } else {
@@ -105,7 +106,7 @@ class html_output {
         }
     ?>
 <div class="footer"><span class="helplinks"><a href="doc/">Documentation</a> -<?php echo $helplink; ?></span>
-    Powered by <a href="http://timhunt.github.com/Orchestra-register/">Orchestra register</a></div>
+    Powered by <a href="https://github.com/timhunt/Orchestra-register">Orchestra register</a></div>
 <script type="text/javascript" src="<?php echo $this->or->url('thirdparty/yui-min.js', false, true, 'none'); ?>"></script>
 <script type="text/javascript" src="<?php echo $this->or->url('script.js', false, true, 'none'); ?>"></script>
     <?php
@@ -118,7 +119,7 @@ class html_output {
     <?php
     }
 
-    public function action_button($url, $params, $label, $method = 'post') {
+    public function action_button($url, $params, $label, $method = 'post'): string {
         $output = '<form action="' . $url . '" method="' . $method . '"><div>';
         if ($method == 'post') {
             $output .= $this->sesskey_input();
@@ -131,50 +132,49 @@ class html_output {
         return $output;
     }
 
-    public function start_form($action, $method) {
-        $html = '<form action="' . htmlspecialchars($action) . '" method="' . $method . '"><div>';
-        return $html;
+    public function start_form($action, $method): string {
+        return '<form action="' . htmlspecialchars($action) . '" method="' . $method . '"><div>';
     }
 
-    public function submit_button($name, $label) {
+    public function submit_button($name, $label): string {
         return '<input type="submit" name="' . $name . '" value="' . $label . '">';
     }
 
-    public function end_form() {
+    public function end_form(): string {
         return '</div></form>';
     }
 
-    public function form_field($label, $field, $postfix = '') {
+    public function form_field($label, $field, $postfix = ''): string {
         return '<p><span class="label">' . $label . ' </span><span class="field">' .
                 $field . '</span><span class="postfix"> ' . $postfix . "</span></p>\n";
     }
 
-    public function sesskey_input() {
+    public function sesskey_input(): string {
         return $this->hidden_field('sesskey', $this->or->get_sesskey());
     }
 
-    public function hidden_field($name, $value) {
+    public function hidden_field($name, $value): string {
         return '<input type="hidden" name="' . $name . '" value="' . htmlspecialchars($value) . '" />';
     }
 
-    public function text_field($label, $name, $default, $postfix = '') {
+    public function text_field($label, $name, $default, $postfix = ''): string {
         return $this->form_field($label, '<input type="text" name="' . $name .
                 '" value="' . htmlspecialchars($default) . '" />', $postfix);
     }
 
-    public function password_field($label, $name, $default, $postfix = '') {
+    public function password_field($label, $name, $default, $postfix = ''): string {
         return $this->form_field($label, '<input type="password" name="' . $name .
                 '" value="' . htmlspecialchars($default) . '" /> ', $postfix);
     }
 
-    public function select($name, $choices, $default = null) {
+    public function select($name, $choices, $default = null): string {
         $output = '<select id="' . $name . '" name="' . $name . '">';
         $output .= $this->options($choices, $default);
         $output .= '</select>';
         return $output;
     }
 
-    public function group_select($name, $choices, $default = null) {
+    public function group_select($name, $choices, $default = null): string {
         $output = '<select id="' . $name . '" name="' . $name . '">';
         foreach ($choices as $group => $groupchoices) {
             $output .= '<optgroup label="' . $group . '">';
@@ -185,7 +185,7 @@ class html_output {
         return $output;
     }
 
-    public function multi_select($name, $choices, $default = null, $size = 10) {
+    public function multi_select($name, $choices, $default = null, $size = 10): string {
         $output = '<select id="' . $name . '" name="' . $name .
                 '[]" multiple="multiple" size="' . $size . '">';
         $output .= $this->options($choices, $default);
@@ -193,7 +193,7 @@ class html_output {
         return $output;
     }
 
-    public function group_multi_select($name, $choices, $default = null, $size = 10) {
+    public function group_multi_select($name, $choices, $default = null, $size = 10): string {
         $output = '<select id="' . $name . '" name="' . $name .
                 '[]" multiple="multiple" size="' . $size . '">';
         foreach ($choices as $group => $groupchoices) {
@@ -205,7 +205,7 @@ class html_output {
         return $output;
     }
 
-    protected function options($choices, $default) {
+    protected function options($choices, $default): string {
         $output = '';
         foreach ($choices as $value => $label) {
             if ($this->option_is_selected($value, $default)) {
@@ -218,7 +218,7 @@ class html_output {
         return $output;
     }
 
-    protected function option_is_selected($value, $default) {
+    protected function option_is_selected($value, $default): string {
         if (!is_array($default)) {
             return ((string)$value) === ((string)$default);
         } else {
@@ -226,7 +226,7 @@ class html_output {
         }
     }
 
-    public function action_menu($actions) {
+    public function action_menu($actions): string {
         if (empty($actions)) {
             return '';
         }
@@ -239,7 +239,7 @@ class html_output {
     }
 
     public function links_to_other_series($series, $relativeurl = '', $withtoken = true,
-            $linkall = false, $intro = 'Other series of rehearsals') {
+            $linkall = false, $intro = 'Other series of rehearsals'): string {
         if (!$linkall && count($series) <= 1) {
             return '';
         }
@@ -257,7 +257,7 @@ class html_output {
         return '<p>' . $intro . ': ' . implode(' - ', $links) . '</p>';
     }
 
-    public function back_link($text = 'Back to the register', event $event = null) {
+    public function back_link($text = 'Back to the register', event $event = null): string {
         if (($event && $event->timestart < time()) || $this->or->get_param('past', request::TYPE_BOOL, false, false)) {
             $url = '?past=1';
         } else {
@@ -266,7 +266,7 @@ class html_output {
         return '<p><a href="' . $this->or->url($url) . '">' . $text . '</a></p>';
     }
 
-    public function event_link($event, $fragment = '') {
+    public function event_link($event, $fragment = ''): string {
         if ($fragment) {
             $fragment = '#' . $fragment;
         }
@@ -274,7 +274,7 @@ class html_output {
                 htmlspecialchars($event->name) . '</a>';
     }
 
-    public function player_link(player $player, event $event = null, $fullname = false) {
+    public function player_link(player $player, event $event = null, $fullname = false): string {
         $params = array();
         if ($player->id != $this->or->get_current_user()->id) {
             $params[] = 'id=' . $player->id;
@@ -302,7 +302,7 @@ class html_output {
                 htmlspecialchars($name) . '</a>';
     }
 
-    public function player_attendance(player $player, event $event) {
+    public function player_attendance(player $player, event $event): string {
         $attendance = $player->get_attendance($event);
 
         $content = $this->player_link($player, $event);
@@ -313,7 +313,7 @@ class html_output {
         return '<li class="' . $attendance->status . '">' . $content . '</li> ';
     }
 
-    public function subtotal($attending, $outof) {
+    public function subtotal($attending, $outof): string {
         if ($outof) {
             return '<span class="total">' . $attending . '</span><span class="outof">/' . $outof . '</span>';
         } else {
@@ -323,10 +323,12 @@ class html_output {
 
     /**
      * Output the links to the previous or next events, if any.
-     * @param event $previousevent
-     * @param event $nextevent
+     *
+     * @param event|null $previousevent
+     * @param event|null $nextevent
+     * @return string HTML to outpute.
      */
-    public function previous_next_links($previousevent, $nextevent) {
+    public function previous_next_links(?event $previousevent, ?event $nextevent): string {
         $output = '';
         if ($previousevent) {
             $output .= '<p><a href="' . $this->or->url('event.php?id=' . $previousevent->id) .
@@ -340,11 +342,11 @@ class html_output {
         return $output;
     }
 
-    public function make_id($string) {
+    public function make_id($string): string {
         return trim(preg_replace('~[^a-z0-9]+~', '-', strtolower($string)), '-');
     }
 
-    public function call_to_js($function, $arguments = array()) {
+    public function call_to_js(string $function, array $arguments = []): void {
         $quotedargs = array();
         foreach ($arguments as $arg) {
             $quotedargs[] = json_encode($arg);
@@ -352,7 +354,7 @@ class html_output {
         $this->javascriptcode[] = $function . '(' . implode(', ', $quotedargs) . ');';
     }
 
-    public function markdown($content) {
+    public function markdown($content): string {
         if (is_null($this->markdownparser)) {
             require_once(__DIR__ . '/../thirdparty/parsedown/Parsedown.php');
             $this->markdownparser = new Parsedown();

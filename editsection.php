@@ -63,7 +63,6 @@ if ($newsection != $section && $or->is_valid_section($newsection)) {
 switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('parts.php');
-        break;
 
     case form::SUBMITTED:
         $data = $form->get_submitted_data('stdClass');
@@ -81,7 +80,6 @@ switch ($form->get_outcome()) {
         }
 
         $or->redirect('parts.php');
-        break;
 }
 
 $output = $or->get_output();

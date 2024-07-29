@@ -89,7 +89,6 @@ if ($currentuser->can_edit_password($userid) && $form->get_field_value('changepw
 switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('users.php');
-        break;
 
     case form::SUBMITTED:
         $newuser = $form->get_submitted_data('user');
@@ -132,7 +131,6 @@ switch ($form->get_outcome()) {
         }
 
         $or->redirect('users.php');
-        break;
 }
 
 $output = $or->get_output();

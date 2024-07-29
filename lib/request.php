@@ -31,7 +31,7 @@ class request {
     const TYPE_AUTHTOKEN = '/[a-zA-Z0-9]{40}/';
     const TYPE_TIME = '/\d\d?:\d\d?(?::\d\d?)?/';
     const TYPE_ALNUMSPACE = '/^[a-zA-Z0-9 ]*$/';
-    public static $typenames = array(
+    public static array $typenames = [
         self::TYPE_INT => 'integer',
         self::TYPE_ATTENDANCE => 'attendance status',
         self::TYPE_EMAIL => 'email address',
@@ -41,9 +41,9 @@ class request {
         self::TYPE_AUTHTOKEN => 'authentication token',
         self::TYPE_TIME => 'time',
         self::TYPE_ALNUMSPACE => 'string of letters, numbers and spaces only',
-    );
+    ];
 
-    public function get_param($name, $type, $default = null, $postonly = true) {
+    public function get_param(string $name, int $type, mixed $default = null, bool $postonly = true): mixed {
         if (array_key_exists($name, $_POST)) {
             $raw = $_POST[$name];
         } else if (!$postonly && array_key_exists($name, $_GET)) {
@@ -61,11 +61,11 @@ class request {
         }
     }
 
-    protected function bool_value($raw) {
+    protected function bool_value(string $raw): bool {
         return $raw !== '' && $raw !== '0' && $raw !== 'false' && $raw !== 'no';
     }
 
-    public function get_array_param($name, $type, $default = null, $postonly = true) {
+    public function get_array_param(string $name, int $type, mixed $default = null, bool $postonly = true): array {
         if (array_key_exists($name, $_POST)) {
             $raw = $_POST[$name];
         } else if (!$postonly && array_key_exists($name, $_GET)) {
@@ -87,7 +87,7 @@ class request {
         return $clean;
     }
 
-    public function validate($raw, $type) {
+    public function validate(string $raw, int $type): bool {
         switch ($type) {
             case self::TYPE_INT:
                 return strval(intval($raw)) === $raw;
@@ -104,7 +104,7 @@ class request {
         }
     }
 
-    public static function get_ip_address() {
+    public static function get_ip_address(): string {
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             return $_SERVER['HTTP_CLIENT_IP']; // share internet
         } else if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {

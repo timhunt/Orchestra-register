@@ -26,13 +26,13 @@
  */
 class database_connection {
     /** @var mysqli */
-    private $conn;
+    private mysqli $conn;
 
     /** @var transaction[] stack of currently active transactions. */
-    private $transactions = array();
-    private $isrolledback = false;
+    private array $transactions = [];
+    private bool $isrolledback = false;
 
-    public function __construct($dbhost, $dbuser, $dbpass, $dbname) {
+    public function __construct(string $dbhost, string $dbuser, string $dbpass, string $dbname) {
         $this->conn = new mysqli($dbhost, $dbuser, $dbpass);
         if (!$this->conn) {
             throw new database_connect_exception($this->get_last_error());
@@ -42,7 +42,7 @@ class database_connection {
         }
     }
 
-    public function escape($value, $maxlength = null) {
+    public function escape(?string $value, ?int $maxlength = null): string {
         if (is_null($value)) {
             return 'NULL';
         }
@@ -52,15 +52,15 @@ class database_connection {
         return "'" . $this->conn->real_escape_string($value) . "'";
     }
 
-    public function get_last_insert_id() {
+    public function get_last_insert_id(): int|string {
         return $this->conn->insert_id;
     }
 
-    public function get_last_error() {
+    public function get_last_error(): string {
         return $this->conn->error;
     }
 
-    public function execute_sql($sql) {
+    public function execute_sql(string $sql): mysqli_result {
         $result = $this->conn->query($sql);
         if ($result === false) {
             throw new database_exception('Failed to load or save data from the databse.',
@@ -69,33 +69,33 @@ class database_connection {
         return $result;
     }
 
-    public function update($sql) {
+    public function update(string $sql): void {
         $this->execute_sql($sql);
     }
 
-    public function set_field($table, $column, $newvalue, $where) {
+    public function set_field(string $table, string $column, ?string $newvalue, string $where): void {
         $this->update("UPDATE $table SET $column = " . $this->escape($newvalue) .
                 "WHERE $where");
     }
 
-    public function table_exists($name) {
+    public function table_exists(string $name): bool {
         $result = $this->execute_sql("SHOW TABLES LIKE {$this->escape($name)}");
         $exists = $result->num_rows;
         $result->close();
-        return $exists;
+        return (bool) $exists;
     }
 
-    public function get_record_select($table, $where, $class) {
+    public function get_record_select(string $table, string $where, string $class): mixed {
         return $this->get_record_sql("SELECT * FROM $table WHERE $where", $class);
     }
 
     /**
-     * @param $sql
-     * @param $class
+     * @param string $sql
+     * @param string $class
      * @return mixed
      * @throws database_exception
      */
-    public function get_record_sql($sql, $class) {
+    public function get_record_sql(string $sql, string $class): mixed {
         $object = null;
         $result = $this->execute_sql($sql);
         if ($result->num_rows == 1) {
@@ -105,14 +105,14 @@ class database_connection {
         return $object;
     }
 
-    public function get_records($table, $class, $order = '') {
+    public function get_records(string $table, string $class, string $order = ''): array {
         if ($order) {
             $order = ' ORDER BY ' . $order;
         }
         return $this->get_records_sql('SELECT * FROM ' . $table . $order, $class);
     }
 
-    public function get_records_select($table, $where, $class, $order = '') {
+    public function get_records_select(string $table, string $where, string $class, string $order = ''): array {
         if ($where) {
             $where = ' WHERE ' . $where;
         }
@@ -122,7 +122,7 @@ class database_connection {
         return $this->get_records_sql('SELECT * FROM ' . $table . $where . $order, $class);
     }
 
-    public function get_records_sql($sql, $class) {
+    public function get_records_sql(string $sql, string $class): array {
         $result = $this->execute_sql($sql);
         $objects = array();
         while ($object = $result->fetch_object($class)) {
@@ -136,7 +136,7 @@ class database_connection {
         return $objects;
     }
 
-    public function count_records($table) {
+    public function count_records(string $table) {
         $record = $this->get_record_sql('SELECT COUNT(1) AS count FROM ' . $table, 'stdClass');
         if (!$record) {
             throw new database_exception('Failed to count data in the databse.', 'Table ' . $table);
@@ -144,7 +144,7 @@ class database_connection {
         return $record->count;
     }
 
-    public function begin_transaction() {
+    public function begin_transaction(): transaction {
         if (empty($this->transactions)) {
             $this->execute_sql('BEGIN');
         }
@@ -153,7 +153,7 @@ class database_connection {
         return $transaction;
     }
 
-    protected function verify_right_transaction(transaction $transaction) {
+    protected function verify_right_transaction(transaction $transaction): void {
         $nexttrans = array_pop($this->transactions);
         if ($nexttrans !== $transaction) {
             throw new coding_error('Transactions incorrectly nested.');
@@ -161,7 +161,7 @@ class database_connection {
         $transaction->dispose();
     }
 
-    public function commit_transaction(transaction $transaction) {
+    public function commit_transaction(transaction $transaction): void {
         if ($this->isrolledback) {
             $this->rollback_transaction($transaction);
         }
@@ -173,7 +173,7 @@ class database_connection {
         }
     }
 
-    public function rollback_transaction(transaction $transaction) {
+    public function rollback_transaction(transaction $transaction): void {
         $this->verify_right_transaction($transaction);
 
         if (empty($this->transactions)) {

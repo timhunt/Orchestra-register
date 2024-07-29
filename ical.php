@@ -26,15 +26,15 @@ $or = new orchestra_register();
 $events = $or->get_events(true);
 $debug = $or->get_param('debug', request::TYPE_BOOL, false, false);
 
-function ical_foramt_timestamp($timestamp) {
+function ical_foramt_timestamp(int $timestamp): string {
     return gmstrftime('%Y%m%dT%H%M%SZ', $timestamp);
 }
 
-function output_ical_property($name, $value) {
+function output_ical_property(string $name, string $value): void {
     echo $name , ':', $value, "\n";
 }
 
-function output_event_as_ical(event $event, orchestra_register $or) {
+function output_event_as_ical(event $event, orchestra_register $or): void {
     $name = $event->name;
     if ($or->get_config()->icaleventnameprefix) {
         $name = $or->get_config()->icaleventnameprefix . ' ' . $name;

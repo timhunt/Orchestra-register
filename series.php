@@ -34,7 +34,7 @@ if (!$user->can_edit_series()) {
 if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $or->require_sesskey();
     $series = $or->get_series($id);
-    if ($series && $series->deleted == 0) {
+    if ($series->deleted == 0) {
         $or->delete_series($series);
         $or->log('delete series ' . $id);
     }
@@ -43,7 +43,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
 } else if ($id = $or->get_param('undelete', request::TYPE_INT, 0)) {
     $or->require_sesskey();
     $series = $or->get_series($id, true);
-    if ($series && $series->deleted == 1) {
+    if ($series->deleted == 1) {
         $or->undelete_series($series);
         $or->log('undelete series ' . $id);
     }

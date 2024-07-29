@@ -33,7 +33,7 @@ $user = $or->get_current_user();
 $series = $or->get_series_list();
 
 if ($printview) {
-    $players = $or->get_players(false);
+    $players = $or->get_players();
 } else {
     $players = $or->get_players(false, $user->id);
 }

@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define('LOG_PAGE_SIZE', 100);
+const LOG_PAGE_SIZE = 100;
 
 require_once(__DIR__ . '/setup.php');
 $or = new orchestra_register();

@@ -60,7 +60,7 @@ if ($playerid == $user->id) {
 } else {
     $showhideurl = 'player.php?id=' . $playerid;
 }
-list($seriesactions, $systemactions) = $or->get_actions_menus($user, $includepast, false, $showhideurl);
+[$seriesactions, $systemactions] = $or->get_actions_menus($user, $includepast, $showhideurl);
 
 if ($editable) {
     $savechangesbutton = '<p><input type="submit" name="save" value="Save changes" /></p>';

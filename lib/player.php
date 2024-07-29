@@ -38,7 +38,7 @@ class player {
 
     public $attendance = array(); // $eventid => attendance.
 
-    public function get_attendance($event) {
+    public function get_attendance(event $event): attendance {
         if (!array_key_exists($event->id, $this->attendance)) {
             $attendance = new attendance();
             $attendance->eventid = $event->id;
@@ -48,10 +48,10 @@ class player {
         }
         return $this->attendance[$event->id];
     }
-    public function get_name() {
+    public function get_name(): string {
         return $this->firstname . ' ' . $this->lastname;
     }
-    public function get_public_name() {
+    public function get_public_name(): string {
         return $this->firstname . ' ' . substr($this->lastname, 0, 1);
     }
 }

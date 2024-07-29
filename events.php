@@ -33,7 +33,7 @@ if (!$user->can_edit_events()) {
 if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
     $or->require_sesskey();
     $event = $or->get_event($id);
-    if ($event && $event->deleted == 0) {
+    if ($event->deleted == 0) {
         $or->delete_event($event);
         $or->log('delete event ' . $id);
     }
@@ -42,7 +42,7 @@ if ($id = $or->get_param('delete', request::TYPE_INT, 0)) {
 } else if ($id = $or->get_param('undelete', request::TYPE_INT, 0)) {
     $or->require_sesskey();
     $event = $or->get_event($id, true);
-    if ($event && $event->deleted == 1) {
+    if ($event->deleted == 1) {
         $or->undelete_event($event);
         $or->log('undelete event ' . $id);
     }

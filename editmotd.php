@@ -33,7 +33,7 @@ if (!$user->can_edit_motd()) {
 $form = new form($or->url('editmotd.php'));
 $form->add_field(new text_field('motdheading', 'Heading', request::TYPE_RAW));
 $form->add_field(new textarea_field('motd', 'Message', request::TYPE_RAW, 10, 50));
-$form->get_field('motd')->set_note('Uses <a href="http://daringfireball.net/projects/markdown/syntax">MarkDown</a> formatting.');
+$form->get_field('motd')->set_note('Uses <a href="https://daringfireball.net/projects/markdown/syntax">MarkDown</a> formatting.');
 
 $current = array(
     'motdheading' => $or->get_motd_heading(),
@@ -45,7 +45,6 @@ $form->set_initial_data($current);
 switch ($form->parse_request($or)) {
     case form::CANCELLED:
         $or->redirect('');
-        break;
 
     case form::SUBMITTED:
         foreach (array('motdheading', 'motd') as $field) {

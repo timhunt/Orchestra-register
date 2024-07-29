@@ -24,21 +24,21 @@
 class event {
     const DATE_FORMAT = '%a %e %b';
     const TIME_FORMAT = '%H:%M';
-    public $id;
-    public $seriesid;
-    public $name;
-    public $description;
-    public $venue;
-    public $timestart;
-    public $timeend;
-    public $timemodified;
-    public $deleted = 0;
+    public int $id;
+    public int $seriesid;
+    public string $name;
+    public string $description;
+    public string $venue;
+    public int $timestart;
+    public int $timeend;
+    public int $timemodified;
+    public int $deleted = 0;
 
-    protected function wrap_in_span($content, $class) {
+    protected function wrap_in_span($content, $class): string {
         return '<span class="' . $class . '">' . $content . '</span>';
     }
 
-    public function get_nice_datetime($dateformat = self::DATE_FORMAT, $html = true) {
+    public function get_nice_datetime($dateformat = self::DATE_FORMAT, $html = true): string {
         if (strftime('%Y', $this->timestart) != strftime('%Y', time())) {
             $dateformat .= ' %Y';
         }

@@ -22,42 +22,42 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class db_config {
-    public $version;
+    public int $version;
 
-    public $changesesskeyonloginout = 0;
+    public int $changesesskeyonloginout = 0;
 
-    public $icalguid;
-    public $icaleventnameprefix = '';
+    public string $icalguid;
+    public string $icaleventnameprefix = '';
 
-    public $title = 'Orchestra Register';
-    public $timezone = 'Europe/London';
+    public string $title = 'Orchestra Register';
+    public string $timezone = 'Europe/London';
 
-    public $helpurl = null;
-    public $wikiediturl = null;
+    public ?string $helpurl = null;
+    public ?string $wikiediturl = null;
 
-    public $motdheading = '';
-    public $motd = '';
+    public string $motdheading = '';
+    public string $motd = '';
 
-    public $defaultseriesid;
+    public int $defaultseriesid;
 
     /** @var bool whether the system is in maitenance mode. */
-    public $maintenancemode = false;
+    public bool $maintenancemode = false;
 
-    protected $propertynames = null;
+    protected ?array $propertynames = null;
 
     /**
      * Is this a config property that can be set by the admin?
      * @param string $name
      * @return boolean
      */
-    public function is_settable_property($name) {
+    public function is_settable_property(string $name): bool {
         if (in_array($name, array('icalguid', 'version'))) {
             return false;
         }
 
         if (is_null($this->propertynames)) {
             $class = new ReflectionClass('db_config');
-            $this->propertynames = array();
+            $this->propertynames = [];
             foreach ($class->getProperties() as $property) {
                 $this->propertynames[] = $property->name;
             }

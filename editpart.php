@@ -68,7 +68,6 @@ if ($newpart != $part && $or->is_valid_part($newpart)) {
 switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('parts.php');
-        break;
 
     case form::SUBMITTED:
         $data = $form->get_submitted_data('stdClass');

@@ -28,20 +28,20 @@ class form {
     const INVALID = 1;
     const SUBMITTED = 2;
 
-    protected $state = null;
-    protected $actionurl;
-    protected $method = 'post';
-    protected $fields = array();
-    protected $submitlabel;
-    protected $hascancel;
+    protected ?int $state = null;
+    protected string $actionurl;
+    protected string $method = 'post';
+    protected array $fields = [];
+    protected string $submitlabel;
+    protected bool $hascancel;
 
-    public function __construct($actionurl, $submitlabel = 'Save changes', $hascancel = true) {
+    public function __construct(string $actionurl, string $submitlabel = 'Save changes', bool $hascancel = true) {
         $this->actionurl = $actionurl;
         $this->submitlabel = $submitlabel;
         $this->hascancel = $hascancel;
     }
 
-    public function add_field(form_field $field) {
+    public function add_field(form_field $field): void {
         $this->fields[$field->get_name()] = $field;
     }
 
@@ -49,26 +49,26 @@ class form {
      * @param string $name
      * @return form_field
      */
-    public function get_field($name) {
+    public function get_field(string $name): form_field {
         return $this->fields[$name];
     }
 
     /**
      * @param $_
      */
-    public function set_required_fields($_) {
+    public function set_required_fields($_): void {
         foreach (func_get_args() as $field) {
             $this->fields[$field]->set_required(true);
         }
     }
 
-    public function set_initial_data($data) {
+    public function set_initial_data($data): void {
         foreach ($this->fields as $field) {
             $field->set_initial($data);
         }
     }
 
-    public function parse_request(orchestra_register $or) {
+    public function parse_request(orchestra_register $or): int {
         if ($or->get_param('cancel', request::TYPE_BOOL, false)) {
             return $this->state = self::CANCELLED;
         }
@@ -93,14 +93,14 @@ class form {
         }
     }
 
-    public function set_field_error($name, $message) {
+    public function set_field_error($name, $message): void {
         $this->get_field($name)->set_error($message);
         if ($this->state == self::SUBMITTED) {
             $this->state = self::INVALID;
         }
     }
 
-    public function get_outcome() {
+    public function get_outcome(): int {
         if (is_null($this->state)) {
             throw new coding_error('Call to form::get_outcome without first calling ' .
                     'form::parse_request.');
@@ -108,11 +108,11 @@ class form {
         return $this->state;
     }
 
-    public function get_field_value($name) {
+    public function get_field_value($name): string {
         return $this->get_field($name)->get_current();
     }
 
-    public function get_submitted_data($class) {
+    public function get_submitted_data(string $class): mixed {
         $object = new $class();
         foreach ($this->fields as $name => $field) {
             $object->$name = $field->get_submitted();
@@ -120,7 +120,7 @@ class form {
         return $object;
     }
 
-    public function output(html_output $output) {
+    public function output(html_output $output): string {
         $html = $output->start_form($this->actionurl, $this->method);
         $html .= $output->sesskey_input();
         foreach ($this->fields as $field) {
@@ -137,24 +137,24 @@ class form {
 }
 
 abstract class form_field {
-    protected $label;
-    protected $name;
-    protected $note = '';
-    protected $error = '';
-    protected $default = null;
-    protected $initial = null;
-    protected $submitted = null;
-    protected $raw = null;
-    protected $isrequired = false;
+    protected string $label;
+    protected string $name;
+    protected string $note = '';
+    protected string $error = '';
+    protected ?string $default = null;
+    protected ?string $initial = null;
+    protected ?string $submitted = null;
+    protected ?string $raw = null;
+    protected bool $isrequired = false;
 
-    public function __construct($name, $label) {
+    public function __construct(string $name, string $label) {
         $this->name = $name;
         $this->label = $label;
     }
 
-    abstract public function parse_request(orchestra_register $or);
+    abstract public function parse_request(orchestra_register $or): bool;
 
-    public function set_initial($data) {
+    public function set_initial(object|array $data): void {
         if (is_array($data) && isset($data[$this->name])) {
             $this->initial = $data[$this->name];
         } else if (is_object($data) && isset($data->{$this->name})) {
@@ -162,15 +162,15 @@ abstract class form_field {
         }
     }
 
-    public function set_required($isrequired) {
+    public function set_required(bool $isrequired): void {
         $this->isrequired = $isrequired;
     }
 
-    public function set_note($note) {
+    public function set_note(string $note): void {
         $this->note = $note;
     }
 
-    public function set_error($message) {
+    public function set_error(string $message): void {
         $this->error = $message;
         if (is_null($this->raw)) {
             $this->raw = $this->submitted;
@@ -178,18 +178,18 @@ abstract class form_field {
         $this->submitted = null;
     }
 
-    public function get_name() {
+    public function get_name(): string {
         return $this->name;
     }
 
-    public function get_submitted() {
+    public function get_submitted(): string {
         if (is_null($this->submitted)) {
             throw new coding_error('No submitted data.');
         }
         return $this->submitted;
     }
 
-    public function get_current() {
+    public function get_current(): string {
         if (!is_null($this->submitted)) {
             return $this->submitted;
         } else if (!is_null($this->raw)) {
@@ -199,7 +199,7 @@ abstract class form_field {
         }
     }
 
-    public function get_initial() {
+    public function get_initial(): string {
         if (!is_null($this->initial)) {
             return $this->initial;
         } else if (!is_null($this->default)) {
@@ -209,7 +209,7 @@ abstract class form_field {
         }
     }
 
-    public function output(html_output $output) {
+    public function output(html_output $output): string {
         if ($this->error) {
             $note = '<span class="error">' . $this->error . '</span>';
         } else if ($this->note) {
@@ -222,19 +222,19 @@ abstract class form_field {
         return $output->form_field($this->label, $this->output_field($output), $note);
     }
 
-    public abstract function output_field(html_output $output);
+    public abstract function output_field(html_output $output): string;
 }
 
 abstract class single_value_field extends form_field {
-    protected $type;
+    protected string $type;
 
-    public function __construct($name, $label, $type, $default = null) {
+    public function __construct(string $name, string $label, string $type, ?string $default = null) {
         parent::__construct($name, $label);
         $this->type = $type;
         $this->default = $default;
     }
 
-    public function parse_request(orchestra_register $or) {
+    public function parse_request(orchestra_register $or): bool {
         $this->submitted = $or->get_param($this->name, $this->type);
         if (is_null($this->submitted)) {
             $this->error = 'Not a valid ' . request::$typenames[$this->type];
@@ -254,28 +254,28 @@ class hidden_field extends single_value_field {
         parent::__construct($name, '', $type, $default);
     }
 
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return '<input type="hidden" id="' . $this->name . '" name="' . $this->name .
                 '" value="' . $this->get_current() . '" />';
     }
 }
 
 class text_field extends single_value_field {
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return '<input type="text" id="' . $this->name . '" name="' . $this->name .
                 '" value="' . $this->get_current() . '" />';
     }
 }
 
 class textarea_field extends single_value_field {
-    protected $rows;
-    protected $cols;
-    public function __construct($name, $label, $type, $rows, $cols, $default = null) {
+    protected int $rows;
+    protected int $cols;
+    public function __construct(string $name, string $label, string $type, int $rows, int $cols, string $default = null) {
         parent::__construct($name, $label, $type, $default);
         $this->rows = $rows;
         $this->cols = $cols;
     }
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return '<textarea id="' . $this->name . '" name="' . $this->name .
                 '" rows="' . $this->rows . '" cols="' . $this->cols . '">' .
                 htmlspecialchars($this->get_current()) . '</textarea>';
@@ -286,7 +286,7 @@ class date_field extends text_field {
     public function __construct($name, $label, $default = null) {
         parent::__construct($name, $label, request::TYPE_DATE, $default);
     }
-    public function output(html_output $output) {
+    public function output(html_output $output): string {
         $output->call_to_js('init_date_hint', array($this->name));
         return parent::output($output);
     }
@@ -299,30 +299,30 @@ class time_field extends text_field {
 }
 
 class password_field extends single_value_field {
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return '<input type="password" id="' . $this->name . '" name="' . $this->name .
                 '" value="' . $this->get_current() . '" />';
     }
-    public function parse_request(orchestra_register $or) {
+    public function parse_request(orchestra_register $or): bool {
         $isvalid = parent::parse_request($or);
         $this->raw = '';
         return $isvalid;
     }
-    public function set_error($message) {
+    public function set_error($message): void {
         parent::set_error($message);
         $this->raw = '';
     }
 }
 
 class select_field extends single_value_field {
-    public $choices;
+    public array $choices;
 
-    public function __construct($name, $label, $choices, $default = null) {
+    public function __construct(string $name, string $label, array $choices, string $default = null) {
         parent::__construct($name, $label, request::TYPE_RAW, $default);
         $this->choices = $choices;
     }
 
-    public function parse_request(orchestra_register $or) {
+    public function parse_request(orchestra_register $or): bool {
         if (parent::parse_request($or) && array_key_exists($this->submitted, $this->choices)) {
             return true;
         }
@@ -330,20 +330,20 @@ class select_field extends single_value_field {
         return false;
     }
 
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return $output->select($this->name, $this->choices, $this->get_current());
     }
 }
 
 class group_select_field extends single_value_field {
-    public $choices;
+    public array $choices;
 
-    public function __construct($name, $label, $choices, $default = null) {
+    public function __construct(string $name, string $label, array $choices, string $default = null) {
         parent::__construct($name, $label, request::TYPE_RAW, $default);
         $this->choices = $choices;
     }
 
-    public function parse_request(orchestra_register $or) {
+    public function parse_request(orchestra_register $or): bool {
         if (parent::parse_request($or)) {
             foreach ($this->choices as $groupoptions) {
                 if (array_key_exists($this->submitted, $groupoptions)) {
@@ -355,23 +355,23 @@ class group_select_field extends single_value_field {
         return false;
     }
 
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return $output->group_select($this->name, $this->choices, $this->get_current());
     }
 }
 
 class multi_select_field extends form_field {
-    public $choices;
-    public $size;
+    public array $choices;
+    public int $size;
 
-    public function __construct($name, $label, $choices, $size = 10, $default = null) {
+    public function __construct(string $name, string $label, array $choices, int $size = 10, string $default = null) {
         parent::__construct($name, $label);
         $this->choices = $choices;
         $this->default = $default;
         $this->size = $size;
     }
 
-    public function parse_request(orchestra_register $or) {
+    public function parse_request(orchestra_register $or): bool {
         $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, array());
 
         foreach ($this->submitted as $index => $value) {
@@ -383,24 +383,24 @@ class multi_select_field extends form_field {
         return true;
     }
 
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return $output->multi_select($this->name, $this->choices,
                 $this->get_current(), $this->size);
     }
 }
 
 class group_multi_select_field extends form_field {
-    public $choices;
-    public $size;
+    public array $choices;
+    public int $size;
 
-    public function __construct($name, $label, $choices, $size = 10, $default = null) {
+    public function __construct(string $name, string $label, array$choices, int $size = 10, string $default = null) {
         parent::__construct($name, $label);
         $this->choices = $choices;
         $this->default = $default;
         $this->size = $size;
     }
 
-    public function parse_request(orchestra_register $or) {
+    public function parse_request(orchestra_register $or): bool {
         $this->submitted = $or->get_array_param($this->name, request::TYPE_RAW, array());
 
         foreach ($this->submitted as $index => $value) {
@@ -419,7 +419,7 @@ class group_multi_select_field extends form_field {
         return true;
     }
 
-    public function output_field(html_output $output) {
+    public function output_field(html_output $output): string {
         return $output->group_multi_select($this->name, $this->choices,
                 $this->get_current(), $this->size);
     }

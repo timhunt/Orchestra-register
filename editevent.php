@@ -69,7 +69,6 @@ if ($form->get_field_value('start') > $form->get_field_value('end')) {
 switch ($form->get_outcome()) {
     case form::CANCELLED:
         $or->redirect('events.php');
-        break;
 
     case form::SUBMITTED:
         $newevent = $form->get_submitted_data('event');

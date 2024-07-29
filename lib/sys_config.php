@@ -22,16 +22,16 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class sys_config {
-    public $dbhost;
-    public $dbuser;
-    public $dbpass;
-    public $dbname;
+    public string $dbhost;
+    public string $dbuser;
+    public string $dbpass;
+    public string $dbname;
 
-    public $wwwroot;
+    public string $wwwroot;
 
-    public $pwsalt;
+    public string $pwsalt;
 
-    public function check() {
+    public function check(): void {
         if (empty($this->wwwroot)) {
             throw new configuration_exception('Web site location ($config->wwwroot) not set in config.php.');
         }

@@ -23,16 +23,16 @@
  */
 class installer {
     /** @var database_connection */
-    private $connection;
+    private database_connection $connection;
     /** @var database */
-    private $db;
+    private database $db;
 
     public function __construct(database $db, database_connection $connection) {
         $this->db = $db;
         $this->connection = $connection;
     }
 
-    public function install() {
+    public function install(): void {
 
         $this->connection->execute_sql("
             CREATE TABLE config (
@@ -161,7 +161,7 @@ class installer {
         }
     }
 
-    public function upgrade($fromversion) {
+    public function upgrade(int $fromversion): void {
         if ($fromversion < 2009111800) {
             // Allow events to be deleted.
             $this->connection->execute_sql('ALTER TABLE events ADD COLUMN

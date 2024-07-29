@@ -27,26 +27,26 @@ class attendance {
     const YES = 'yes';
     const NO = 'no';
     const NOTREQUIRED = 'notrequired';
-    public static $symbols = array(
+    public static array $symbols = [
         self::UNKNOWN => ' ',
         self::YES => 'Yes',
         self::NO => 'No',
         self::UNSURE => '?',
         self::NOTREQUIRED => '-',
-    );
-    public $eventid;
-    public $userid;
-    public $seriesid;
-    public $status = self::UNKNOWN;
+    ];
+    public int $eventid;
+    public int $userid;
+    public int $seriesid;
+    public string $status = self::UNKNOWN;
     public function get_symbol() {
         return self::$symbols[$this->status];
     }
-    public function get_field_name() {
+    public function get_field_name(): string {
         return 'att_' . $this->userid . '_' . $this->eventid;
     }
 
-    protected function get_choices($includenoneeded) {
-        $choices = array();
+    protected function get_choices($includenoneeded): array {
+        $choices = [];
 
         foreach (self::$symbols as $value => $symbol) {
             if (!$includenoneeded && $value == self::NOTREQUIRED) {

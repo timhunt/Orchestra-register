@@ -24,20 +24,20 @@
 
 class mail_helper {
     /** @var orchestra_register */
-    protected $or;
+    protected orchestra_register $or;
 
     public function __construct(orchestra_register $or) {
         $this->or = $or;
     }
 
-    public function forgotten_url_mailto(player $user) {
+    public function forgotten_url_mailto(player $user): string {
         $body = $user->firstname . ",\n\nThe URL you need to use to edit your attendance in the " .
                 $this->or->get_title() . " is:\n\n" . $this->or->url('', false) . "?t=" .
                 $user->authkey . "\n\nThanks,\n\n" . $this->or->get_current_user()->firstname;
         return $this->make_mailto_url($user->email, $this->or->get_title() . ' URL reminder', $body);
     }
 
-    protected function make_mailto_url($to, $subject, $body) {
+    protected function make_mailto_url($to, $subject, $body): string {
         return str_replace('+', '%20', 'mailto:' . urlencode($to) .
                 '?subject=' . urlencode($subject) .
                 '&body=' . urlencode($body));

@@ -25,17 +25,17 @@ class database {
     /**
      * @var database_connection
      */
-    private $connection;
+    private database_connection $connection;
 
-    public function __construct($dbhost, $dbuser, $dbpass, $dbname) {
+    public function __construct(string $dbhost, string $dbuser, string $dbpass, string $dbname) {
         $this->connection = new database_connection($dbhost, $dbuser, $dbpass, $dbname);
     }
 
-    protected function escape($value, $maxlength = null) {
+    protected function escape(?string $value, ?int $maxlength = null): string {
         return $this->connection->escape($value, $maxlength);
     }
 
-    public function load_users($includedisabled = false) {
+    public function load_users(bool $includedisabled = false): array {
         $order = 'firstname, lastname';
         if ($includedisabled) {
             return $this->connection->get_records('users', 'player', $order);
@@ -45,8 +45,8 @@ class database {
         }
     }
 
-    public function load_players($seriesid, $includenotplaying = false,
-            $currentuserid = null) {
+    public function load_players(int $seriesid, bool $includenotplaying = false,
+            ?int $currentuserid = null): array {
         if ($includenotplaying) {
             $deletedtest = '';
         } else {
@@ -79,7 +79,7 @@ class database {
         return $this->connection->get_records_sql($sql, 'player');
     }
 
-    public function load_series($includedeleted = false) {
+    public function load_series(bool $includedeleted = false): array {
         $conditions = array();
         if (!$includedeleted) {
             $conditions['deleted'] = 0;
@@ -88,7 +88,7 @@ class database {
                 $this->where_clause($conditions), 'series', 'id');
     }
 
-    public function load_events($seriesid, $includepast = false, $includedeleted = false) {
+    public function load_events(int $seriesid, bool $includepast = false, bool $includedeleted = false): array {
         $conditions = array('seriesid = ' . $this->escape($seriesid));
         if (!$includedeleted) {
             $conditions[] = 'deleted = 0';
@@ -99,12 +99,12 @@ class database {
         return $this->connection->get_records_select('events', implode(' AND ', $conditions), 'event', 'timestart');
     }
 
-    public function load_attendances($seriesid) {
+    public function load_attendances(int $seriesid): array {
         return $this->connection->get_records_select('attendances',
                 'seriesid = ' . $this->escape($seriesid), 'attendance');
     }
 
-    public function load_subtotals($seriesid) {
+    public function load_subtotals(int $seriesid): array {
         return $this->connection->get_records_sql("
             SELECT
                 parts.part,
@@ -127,7 +127,7 @@ class database {
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
-    public function load_selected_players($seriesid, $parts, $eventid, $statuses) {
+    public function load_selected_players(int $seriesid, array $parts, int $eventid, array $statuses): array {
         $tests = array("users.role <> '" . user::DISABLED . "'");
 
         $extrajoin = '';
@@ -179,7 +179,7 @@ class database {
         return $this->connection->get_records_sql($sql, 'player');
     }
 
-    public function load_parts() {
+    public function load_parts(): array {
         return $this->connection->get_records_sql("
             SELECT parts.part, parts.section
             FROM parts
@@ -187,7 +187,7 @@ class database {
             ORDER BY sectionsort, partsort", 'stdClass');
     }
 
-    public function load_sections_and_parts() {
+    public function load_sections_and_parts(): array {
         return $this->connection->get_records_sql("
                 SELECT sections.section, sections.sectionsort, parts.part, parts.partsort,
                     CASE WHEN EXISTS (SELECT 1 FROM players WHERE players.part = parts.part)
@@ -198,7 +198,7 @@ class database {
                 ORDER BY sectionsort, partsort", 'stdClass');
     }
 
-    public function load_player_parts($userid) {
+    public function load_player_parts(int $userid): array {
         return $this->connection->get_records_sql("
             SELECT seriesid AS id, seriesid, part
             FROM players
@@ -206,7 +206,7 @@ class database {
             ORDER BY seriesid", 'stdClass');
     }
 
-    public function find_user_by_id($userid, $includedisabled = false) {
+    public function find_user_by_id(int $userid, bool $includedisabled = false): ?user {
         $disabledtest = '';
         if (!$includedisabled) {
             $disabledtest = " AND role <> '" . user::DISABLED . "'";
@@ -221,51 +221,51 @@ class database {
     }
 
     /**
-     * @param $eventid
+     * @param int $eventid
      * @param bool $includedeleted
-     * @return event
+     * @return event|null
      */
-    public function find_event_by_id($eventid, $includedeleted = false) {
-        $conditions = array('id' => $eventid);
+    public function find_event_by_id(int $eventid, bool $includedeleted = false): ?event {
+        $conditions = ['id' => $eventid];
         if (!$includedeleted) {
             $conditions['deleted'] = 0;
         }
         return $this->connection->get_record_select('events', $this->where_clause($conditions), 'event');
     }
 
-    public function find_series_by_id($seriesid, $includedeleted = false) {
-        $conditions = array('id' => $seriesid);
+    public function find_series_by_id(int $seriesid, bool $includedeleted = false) {
+        $conditions = ['id' => $seriesid];
         if (!$includedeleted) {
             $conditions['deleted'] = 0;
         }
         return $this->connection->get_record_select('series', $this->where_clause($conditions), 'series');
     }
 
-    public function check_user_auth($email, $saltedpassword) {
+    public function check_user_auth(string $email, string $saltedpassword) {
         return $this->connection->get_record_select('users',
                 "email = " . $this->escape($email) . " AND pwhash = SHA1(CONCAT(" .
                 $this->escape($saltedpassword) . ", pwsalt)) AND role <> '" . user::DISABLED . "'", 'user');
     }
 
-    public function set_password($userid, $saltedpassword) {
+    public function set_password(int $userid, string $saltedpassword): void {
         $this->connection->update("UPDATE users SET pwhash = SHA1(CONCAT(" .
             $this->escape($saltedpassword) . ", pwsalt)) WHERE id = " . $this->escape($userid));
     }
 
-    public function set_event_deleted($eventid, $deleted) {
+    public function set_event_deleted(int $eventid, bool $deleted): void {
         $this->connection->update("UPDATE events SET deleted = " . $this->escape($deleted) .
                 " WHERE id = " . $this->escape($eventid));
     }
 
-    public function set_series_deleted($seriesid, $deleted) {
+    public function set_series_deleted(int $seriesid, bool $deleted): void {
         $this->connection->update("UPDATE series SET deleted = " . $this->escape($deleted) .
                 " WHERE id = " . $this->escape($seriesid));
     }
 
     /**
-     * @return db_config
+     * @return db_config|null
      */
-    public function load_config() {
+    public function load_config(): ?db_config {
         if (!$this->connection->table_exists('config')) {
             return null;
         }
@@ -278,7 +278,7 @@ class database {
         return $config;
     }
 
-    public function copy_players_between_series($oldseriesid, $newseriesid) {
+    public function copy_players_between_series(int $oldseriesid, int $newseriesid): void {
         $sql = "INSERT INTO players (userid, seriesid, part)
                 SELECT oldplayers.userid, {$this->escape($newseriesid)}, oldplayers.part
                 FROM players oldplayers
@@ -290,7 +290,7 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function set_player_part($userid, $seriesid, $newpart) {
+    public function set_player_part(int $userid, int $seriesid, string $newpart): void {
         $sql = "INSERT INTO players (userid, seriesid, part)
                 VALUES (" . $this->escape($userid) . ", " . $this->escape($seriesid) . ", " .
                         $this->escape($newpart) . ")
@@ -298,7 +298,7 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function set_attendance($userid, $seriesid, $eventid, $newstatus) {
+    public function set_attendance(int $userid, int $seriesid, int $eventid, string $newstatus): void {
         $sql = "INSERT INTO attendances (userid, seriesid, eventid, status)
                 VALUES (" . $this->escape($userid) . ", " . $this->escape($seriesid) . ", " .
                         $this->escape($eventid) . ", " . $this->escape($newstatus) . ")
@@ -306,7 +306,7 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function set_config($name, $value, $config = null) {
+    public function set_config(string $name, ?string $value, ?db_config $config = null): void {
         $sql = "INSERT INTO config (name, value)
                 VALUES (" . $this->escape($name) . ", " . $this->escape($value) . ")
                 ON DUPLICATE KEY UPDATE value = " . $this->escape($value);
@@ -316,7 +316,7 @@ class database {
         }
     }
 
-    public function insert_user($user) {
+    public function insert_user(user $user): void {
         $sql = "INSERT INTO users (firstname, lastname, email, authkey, pwhash, pwsalt, role)
                 VALUES (" . $this->escape($user->firstname) . ", " .
                 $this->escape($user->lastname) . ", " .
@@ -329,7 +329,7 @@ class database {
         $user->id = $this->connection->get_last_insert_id();
     }
 
-    public function update_user($user) {
+    public function update_user(user $user): void {
         if (empty($user->id)) {
             throw new coding_error('Trying to update a player who is not in the database.');
         }
@@ -342,7 +342,7 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function insert_series($series) {
+    public function insert_series(series $series): void {
         $sql = "INSERT INTO series (name, description, deleted)
                 VALUES (" . $this->escape($series->name) . ", " .
                 $this->escape($series->description) . ", " .
@@ -351,7 +351,7 @@ class database {
         $series->id = $this->connection->get_last_insert_id();
     }
 
-    public function insert_event($event) {
+    public function insert_event(event $event): void {
         $sql = "INSERT INTO events (seriesid, name, description, venue, timestart, timeend, timemodified)
                 VALUES (" . $this->escape($event->seriesid) . ", " .
                 $this->escape($event->name) . ", " . $this->escape($event->description) . ", " .
@@ -361,7 +361,7 @@ class database {
         $event->id = $this->connection->get_last_insert_id();
     }
 
-    public function update_series($series) {
+    public function update_series(series $series): void {
         if (empty($series->id)) {
             throw new coding_error('Trying to update a series that is not in the database.');
         }
@@ -373,7 +373,7 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function update_event($event) {
+    public function update_event(event $event): void {
         if (empty($event->id)) {
             throw new coding_error('Trying to update an event that is not in the database.');
         }
@@ -389,7 +389,7 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function insert_section($section) {
+    public function insert_section(string $section): void {
         $sql = "INSERT INTO sections (section, sectionsort)
                 VALUES (" . $this->escape($section) . ",
                     COALESCE(1 + (SELECT MAX(sectionsort) FROM
@@ -398,7 +398,7 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function insert_part($section, $part) {
+    public function insert_part(string $section, string $part): void {
         $sql = "INSERT INTO parts (part, section, partsort)
                 VALUES (" . $this->escape($part) . ", " . $this->escape($section) . ",
                     COALESCE(1 + (SELECT MAX(partsort) FROM
@@ -407,17 +407,17 @@ class database {
         $this->connection->update($sql);
     }
 
-    public function delete_section($section) {
+    public function delete_section(string $section): void {
         $sql = "DELETE FROM sections WHERE section = " . $this->escape($section);
         $this->connection->update($sql);
     }
 
-    public function delete_part($part) {
+    public function delete_part(string $part): void {
         $sql = "DELETE FROM parts WHERE part = " . $this->escape($part);
         $this->connection->update($sql);
     }
 
-    public function rename_section($oldname, $newname) {
+    public function rename_section(string $oldname, string $newname): void {
         $transaction = $this->connection->begin_transaction();
         $oldsection = $this->connection->get_record_select('sections', 'section = ' .
                 $this->escape($oldname), 'stdClass');
@@ -433,7 +433,7 @@ class database {
         $transaction->commit();
     }
 
-    public function rename_part($oldname, $newname) {
+    public function rename_part(string $oldname, string $newname): void {
         $transaction = $this->connection->begin_transaction();
         $oldpart = $this->connection->get_record_select('parts', 'part = ' .
                 $this->escape($oldname), 'stdClass');
@@ -449,7 +449,7 @@ class database {
         $transaction->commit();
     }
 
-    public function swap_section_order($section1, $order1, $section2, $order2) {
+    public function swap_section_order(string $section1, int $order1, string $section2, int $order2): void {
         $transaction = $this->connection->begin_transaction();
         $this->connection->set_field('sections', 'sectionsort', 0,
                 'section = ' . $this->escape($section1));
@@ -460,7 +460,7 @@ class database {
         $transaction->commit();
     }
 
-    public function swap_part_order($part1, $order1, $part2, $order2) {
+    public function swap_part_order(string $part1, int $order1, string $part2, int $order2): void {
         $transaction = $this->connection->begin_transaction();
         $this->connection->set_field('parts', 'partsort', 0, 'part = ' . $this->escape($part1));
         $this->connection->set_field('parts', 'partsort', $order1, 'part = ' . $this->escape($part2));
@@ -468,7 +468,7 @@ class database {
         $transaction->commit();
     }
 
-    public function insert_log($userid, $authlevel, $action) {
+    public function insert_log(?int $userid, int $authlevel, string $action): void {
         $sql = "INSERT INTO logs (timestamp, userid, authlevel, ipaddress, action)
                 VALUES (" . $this->escape(time()) . ", " . $this->escape($userid) . ", " .
                 $this->escape($authlevel) . ", " . $this->escape(request::get_ip_address()) . ", " .
@@ -480,7 +480,7 @@ class database {
         return $this->connection->count_records('logs');
     }
 
-    public function load_logs($from, $limit) {
+    public function load_logs(int $from, int $limit): array {
         $sql = "SELECT l.timestamp, u.firstname, u.lastname, u.email, l.authlevel, l.ipaddress, l.action
                 FROM logs l
                 LEFT JOIN users u ON u.id = l.userid
@@ -489,7 +489,7 @@ class database {
         return $this->connection->get_records_sql($sql, 'stdCLass');
     }
 
-    public static function random_string($length) {
+    public static function random_string(int $length): string {
         $pool  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $pool .= 'abcdefghijklmnopqrstuvwxyz';
         $pool .= '0123456789';
@@ -501,7 +501,7 @@ class database {
         return $string;
     }
 
-    protected function where_clause($tests) {
+    protected function where_clause(array $tests): string {
         $clauses = array();
         foreach ($tests as $field => $value) {
             $clauses[] = $field . " = " . $this->escape($value);
@@ -509,11 +509,11 @@ class database {
         return implode(' AND ', $clauses);
     }
 
-    protected function get_last_error() {
+    protected function get_last_error(): string {
         return $this->connection->get_last_error();
     }
 
-    public static function load_csv($filename, $skipheader = true) {
+    public static function load_csv(string $filename, bool $skipheader = true): array {
         $handle = fopen(__DIR__ . '/../' . $filename, 'r');
         if (!$handle) {
             return array();
@@ -529,7 +529,7 @@ class database {
         return $data;
     }
 
-    protected function get_installer() {
+    protected function get_installer(): installer {
         require_once(__DIR__ . '/installer.php');
         return new installer($this, $this->connection);
     }
@@ -538,9 +538,9 @@ class database {
      * Check that the database is installed, and up-to-date. If not, rectify that.
      * @param db_config $config
      * @param string $codeversion
-     * @return db_config the config, possibly updated.
+     * @return db_config|null the config, possibly updated.
      */
-    public function check_installed($config, $codeversion) {
+    public function check_installed(db_config $config, string $codeversion): ?db_config {
         if ($config->version < $codeversion) {
             $this->get_installer()->upgrade($config->version);
             $this->insert_log(null, user::AUTH_NONE, 'upgrade to version ' . $codeversion);
@@ -551,7 +551,7 @@ class database {
         return $config;
     }
 
-    public function install($codeversion) {
+    public function install(int $codeversion): void {
         $this->get_installer()->install();
         $this->set_config('version', $codeversion);
     }

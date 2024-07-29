@@ -69,7 +69,7 @@ if ($params) {
 $or->redirect($url);
 
 
-function has_really_changed($newattendance, $oldattendance, $canchangenotrequired) {
+function has_really_changed(string $newattendance, string $oldattendance, bool $canchangenotrequired): bool {
     if ($newattendance == 'nochange' || $newattendance == $oldattendance) {
         return false;
     }

@@ -22,29 +22,29 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class transaction {
-    /** @var database_connection */
-    private $connection;
+    /** @var database_connection|null */
+    private ?database_connection $connection;
 
     public function __construct(database_connection $connection) {
         $this->connection = $connection;
     }
 
-    protected function is_disposed() {
+    protected function is_disposed(): bool {
         return empty($this->connection);
     }
 
-    public function dispose() {
-        return $this->connection = null;
+    public function dispose(): void {
+        $this->connection = null;
     }
 
-    public function commit() {
+    public function commit(): void {
         if ($this->is_disposed()) {
             throw new coding_error('Transactions already disposed');
         }
         $this->connection->commit_transaction($this);
     }
 
-    public function rollback() {
+    public function rollback(): void {
         if ($this->is_disposed()) {
             throw new coding_error('Transactions already disposed');
         }

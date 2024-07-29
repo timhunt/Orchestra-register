@@ -54,7 +54,6 @@ $form->set_initial_data($currentconfig);
 switch ($form->parse_request($or)) {
     case form::CANCELLED:
         $or->redirect('');
-        break;
 
     case form::SUBMITTED:
         foreach ($fields as $field) {
@@ -66,7 +65,6 @@ switch ($form->parse_request($or)) {
         }
 
         $or->redirect('');
-        break;
 }
 
 $output = $or->get_output();

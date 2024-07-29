@@ -22,19 +22,19 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class actions {
-    protected $actions = array();
+    protected array $actions = [];
 
-    public function add($url, $linktext, $allowed = true) {
+    public function add($url, $linktext, $allowed = true): void {
         if ($allowed) {
             $this->actions[$url] = $linktext;
         }
     }
 
-    public function output(html_output $output) {
+    public function output(html_output $output): string {
         return $output->action_menu($this->actions);
     }
 
-    public function is_empty() {
+    public function is_empty(): bool {
         return empty($this->actions);
     }
 }
