@@ -58,12 +58,14 @@ $output->header('Edit rehearsal series');
 ?>
 <p><a href="<?php echo $or->url('editseries.php'); ?>">Add another rehearsal series</a></p>
 <?php echo $output->back_link(); ?>
+
 <table>
+<caption>Rehearsal series</caption>
 <thead>
 <tr class="headingrow">
-<th>Name</th>
-<th>Description</th>
-<th>Actions</th>
+<th scope="col">Name</th>
+<th scope="col">Description</th>
+<th scope="col">Actions</th>
 </tr>
 </thead>
 <tbody>
@@ -88,7 +90,7 @@ foreach ($serieslist as $series) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
-<th><?php echo htmlspecialchars($series->name); ?></th>
+<th scope="row"><?php echo htmlspecialchars($series->name); ?></th>
 <td><?php echo htmlspecialchars($series->description); ?></td>
 <td><?php echo implode("\n", $actions); ?></td>
 </tr>

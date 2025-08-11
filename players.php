@@ -80,11 +80,12 @@ echo $output->sesskey_input();
 <p><input type="submit" name="save" value="Save changes" /></p>
 
 <table id="players">
+<caption>Players for <?php echo $series[$or->get_current_seriesid()]->name; ?></caption>
 <thead>
 <tr class="headingrow">
-<th>Name</th>
-<th>Part</th>
-<th>URL</th>
+<th scope="col">Name</th>
+<th scope="col">Part</th>
+<th scope="col">URL</th>
 </tr>
 </thead>
 <tbody>
@@ -96,7 +97,7 @@ foreach ($players as $player) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
-<th><label for="player<?php echo $player->id ?>"><?php echo $output->player_link($player, null, true); ?></label></th>
+<th scope="row"><label for="player<?php echo $player->id ?>"><?php echo $output->player_link($player, null, true); ?></label></th>
 <td><?php
     echo $output->group_select('player' . $player->id, $parts, $player->part);
     ?>

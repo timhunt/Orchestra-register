@@ -101,15 +101,37 @@ if (!$printview && $user->is_authenticated()) {
 ?>
 
 <table id="register">
+<caption>Attendance register</caption>
 <thead>
 <tr class="headingrow">
-<th rowspan="4">Section</th>
-<th rowspan="4">Part</th>
-<th rowspan="4">Name</th>
+<th rowspan="4" scope="col">Section</th>
+<th rowspan="4" scope="col">Part</th>
+<th rowspan="4" scope="col">Name</th>
+<?php
+foreach ($events as $event) {
+    $rowspan = (string)($event->description) === '' ? ' rowspan="2"' : '';
+    ?>
+<th class="eventname" scope="col"<?php echo $rowspan; ?>><?php echo $output->event_link($event); ?></th>
+    <?php
+}
+?>
+</tr>
+<tr class="headingrow">
+<?php
+foreach ($events as $event) {
+    if ((string)($event->description) !== '') {
+        ?>
+<th class="eventdesc" scope="col"><?php echo htmlspecialchars($event->description); ?></th>
+        <?php
+    }
+}
+?>
+</tr>
+<tr class="headingrow">
 <?php
 foreach ($events as $event) {
     ?>
-<th class="eventname"><?php echo $output->event_link($event); ?></th>
+<th class="eventvenue" scope="col"><?php echo htmlspecialchars($event->venue); ?></th>
     <?php
 }
 ?>
@@ -118,25 +140,7 @@ foreach ($events as $event) {
 <?php
 foreach ($events as $event) {
     ?>
-<th class="eventdesc"><?php echo htmlspecialchars($event->description); ?></th>
-    <?php
-}
-?>
-</tr>
-<tr class="headingrow">
-<?php
-foreach ($events as $event) {
-    ?>
-<th class="eventvenue"><?php echo htmlspecialchars($event->venue); ?></th>
-    <?php
-}
-?>
-</tr>
-<tr class="headingrow">
-<?php
-foreach ($events as $event) {
-    ?>
-<th class="eventdatetime"><?php echo $event->get_nice_datetime(); ?></th>
+<th class="eventdatetime" scope="col"><?php echo $event->get_nice_datetime(); ?></th>
     <?php
 }
 ?>
@@ -151,7 +155,7 @@ foreach ($players as $player) {
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
 <td class="sectcol"><?php echo htmlspecialchars($player->section); ?></td>
 <td class="partcol"><?php echo htmlspecialchars($player->part); ?></td>
-<th><?php echo $output->player_link($player); ?></th>
+<th scope="row"><?php echo $output->player_link($player); ?></th>
     <?php
     foreach ($events as $event) {
         $attendance = $player->get_attendance($event);

@@ -45,13 +45,14 @@ echo $output->back_link();
 
 ?>
 <table>
+<caption>Users</caption>
 <thead>
 <tr class="headingrow">
-<th>Name</th>
-<th>Email</th>
-<th>Role</th>
-<th>Actions</th>
-<th>URL</th>
+<th scope="col">Name</th>
+<th scope="col">Email</th>
+<th scope="col">Role</th>
+<th scope="col">Actions</th>
+<th scope="col">URL</th>
 </tr>
 </thead>
 <tbody>
@@ -74,7 +75,7 @@ foreach ($users as $user) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
-<th><?php echo htmlspecialchars($user->get_name()); ?></th>
+<th scope="row"><?php echo htmlspecialchars($user->get_name()); ?></th>
 <td><?php echo htmlspecialchars($user->email); ?></td>
 <td><?php echo htmlspecialchars($role); ?></td>
 <td><?php echo implode("\n", $actions); ?></td>

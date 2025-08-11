@@ -61,15 +61,16 @@ echo $output->links_to_other_series($series, 'events.php');
 <p><a href="<?php echo $or->url('editevent.php'); ?>">Add another event</a></p>
 <?php echo $output->back_link(); ?>
 <table>
+<caption>Events in <?php echo $series[$or->get_current_seriesid()]->name; ?></caption>
 <thead>
 <tr class="headingrow">
-<th>Event name</th>
-<th>Venue</th>
-<th>Date</th>
-<th>Time start</th>
-<th>Time end</th>
-<th>Actions</th>
-<th>Description</th>
+<th scope="col">Event name</th>
+<th scope="col">Venue</th>
+<th scope="col">Date</th>
+<th scope="col">Time start</th>
+<th scope="col">Time end</th>
+<th scope="col">Actions</th>
+<th scope="col">Description</th>
 </tr>
 </thead>
 <tbody>
@@ -90,7 +91,7 @@ foreach ($events as $event) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
-<th><?php echo $output->event_link($event); ?></th>
+<th scope="row"><?php echo $output->event_link($event); ?></th>
 <td><?php echo htmlspecialchars($event->venue); ?></td>
 <td><?php echo date(event::DATE_FORMAT, $event->timestart); ?></td>
 <td><?php echo date(event::TIME_FORMAT, $event->timestart); ?></td>

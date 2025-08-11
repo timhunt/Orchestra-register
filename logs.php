@@ -54,13 +54,14 @@ echo $topactions->output($output);
 
 ?>
 <table class="logs">
+<caption>Logs</caption>
 <thead>
 <tr class="headingrow">
-<th>Time</th>
-<th>User</th>
-<th>Authentication</th>
-<th>IP address</th>
-<th>Action</th>
+<th scope="col">Time</th>
+<th scope="col">User</th>
+<th scope="col">Authentication</th>
+<th scope="col">IP address</th>
+<th scope="col">Action</th>
 </tr>
 </thead>
 <tbody>
