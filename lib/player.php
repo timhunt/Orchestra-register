@@ -22,21 +22,21 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class player {
-    public $id;
-    public $seriesid;
-    public $part;
-    public $section;
+    public int $id;
+    public int $seriesid;
+    public string $part;
+    public string $section;
 
-    public $firstname;
-    public $lastname;
-    public $email;
-    public $authkey;
-    public $username;
-    public $pwhash;
-    public $pwsalt;
-    public $role = user::PLAYER;
+    public string $firstname;
+    public string $lastname;
+    public string $email;
+    public string $authkey;
+    public string $username;
+    public ?string $pwhash;
+    public ?string $pwsalt;
+    public string $role = user::PLAYER;
 
-    public $attendance = []; // $eventid => attendance.
+    public array $attendance = []; // $eventid => attendance.
 
     public function get_attendance(event $event): attendance {
         if (!array_key_exists($event->id, $this->attendance)) {

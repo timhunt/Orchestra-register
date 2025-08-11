@@ -43,7 +43,7 @@ class request {
         self::TYPE_ALNUMSPACE => 'string of letters, numbers and spaces only',
     ];
 
-    public function get_param(string $name, int $type, mixed $default = null, bool $postonly = true): mixed {
+    public function get_param(string $name, int|string $type, mixed $default = null, bool $postonly = true): mixed {
         if (array_key_exists($name, $_POST)) {
             $raw = $_POST[$name];
         } else if (!$postonly && array_key_exists($name, $_GET)) {
@@ -65,7 +65,7 @@ class request {
         return $raw !== '' && $raw !== '0' && $raw !== 'false' && $raw !== 'no';
     }
 
-    public function get_array_param(string $name, int $type, mixed $default = null, bool $postonly = true): array {
+    public function get_array_param(string $name, int|string $type, mixed $default = null, bool $postonly = true): array {
         if (array_key_exists($name, $_POST)) {
             $raw = $_POST[$name];
         } else if (!$postonly && array_key_exists($name, $_GET)) {
@@ -87,7 +87,7 @@ class request {
         return $clean;
     }
 
-    public function validate(string $raw, int $type): bool {
+    public function validate(string $raw, int|string $type): bool {
         switch ($type) {
             case self::TYPE_INT:
                 return strval(intval($raw)) === $raw;

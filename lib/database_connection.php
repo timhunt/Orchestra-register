@@ -60,7 +60,7 @@ class database_connection {
         return $this->conn->error;
     }
 
-    public function execute_sql(string $sql): mysqli_result {
+    public function execute_sql(string $sql): bool|mysqli_result {
         $result = $this->conn->query($sql);
         if ($result === false) {
             throw new database_exception('Failed to load or save data from the databse.',

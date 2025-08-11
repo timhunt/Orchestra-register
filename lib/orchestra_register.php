@@ -23,7 +23,7 @@ use JetBrains\PhpStorm\NoReturn;
  */
 class orchestra_register {
     /** @var user|null */
-    private ?user $user;
+    private ?user $user = null;
     private ?array $players = null;
     private ?array $events = null;
     private ?array $parts = null;
@@ -472,7 +472,7 @@ class orchestra_register {
         return 'event' . $event->id . '@' . $this->config->icalguid;
     }
 
-    public function url(string $relativeurl, bool $withtoken = true, bool $xmlescape = true, ?int $seriesid = null): string {
+    public function url(string $relativeurl, bool $withtoken = true, bool $xmlescape = true, int|string|null $seriesid = null): string {
         $extra = [];
 
         if (is_null($seriesid)) {
@@ -503,11 +503,11 @@ class orchestra_register {
         }
     }
 
-    public function get_param(string $name, int $type, mixed $default = null, bool $postonly = true): mixed {
+    public function get_param(string $name, int|string $type, mixed $default = null, bool $postonly = true): mixed {
         return $this->request->get_param($name, $type, $default, $postonly);
     }
 
-    public function get_array_param(string $name, int $type, mixed $default = null, bool $postonly = true): array {
+    public function get_array_param(string $name, int|string $type, mixed $default = null, bool $postonly = true): array {
         return $this->request->get_array_param($name, $type, $default, $postonly);
     }
 
@@ -553,7 +553,7 @@ class orchestra_register {
     }
 
     public function check_series_exists(int $seriesid): bool {
-        return $this->db->find_series_by_id($seriesid);
+        return (bool) $this->db->find_series_by_id($seriesid);
     }
 
     public function get_current_seriesid(): int {

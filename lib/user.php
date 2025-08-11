@@ -35,14 +35,14 @@ class user {
         self::ORGANISER => 'Committee member',
         self::ADMIN => 'Administrator',
     ];
-    public int $id;
+    public ?int $id = null;
     public string $firstname;
     public string $lastname;
     public string $email;
     public string $authkey;
     public string $username;
-    public string $pwhash;
-    public string $pwsalt;
+    public ?string $pwhash;
+    public ?string $pwsalt;
     public string $role = user::PLAYER;
     public int $authlevel = self::AUTH_NONE;
     public mixed $sesskey;
