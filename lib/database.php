@@ -53,7 +53,9 @@ class database {
             $deletedtest = 'AND players.part IS NOT NULL';
         }
         $sql = "
-            SELECT id, firstname, lastname, email, players.part, parts.section, authkey, pwhash, pwsalt, role
+            SELECT id, firstname, lastname, email,
+                players.part, parts.section, {$this->escape($seriesid)} AS seriesid,
+                authkey, pwhash, pwsalt, role
             FROM users
             LEFT JOIN players ON users.id = players.userid AND players.seriesid = {$this->escape($seriesid)}
             LEFT JOIN parts ON players.part = parts.part
