@@ -242,7 +242,7 @@ if (!$printview && $user->is_authenticated()) {
 
 if ($printview) {
     ?>
-<p>From <?php echo $or->url('', false); ?> at <?php echo strftime('%H:%M, %d %B %Y') ?>.</p>
+<p>From <?php echo $or->url('', false); ?> at <?php echo date('H:i, d F Y'); ?>.</p>
     <?php
 
 } else {

@@ -47,9 +47,9 @@ if ($eventid) {
     $url = $or->url('editevent.php', false, false);
 }
 
-$event->date = strftime('%d %B %Y', $event->timestart);
-$event->start = strftime('%H:%M', $event->timestart);
-$event->end = strftime('%H:%M', $event->timeend);
+$event->date = date('d F Y', $event->timestart);
+$event->start = date('H:i', $event->timestart);
+$event->end = date('H:i', $event->timeend);
 
 $form = new form($url, $submitlabel);
 $form->add_field(new text_field('name', 'Event name', request::TYPE_RAW));

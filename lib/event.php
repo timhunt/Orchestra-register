@@ -22,8 +22,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class event {
-    const DATE_FORMAT = '%a %e %b';
-    const TIME_FORMAT = '%H:%M';
+    const DATE_FORMAT = 'D j M';
+    const TIME_FORMAT = 'H:i';
     public int $id;
     public int $seriesid;
     public string $name;
@@ -39,13 +39,13 @@ class event {
     }
 
     public function get_nice_datetime($dateformat = self::DATE_FORMAT, $html = true): string {
-        if (strftime('%Y', $this->timestart) != strftime('%Y', time())) {
-            $dateformat .= ' %Y';
+        if (date('Y', $this->timestart) != date('Y', time())) {
+            $dateformat .= ' Y';
         }
-        $startdate = strftime($dateformat, $this->timestart);
-        $enddate = strftime($dateformat, $this->timeend);
-        $starttime = strftime(self::TIME_FORMAT, $this->timestart);
-        $endtime = strftime(self::TIME_FORMAT, $this->timeend);
+        $startdate = date($dateformat, $this->timestart);
+        $enddate = date($dateformat, $this->timeend);
+        $starttime = date(self::TIME_FORMAT, $this->timestart);
+        $endtime = date(self::TIME_FORMAT, $this->timeend);
         if ($html) {
             $startdate = $this->wrap_in_span($startdate, 'date');
             $enddate = $this->wrap_in_span($enddate, 'date');

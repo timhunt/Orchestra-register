@@ -28,12 +28,12 @@ $events = $or->get_events(true);
 $content = '';
 $month = '';
 foreach ($events as $event) {
-    $nextmonth = strftime('%B', $event->timestart);
+    $nextmonth = date('F', $event->timestart);
     if ($nextmonth != $month) {
         $content .= "\n===" . $nextmonth . "===\n\n";
     }
     $month = $nextmonth;
-    $content .= '* ' . $event->get_nice_datetime('%A %e', false) . ', ' . $event->venue . "\n";
+    $content .= '* ' . $event->get_nice_datetime('l j', false) . ', ' . $event->venue . "\n";
 }
 
 $wikiediturl = $or->get_wiki_edit_url();

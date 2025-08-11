@@ -27,7 +27,7 @@ $events = $or->get_events(true);
 $debug = $or->get_param('debug', request::TYPE_BOOL, false, false);
 
 function ical_foramt_timestamp(int $timestamp): string {
-    return gmstrftime('%Y%m%dT%H%M%SZ', $timestamp);
+    return gmdate('Ymd\THis\Z', $timestamp);
 }
 
 function output_ical_property(string $name, string $value): void {

@@ -92,9 +92,9 @@ foreach ($events as $event) {
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?><?php echo $extrarowclass; ?>">
 <th><?php echo $output->event_link($event); ?></th>
 <td><?php echo htmlspecialchars($event->venue); ?></td>
-<td><?php echo strftime(event::DATE_FORMAT, $event->timestart); ?></td>
-<td><?php echo strftime(event::TIME_FORMAT, $event->timestart); ?></td>
-<td><?php echo strftime(event::TIME_FORMAT, $event->timeend); ?></td>
+<td><?php echo date(event::DATE_FORMAT, $event->timestart); ?></td>
+<td><?php echo date(event::TIME_FORMAT, $event->timestart); ?></td>
+<td><?php echo date(event::TIME_FORMAT, $event->timeend); ?></td>
 <td><?php echo implode("\n", $actions); ?></td>
 <td><?php echo htmlspecialchars($event->description); ?></td>
 </tr>

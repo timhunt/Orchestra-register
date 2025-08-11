@@ -74,7 +74,7 @@ foreach ($logs as $log) {
     }
     ?>
 <tr class="r<?php echo $rowparity = 1 - $rowparity; ?>">
-<td><?php echo strftime('%Y-%m-%d %H:%M:%S', $log->timestamp); ?></td>
+<td><?php echo date('Y-m-d H:i:s', $log->timestamp); ?></td>
 <td><?php echo htmlspecialchars($name); ?></td>
 <td><?php echo htmlspecialchars(user::auth_name($log->authlevel)); ?></td>
 <td><?php echo htmlspecialchars($log->ipaddress); ?></td>
