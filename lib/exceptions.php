@@ -116,7 +116,10 @@ function prepare_exception(Throwable $e) {
         $log .= $debuginfo . ", ";
     }
     error_log($log . $e->getTraceAsString(), E_USER_ERROR);
-
+    if ($debuginfo) {
+        $summary .= '<pre>' . $debuginfo . '</pre>';
+    }
+    $summary .= '<pre>' . $e->getTraceAsString() . '</pre>';
     return $summary;
 }
 
